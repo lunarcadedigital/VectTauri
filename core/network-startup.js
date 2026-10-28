@@ -82,7 +82,7 @@ const PLUGIN_UPDATE_INSTRUCTIONS = 'Restart SillyTavern so it can auto-update th
  * Silent no-op when no plugin is installed — that is a supported setup, not an error.
  *
  * The version comes from the /health probe checkPluginAvailable() already made,
- * NOT from /api/plugins/similharity/version. That route only exists as of plugin
+ * NOT from https://192.168.88.251:8443/api/plugins/similharity/version. That route only exists as of plugin
  * 2026-05-14, so older plugins 404'd it and this function returned silently on
  * `!response.ok` — going quiet in precisely the case it was written to catch.
  * GitHub issue #11 burned hours diagnosing a pre-2026-05-09 plugin whose server

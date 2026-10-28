@@ -172,7 +172,7 @@ export async function checkBackendEndpoints(settings) {
  */
 export async function checkServerPlugin() {
     try {
-        const response = await fetch('/api/plugins/similharity/health', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -225,7 +225,7 @@ export async function checkPluginEndpoints() {
 
     // First check if plugin is available
     try {
-        const healthResponse = await fetch('/api/plugins/similharity/health', {
+        const healthResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -250,13 +250,13 @@ export async function checkPluginEndpoints() {
 
     // Test each plugin endpoint (unified API)
     const pluginEndpoints = [
-        { name: 'collections', method: 'GET', url: `/api/plugins/similharity/collections` },
-        { name: 'sources', method: 'GET', url: '/api/plugins/similharity/sources' },
-        { name: 'chunks/list', method: 'POST', url: '/api/plugins/similharity/chunks/list',
+        { name: 'collections', method: 'GET', url: `https://192.168.88.251:8443/api/plugins/similharity/collections` },
+        { name: 'sources', method: 'GET', url: 'https://192.168.88.251:8443/api/plugins/similharity/sources' },
+        { name: 'chunks/list', method: 'POST', url: 'https://192.168.88.251:8443/api/plugins/similharity/chunks/list',
           body: { backend: 'vectra', collectionId: 'VectFox_diag', source: testSource, limit: 1 } },
-        { name: 'chunks/query', method: 'POST', url: '/api/plugins/similharity/chunks/query',
+        { name: 'chunks/query', method: 'POST', url: 'https://192.168.88.251:8443/api/plugins/similharity/chunks/query',
           body: { backend: 'vectra', collectionId: 'VectFox_diag', searchText: 'test', topK: 1, source: testSource } },
-        { name: 'backend/health', method: 'GET', url: '/api/plugins/similharity/backend/health/vectra' },
+        { name: 'backend/health', method: 'GET', url: 'https://192.168.88.251:8443/api/plugins/similharity/backend/health/vectra' },
     ];
 
     for (const ep of pluginEndpoints) {
@@ -364,7 +364,7 @@ export async function checkQdrantBackend(settings) {
             apiKey: null,
         };
 
-        const initResponse = await fetch('/api/plugins/similharity/backend/init/qdrant', {
+        const initResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/init/qdrant', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify(initConfig)
@@ -394,7 +394,7 @@ export async function checkQdrantBackend(settings) {
 
     // Then check health
     try {
-        const healthResponse = await fetch('/api/plugins/similharity/backend/health/qdrant', {
+        const healthResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/health/qdrant', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -468,7 +468,7 @@ export async function checkQdrantDimensionMatch(settings) {
 
     try {
         // Get collection info from Qdrant
-        const infoResponse = await fetch('/api/plugins/similharity/backend/qdrant/collection-info', {
+        const infoResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/qdrant/collection-info', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -495,7 +495,7 @@ export async function checkQdrantDimensionMatch(settings) {
         }
 
         // Get current embedding dimension by generating a test embedding
-        const testResponse = await fetch('/api/plugins/similharity/get-embedding', {
+        const testResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/get-embedding', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({

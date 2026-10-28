@@ -25,7 +25,7 @@ export async function fetchQueryEmbedding(searchText, settings, providerParams) 
     const source = settings.embedding_provider || 'transformers';
     const model = getModelFromSettings(settings);
     const tStart = performance.now();
-    const response = await fetch('/api/plugins/similharity/get-embedding', {
+    const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/get-embedding', {
         method: 'POST',
         headers: getRequestHeaders(),
         body: JSON.stringify({ text: searchText, source, model, ...providerParams }),

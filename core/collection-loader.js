@@ -568,7 +568,7 @@ export async function checkPluginAvailable() {
 
     pluginProbeInFlight = (async () => {
         try {
-            const response = await fetch('/api/plugins/similharity/health', {
+            const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health', {
                 method: 'GET',
                 headers: getRequestHeaders()
             });
@@ -614,7 +614,7 @@ export function resetPluginAvailableCache() {
  * Version string the plugin reported on its LAST /health probe, or null when no
  * plugin is installed / it answered without a version field.
  *
- * Read this instead of requesting /api/plugins/similharity/version: /health has
+ * Read this instead of requesting https://192.168.88.251:8443/api/plugins/similharity/version: /health has
  * carried `version` since the plugin's initial commit (2025-11-21), whereas the
  * /version route only landed 2026-05-14. A plugin predating that route 404s on
  * it — and a plugin that old is exactly the one worth warning about, so sourcing
@@ -642,7 +642,7 @@ async function discoverViaPlugin(settings) {
         log.trace('🔍 VectFox: Requesting collection discovery from plugin...');
 
         // Plugin now scans ALL sources, not just the current one
-        const response = await fetch(`/api/plugins/similharity/collections`, {
+        const response = await fetch(`https://192.168.88.251:8443/api/plugins/similharity/collections`, {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -846,7 +846,7 @@ export async function cleanupCorruptedCollections() {
     };
 
     try {
-        const response = await fetch('/api/plugins/similharity/collections', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/collections', {
             method: 'GET',
             headers: getRequestHeaders(),
         });
@@ -894,7 +894,7 @@ export async function cleanupCorruptedCollections() {
 
         for (const target of targets) {
             try {
-                const purgeResp = await fetch('/api/plugins/similharity/chunks/purge', {
+                const purgeResp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/purge', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify({

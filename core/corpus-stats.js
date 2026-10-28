@@ -125,7 +125,7 @@ async function _buildStats(collectionId, settings) {
 
     // Stage 1 — HTTP fetch
     const tFetch = _now();
-    const response = await fetch('/api/plugins/similharity/chunks/list', {
+    const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
         method: 'POST',
         headers: getRequestHeaders(),
         body: JSON.stringify({

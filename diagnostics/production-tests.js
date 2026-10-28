@@ -63,7 +63,7 @@ function isDiagnosticTestCollection(id) {
 export async function sweepLeftoverTestCollections(settings) {
     const sweptIds = [];
     try {
-        const response = await fetch('/api/plugins/similharity/collections', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/collections', {
             method: 'GET',
             headers: getRequestHeaders(),
         });
@@ -172,7 +172,7 @@ function getPluginProviderParams(settings) {
  */
 async function isPluginInstalled() {
     try {
-        const response = await fetch('/api/plugins/similharity/health', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health', {
             method: 'GET',
             headers: getRequestHeaders(),
         });
@@ -200,7 +200,7 @@ export async function testEmbeddingGeneration(settings) {
         const testText = 'This is a test message for embedding generation.';
 
         // Use the dedicated get-embedding endpoint which doesn't store anything
-        const response = await fetch('/api/plugins/similharity/get-embedding', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/get-embedding', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -271,7 +271,7 @@ export async function testVectorStorage(settings) {
         const backend = settings.vector_backend || 'standard';
         const backendType = backend === 'standard' ? 'vectra' : backend;
 
-        const insertResponse = await fetch('/api/plugins/similharity/chunks/insert', {
+        const insertResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/insert', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -621,7 +621,7 @@ export async function testPluginEmbeddingGeneration(settings) {
         const testText = 'Plugin embedding generation test';
 
         // Try to insert WITHOUT providing a vector - the plugin must generate it
-        const insertResponse = await fetch('/api/plugins/similharity/chunks/insert', {
+        const insertResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/insert', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -651,7 +651,7 @@ export async function testPluginEmbeddingGeneration(settings) {
         }
 
         // Verify the vector was stored by querying
-        const queryResponse = await fetch('/api/plugins/similharity/chunks/query', {
+        const queryResponse = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/query', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({

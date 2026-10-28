@@ -30,7 +30,7 @@
  *     indicator — DON'T send it as a Bearer token; you'll get 401.
  *
  *     Embedding works because it goes through ST's `/api/vector/insert`
- *     (or the Similharity plugin's `/api/plugins/similharity/chunks/insert`)
+ *     (or the Similharity plugin's `https://192.168.88.251:8443/api/plugins/similharity/chunks/insert`)
  *     proxy, which reads the real key server-side via
  *     `readSecret(SECRET_KEYS.OPENROUTER)`.
  *
@@ -237,7 +237,7 @@ export async function fetchQdrantApiKeyPresence() {
         if (!(await checkPluginAvailable())) {
             return { set: false, masked: '' };
         }
-        const response = await fetch('/api/plugins/similharity/qdrant/key-status', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/qdrant/key-status', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -478,7 +478,7 @@ export async function migrateLegacyApiKeys() {
             // Plugin is up; now capability-probe the specific endpoint to confirm
             // it's new enough to support the secret_state Qdrant slot.
             try {
-                const probe = await fetch('/api/plugins/similharity/qdrant/key-status', {
+                const probe = await fetch('https://192.168.88.251:8443/api/plugins/similharity/qdrant/key-status', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                 });

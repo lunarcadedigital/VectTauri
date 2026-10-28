@@ -2,7 +2,7 @@
  * checkSimilharityVersion — the cross-repo version floor warning.
  *
  * WHY THIS SUITE EXISTS: the check used to source the version from
- * `/api/plugins/similharity/version` and bail on `if (!response.ok) return;`.
+ * `https://192.168.88.251:8443/api/plugins/similharity/version` and bail on `if (!response.ok) return;`.
  * That route only landed in the plugin on 2026-05-14, so every plugin older
  * than it 404'd and the check went SILENT — in exactly the case it was written
  * to catch. GitHub issue #11 burned hours on a plugin reporting v2.0.0-era

@@ -7,7 +7,7 @@
  *
  * ## Plugin dependency rule
  *
- * The Similharity plugin (/api/plugins/similharity/*) is an OPTIONAL
+ * The Similharity plugin (https://192.168.88.251:8443/api/plugins/similharity/*) is an OPTIONAL
  * enhancement here, NOT a requirement. Every method that calls the plugin
  * MUST check `this.pluginAvailable` first and fall back to a native-API path
  * when the plugin is absent. The standard backend must be fully functional
@@ -165,7 +165,7 @@ export class StandardBackend extends VectorBackend {
             log.lifecycle('VectFox DEBUG: Plugin available:', this.pluginAvailable);
 
             if (this.pluginAvailable) {
-                await fetch('/api/plugins/similharity/backend/init/vectra', {
+                await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/init/vectra', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                 });
@@ -378,7 +378,7 @@ export class StandardBackend extends VectorBackend {
             // Try plugin API first (supports metadata) - fallback to native API if unavailable
             log.verbose('VectFox DEBUG: this.pluginAvailable =', this.pluginAvailable);
             let usePluginApi = this.pluginAvailable;
-            let endpoint = usePluginApi ? '/api/plugins/similharity/chunks/insert' : '/api/vector/insert';
+            let endpoint = usePluginApi ? 'https://192.168.88.251:8443/api/plugins/similharity/chunks/insert' : '/api/vector/insert';
 
             log.verbose(`VectFox DEBUG: Using ${usePluginApi ? 'PLUGIN' : 'NATIVE'} API for insertion (${endpoint})`);
             
@@ -531,7 +531,7 @@ export class StandardBackend extends VectorBackend {
         // This fix exists on `main` (commit bcc4302) but was lost in Dev during
         // merge `e9ed4c5`. TEST 009 catches the regression — re-applied 2026-05-23.
         if (this.pluginAvailable) {
-            const response = await fetch('/api/plugins/similharity/chunks/delete', {
+            const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/delete', {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify({
@@ -632,7 +632,7 @@ export class StandardBackend extends VectorBackend {
 
             log.verbose(`[VectFox] queryCollection via plugin: collectionId=${bareCollectionId}, source=${source}, model=${model}, topK=${topK}, threshold=${threshold}, hasQueryVector=${!!queryVector}`);
 
-            const response = await fetch('/api/plugins/similharity/chunks/query', {
+            const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/query', {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify(pluginBody),
@@ -863,7 +863,7 @@ export class StandardBackend extends VectorBackend {
             const errors = [];
             for (const { source, model } of targets) {
                 try {
-                    const response = await fetch('/api/plugins/similharity/chunks/purge', {
+                    const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/purge', {
                         method: 'POST',
                         headers: getRequestHeaders(),
                         body: JSON.stringify({
@@ -939,7 +939,7 @@ export class StandardBackend extends VectorBackend {
     async listChunks(collectionId, settings, options = {}) {
         if (this.pluginAvailable) {
             try {
-                const response = await fetch('/api/plugins/similharity/chunks/list', {
+                const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify({
@@ -997,7 +997,7 @@ export class StandardBackend extends VectorBackend {
         if (!this.pluginAvailable) return null;
 
         try {
-            const response = await fetch(`/api/plugins/similharity/chunks/${encodeURIComponent(hash)}?` + new URLSearchParams({
+            const response = await fetch(`https://192.168.88.251:8443/api/plugins/similharity/chunks/${encodeURIComponent(hash)}?` + new URLSearchParams({
                 backend: 'vectra',
                 collectionId: collectionId,
                 source: settings.embedding_provider || 'transformers',
@@ -1025,7 +1025,7 @@ export class StandardBackend extends VectorBackend {
             throw new Error('Chunk text editing requires the Similharity plugin');
         }
 
-        const response = await fetch(`/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/text`, {
+        const response = await fetch(`https://192.168.88.251:8443/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/text`, {
             method: 'PATCH',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -1053,7 +1053,7 @@ export class StandardBackend extends VectorBackend {
             throw new Error('Chunk metadata editing requires the Similharity plugin');
         }
 
-        const response = await fetch(`/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/metadata`, {
+        const response = await fetch(`https://192.168.88.251:8443/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/metadata`, {
             method: 'PATCH',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -1080,7 +1080,7 @@ export class StandardBackend extends VectorBackend {
     async getStats(collectionId, settings) {
         if (this.pluginAvailable) {
             try {
-                const response = await fetch('/api/plugins/similharity/chunks/stats', {
+                const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/stats', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify({

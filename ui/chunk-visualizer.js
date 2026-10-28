@@ -340,7 +340,7 @@ async function _loadAndRenderCollectionMetaFooter(collectionId, settings) {
 
     let resp;
     try {
-        resp = await fetch('/api/plugins/similharity/chunks/collection-metadata', {
+        resp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/collection-metadata', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({ backend, collectionId: actualCollectionId }),

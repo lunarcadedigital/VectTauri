@@ -679,7 +679,7 @@ export async function getSavedHashes(collectionId, settings, includeMetadata = f
     // Use unified chunks API to get full metadata (works with all backends)
     try {
         const backendName = settings.vector_backend || 'standard';
-        const response = await fetch('/api/plugins/similharity/chunks/list', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({

@@ -246,28 +246,28 @@ function installFetchRouter() {
         fetchLog.push({ url, body });
 
         // --- backend bootstrap -------------------------------------------------
-        if (url === '/api/plugins/similharity/health') return jsonResponse({ ok: true });
-        if (url === '/api/plugins/similharity/backend/init/qdrant') return jsonResponse({ success: true });
-        if (url === '/api/plugins/similharity/backend/health/qdrant') return jsonResponse({ healthy: true });
-        if (url === '/api/plugins/similharity/backend/init/vectra') return jsonResponse({ success: true });
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/health') return jsonResponse({ ok: true });
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/backend/init/qdrant') return jsonResponse({ success: true });
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/backend/health/qdrant') return jsonResponse({ healthy: true });
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/backend/init/vectra') return jsonResponse({ success: true });
         if (url === '/api/vector/list') return jsonResponse([]);
 
         // --- tokenizer-mode sentinel (Qdrant native sparse path) ---------------
-        if (url === '/api/plugins/similharity/chunks/collection-metadata') {
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/collection-metadata') {
             return jsonResponse({ payload: { cjk_tokenizer_mode: 'intl' } });
         }
 
         // --- retrieval ---------------------------------------------------------
-        if (url === '/api/plugins/similharity/get-embedding') {
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/get-embedding') {
             return embeddingResponder(body);
         }
-        if (url === '/api/plugins/similharity/chunks/hybrid-query') {
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query') {
             return hybridQueryResponder(body);
         }
-        if (url === '/api/plugins/similharity/chunks/query' && body?.backend === 'qdrant') {
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/query' && body?.backend === 'qdrant') {
             return denseCosineResponder(body);
         }
-        if (url === '/api/plugins/similharity/chunks/query' || url === '/api/vector/query') {
+        if (url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/query' || url === '/api/vector/query') {
             return plainQueryResponder(body);
         }
 
@@ -330,7 +330,7 @@ describe('Qdrant lorebook routing', () => {
 
         await getSemanticWorldInfoEntries(RECENT_MESSAGES, [], baseSettings(), null, [LOREBOOK_COLLECTION]);
 
-        const hybrid = fetchLog.filter(e => e.url === '/api/plugins/similharity/chunks/hybrid-query');
+        const hybrid = fetchLog.filter(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query');
         expect(hybrid.length).toBeGreaterThan(0);
         expect(hybrid[0].body.backend).toBe('qdrant');
         // The "qdrant:" registry prefix must be stripped before it reaches the plugin —
@@ -367,7 +367,7 @@ describe('Qdrant lorebook routing', () => {
             RECENT_MESSAGES, [], baseSettings(), null, [LOREBOOK_COLLECTION],
         );
 
-        expect(queryCalls()).toContain('/api/plugins/similharity/chunks/query');
+        expect(queryCalls()).toContain('https://192.168.88.251:8443/api/plugins/similharity/chunks/query');
         expect(entries).toHaveLength(1);
     });
 });
@@ -491,16 +491,16 @@ describe('world_info_threshold across backend score scales', () => {
 
         await getSemanticWorldInfoEntries(RECENT_MESSAGES, [], baseSettings(), null, [LOREBOOK_COLLECTION]);
 
-        const embeds = fetchLog.filter(e => e.url === '/api/plugins/similharity/get-embedding');
+        const embeds = fetchLog.filter(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/get-embedding');
         expect(embeds).toHaveLength(1);
 
-        const hybrid = fetchLog.find(e => e.url === '/api/plugins/similharity/chunks/hybrid-query');
+        const hybrid = fetchLog.find(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query');
         expect(hybrid.body.queryVector).toEqual(QUERY_EMBEDDING_FIXTURE);
         // searchText still rides along so an old plugin that ignores queryVector
         // embeds it itself and keeps working.
         expect(hybrid.body.searchText).toBeTruthy();
 
-        const dense = fetchLog.find(e => e.url === '/api/plugins/similharity/chunks/query' && e.body?.queryVector);
+        const dense = fetchLog.find(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/query' && e.body?.queryVector);
         expect(dense.body.queryVector).toEqual(QUERY_EMBEDDING_FIXTURE);
     });
 });
@@ -517,9 +517,9 @@ describe('Vectra lorebook routing (contrast case)', () => {
             [{ id: VECTRA_LOREBOOK_KEY, name: 'WorldLore', sourceName: 'WorldLore' }],
         );
 
-        expect(queryCalls()).not.toContain('/api/plugins/similharity/chunks/hybrid-query');
-        expect(queryCalls()).toContain('/api/plugins/similharity/chunks/query');
-        const q = fetchLog.find(e => e.url === '/api/plugins/similharity/chunks/query');
+        expect(queryCalls()).not.toContain('https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query');
+        expect(queryCalls()).toContain('https://192.168.88.251:8443/api/plugins/similharity/chunks/query');
+        const q = fetchLog.find(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/query');
         expect(q.body.backend).toBe('vectra');
         expect(q.body.collectionId).toBe(VECTRA_LOREBOOK_ID);
         // Embedded once through /get-embedding like the Qdrant path, not server-side.
@@ -594,7 +594,7 @@ describe('Collection discovery gate', () => {
         const entries = await getSemanticWorldInfoEntries(RECENT_MESSAGES, [], baseSettings());
 
         expect(entries).toHaveLength(1);
-        expect(queryCalls()).toContain('/api/plugins/similharity/chunks/hybrid-query');
+        expect(queryCalls()).toContain('https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query');
     });
 });
 
@@ -848,15 +848,15 @@ describe('Backend failure behavior (issue #11 symptom)', () => {
 
         const retrievals = fetchLog.filter(e => /chunks\/hybrid-query$|chunks\/query$|api\/vector\/query$/.test(e.url));
         expect(retrievals.map(e => e.url)).toEqual([
-            '/api/plugins/similharity/chunks/query',        // cosine-gate lookup (parallel with hybrid)
-            '/api/plugins/similharity/chunks/hybrid-query', // native hybrid — fails
-            '/api/plugins/similharity/chunks/query',        // hybrid-search.js client-side fallback
+            'https://192.168.88.251:8443/api/plugins/similharity/chunks/query',        // cosine-gate lookup (parallel with hybrid)
+            'https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query', // native hybrid — fails
+            'https://192.168.88.251:8443/api/plugins/similharity/chunks/query',        // hybrid-search.js client-side fallback
         ]);
         // The fallback reuses the query's one vector instead of re-sending text for
         // a second, server-side embed: a fallback must never cost an embedding call.
         expect(retrievals[0].body.queryVector).toEqual(QUERY_EMBEDDING_FIXTURE);
         expect(retrievals[2].body.queryVector).toEqual(QUERY_EMBEDDING_FIXTURE);
-        expect(fetchLog.filter(e => e.url === '/api/plugins/similharity/get-embedding')).toHaveLength(1);
+        expect(fetchLog.filter(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/get-embedding')).toHaveLength(1);
     });
 
     it('retries a failed query embedding once, then runs the query on the new vector', async () => {
@@ -885,7 +885,7 @@ describe('Backend failure behavior (issue #11 symptom)', () => {
             ['a single line of context'], [], baseSettings(), null, [LOREBOOK_COLLECTION],
         );
 
-        expect(fetchLog.filter(e => e.url === '/api/plugins/similharity/get-embedding')).toHaveLength(2);
+        expect(fetchLog.filter(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/get-embedding')).toHaveLength(2);
         expect(queryCalls()).toEqual([]);
         expect(entries).toEqual([]);
         expect(global.toastr.error).toHaveBeenCalledWith(
@@ -902,7 +902,7 @@ describe('Backend failure behavior (issue #11 symptom)', () => {
             ['a single line of context'], [], baseSettings(), null, [LOREBOOK_COLLECTION],
         );
 
-        expect(fetchLog.filter(e => e.url === '/api/plugins/similharity/get-embedding')).toHaveLength(1);
+        expect(fetchLog.filter(e => e.url === 'https://192.168.88.251:8443/api/plugins/similharity/get-embedding')).toHaveLength(1);
         expect(queryCalls()).toEqual([]);
     });
 

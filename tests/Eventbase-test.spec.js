@@ -340,7 +340,7 @@ async function isSimilharityPluginAvailable() {
                 // Hit the plugin's `/health` endpoint — a real route the
                 // plugin registers (similharity/index.js:526) that returns
                 // `{ status: 'ok', plugin, version, backends: [...] }`.
-                const resp = await fetch('/api/plugins/similharity/health', { method: 'GET' });
+                const resp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health', { method: 'GET' });
                 const status = resp.status;
                 const ct = resp.headers.get('content-type') || '';
                 if (!resp.ok) return { ok: false, status, contentType: ct, body: null };
@@ -419,7 +419,7 @@ async function isQdrantReachable() {
                 const config = vf.qdrant_use_cloud
                     ? { url: vf.qdrant_url || null, apiKey: vf.qdrant_api_key || null, host: null, port: null }
                     : { host: vf.qdrant_host || 'localhost', port: vf.qdrant_port || 6333, url: null, apiKey: null };
-                const resp = await fetch('/api/plugins/similharity/backend/init/qdrant', {
+                const resp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/init/qdrant', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify(config),
@@ -1534,7 +1534,7 @@ test('TEST 007 — E2E standard: both locked, both return results', async () => 
 // identical at the API surface but behave VERY differently underneath:
 //
 //   1. Standard + Similharity plugin  (the path most users have)
-//      ─ insert/list/delete go through /api/plugins/similharity/chunks/*
+//      ─ insert/list/delete go through https://192.168.88.251:8443/api/plugins/similharity/chunks/*
 //      ─ FULL metadata round-trip: text, entryName, keywords, custom
 //        fields all persist and come back via listChunks
 //      ─ DB Browser shows everything

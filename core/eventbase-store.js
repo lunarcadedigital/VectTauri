@@ -1045,7 +1045,7 @@ export async function ensureEventBaseIndexes(settings) {
     const errors = [];
     for (const collectionId of qdrantCollections) {
         try {
-            const resp = await fetch('/api/plugins/similharity/chunks/ensure-eventbase-indexes', {
+            const resp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/ensure-eventbase-indexes', {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify({ collectionId }),

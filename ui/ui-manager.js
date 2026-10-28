@@ -144,7 +144,7 @@ export function renderSettings(containerId, settings, callbacks) {
                                 <!--
                                     MAINTAINERS: the "standard" backend (ST's Vectra via similharity plugin)
                                     has a concurrency problem on the PLUGIN side — concurrent POSTs to
-                                    /api/plugins/similharity/chunks/insert corrupt the Vectra index file
+                                    https://192.168.88.251:8443/api/plugins/similharity/chunks/insert corrupt the Vectra index file
                                     (the plugin doesn't synchronize per-collection writes). Observed
                                     2026-05-30 under parallel-split + hedge: variable-position
                                     truncated-JSON 500s back to the client.
@@ -3399,7 +3399,7 @@ function bindSettingsEvents(settings, callbacks) {
     }
 
     // Helper: gate the Qdrant backend on the Similharity server plugin being
-    // installed. Qdrant depends entirely on the plugin's /api/plugins/similharity/...
+    // installed. Qdrant depends entirely on the plugin's https://192.168.88.251:8443/api/plugins/similharity/...
     // endpoints (and selecting it is what lets a qdrant_api_key get written into
     // extension settings), so when the plugin is absent we must prevent the user
     // from landing on Qdrant at all. Standard backend can fall back to ST's
@@ -5914,7 +5914,7 @@ async function showQdrantDimensionFixDialog() {
             toastr.info('Purging Qdrant collection...');
             try {
                 const { getRequestHeaders } = await import('../../../../../script.js');
-                const response = await fetch('/api/plugins/similharity/backend/qdrant/purge-collection', {
+                const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/qdrant/purge-collection', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify({ collectionName: 'VectFox_main' })

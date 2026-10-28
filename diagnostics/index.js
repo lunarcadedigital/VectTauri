@@ -99,7 +99,7 @@ export async function runDiagnostics(settings, includeProductionTests = false) {
 
     // Try to get plugin version from health endpoint
     try {
-        const response = await fetch('/api/plugins/similharity/health', {
+        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -340,4 +340,4 @@ export async function executeFixAction(check) {
             return { success: false, message: `Unknown fix action: ${check.fixAction}` };
     }
 }
-
+

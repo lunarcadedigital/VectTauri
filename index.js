@@ -69,7 +69,7 @@ const defaultSettings = {
     // post-2026-05-26 migration. NOT in defaults — keeping it here would cause
     // the Object.assign re-introduction loop documented on the vLLM keys. The
     // Similharity plugin reads the slot server-side; the UI presence indicator
-    // round-trips via /api/plugins/similharity/qdrant/key-status. Migration
+    // round-trips via https://192.168.88.251:8443/api/plugins/similharity/qdrant/key-status. Migration
     // drains any legacy settings.qdrant_api_key plaintext on first load.
     // Reader: core/api-keys.js::getQdrantApiKey (transition-fallback only),
     // core/api-keys.js::fetchQdrantApiKeyPresence (canonical presence check).
@@ -493,7 +493,7 @@ async function onPurgeClick() {
         const { getRequestHeaders } = await import('../../../../script.js');
 
         // 1. Delete entire vectors folder
-        await fetch('/api/plugins/similharity/purge-all', {
+        await fetch('https://192.168.88.251:8443/api/plugins/similharity/purge-all', {
             method: 'POST',
             headers: getRequestHeaders(),
         });
