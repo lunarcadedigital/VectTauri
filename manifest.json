@@ -1,17 +1,21 @@
 {
-    "display_name": "VectFox",
+    "display_name": "VectTauri",
     "loading_order": 101,
     "requires": [],
-    "optional": ["embeddings"],
+    "optional": [
+        "embeddings"
+    ],
     "generate_interceptor": "vectfox_rearrangeChat",
     "js": "index.js",
     "css": "vectfox.css",
-    "author": "Kritbalde",
-    "version": "3.6.17",
+    "author": "Lunarcade Digital",
+    "version": "1.0.0",
     "homePage": "https://github.com/KritBlade/VectFox",
     "description": "Advanced RAG system with temporal decay, importance weighting, and intelligent chunking",
     "auto_update": true,
     "hooks": {
         "update": "onUpdate"
-    }
+    },
+    "name": "vecttauri",
+    "homepage": "https://github.com/lunarcadedigital/VectFox"
 }

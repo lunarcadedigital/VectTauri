@@ -39,6 +39,7 @@ import { encodeSparseVector } from './sparse-vector-encoder.js';
 import { progressTracker } from '../ui/progress-tracker.js';
 import { getStringHash } from '../../../../utils.js';
 import { log } from './log.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 // ============================================================================
 // HELPERS
@@ -78,7 +79,7 @@ const EXPORT_BATCH_SIZE = 100;
  */
 async function fetchChunksWithVectors(collectionId, settings) {
     const backendName = settings.vector_backend || 'standard';
-    const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
+    const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/list'), {
         method: 'POST',
         headers: getRequestHeaders(),
         body: JSON.stringify({
@@ -582,7 +583,7 @@ export async function insertChunksWithVectors(collectionId, chunks, settings, on
                 }),
             });
         } else {
-            response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/insert', {
+            response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/insert'), {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify({

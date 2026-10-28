@@ -22,6 +22,7 @@ import { registerCollection, getCollectionRegistry, getCollectionListing } from 
 import { getChatLockedCollections, isCollectionActiveForContextAnyKey } from './collection-metadata.js';
 import { buildEmbedText } from './eventbase-schema.js';
 import { log } from './log.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 // Re-export so callers can import from here if needed
 export { buildEventBaseCollectionId };
@@ -1045,7 +1046,7 @@ export async function ensureEventBaseIndexes(settings) {
     const errors = [];
     for (const collectionId of qdrantCollections) {
         try {
-            const resp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/ensure-eventbase-indexes', {
+            const resp = await fetch(getPluginUrl('/api/plugins/similharity/chunks/ensure-eventbase-indexes'), {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify({ collectionId }),

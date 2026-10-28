@@ -60,6 +60,7 @@ import {
     resolveAgenticMaxTokens,
 } from '../core/retrieval-budget.js';
 import { log } from '../core/log.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 /**
  * Renders the VectFox settings UI
@@ -144,7 +145,7 @@ export function renderSettings(containerId, settings, callbacks) {
                                 <!--
                                     MAINTAINERS: the "standard" backend (ST's Vectra via similharity plugin)
                                     has a concurrency problem on the PLUGIN side — concurrent POSTs to
-                                    https://192.168.88.251:8443/api/plugins/similharity/chunks/insert corrupt the Vectra index file
+                                    /api/plugins/similharity/chunks/insert corrupt the Vectra index file
                                     (the plugin doesn't synchronize per-collection writes). Observed
                                     2026-05-30 under parallel-split + hedge: variable-position
                                     truncated-JSON 500s back to the client.
@@ -189,6 +190,18 @@ export function renderSettings(containerId, settings, callbacks) {
                                 <small id="VectFox_qdrant_plugin_error" class="VectFox_hint" style="display:none; color:#e04a4a; font-weight:600; margin-top:-8px; margin-bottom:16px; line-height:1.5;">
                                     ⚠ Qdrant requires the Similharity server plugin, which is not installed. Install the plugin to use this backend, or switch to Standard.
                                 </small>
+
+                                <!-- Similharity Bridge URL -->
+                                <div style="margin-bottom: 12px;">
+                                    <label for="VectFox_similharity_url">
+                                        <small>Similharity Bridge URL (TauriTavern/Termux):</small>
+                                    </label>
+                                    <input type="text" id="VectFox_similharity_url" class="vectfox-input" placeholder="https://192.168.1.100:8443" />
+                                    <small style="color: #888; font-size: 0.85em;">
+                                        URL bridge server Similharity yang berjalan di Termux. 
+                                        Kosongkan jika plugin terinstall langsung di SillyTavern.
+                                    </small>
+                                </div>
 
                                 <!-- Qdrant Settings (shown only when Qdrant backend is selected) -->
                                 <div id="VectFox_qdrant_settings" style="display: none;">
@@ -3399,7 +3412,7 @@ function bindSettingsEvents(settings, callbacks) {
     }
 
     // Helper: gate the Qdrant backend on the Similharity server plugin being
-    // installed. Qdrant depends entirely on the plugin's https://192.168.88.251:8443/api/plugins/similharity/...
+    // installed. Qdrant depends entirely on the plugin's /api/plugins/similharity/...
     // endpoints (and selecting it is what lets a qdrant_api_key get written into
     // extension settings), so when the plugin is absent we must prevent the user
     // from landing on Qdrant at all. Standard backend can fall back to ST's
@@ -3534,6 +3547,15 @@ function bindSettingsEvents(settings, callbacks) {
 
     // Initial state only — no health reset, no backend init, no toast.
     applyQdrantModeVisibility(settings.qdrant_use_cloud || false);
+
+    // Similharity Bridge URL
+    $('#VectFox_similharity_url')
+        .val(settings.similharity_url || '')
+        .on('input', function() {
+            settings.similharity_url = String($(this).val()).trim();
+            Object.assign(extension_settings.vectfox, settings);
+            saveSettingsDebounced();
+        });
 
     // Qdrant settings
     $('#VectFox_qdrant_host')
@@ -5914,7 +5936,7 @@ async function showQdrantDimensionFixDialog() {
             toastr.info('Purging Qdrant collection...');
             try {
                 const { getRequestHeaders } = await import('../../../../../script.js');
-                const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/qdrant/purge-collection', {
+                const response = await fetch(getPluginUrl('/api/plugins/similharity/backend/qdrant/purge-collection'), {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify({ collectionName: 'VectFox_main' })

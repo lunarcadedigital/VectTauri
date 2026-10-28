@@ -48,6 +48,7 @@ import { initializeDatabaseBrowser } from './ui/database-browser.js';
 import { initializeWorldInfoIntegration } from './core/world-info-integration.js';
 import { refreshWorldInfoEntryDepthCache } from './core/summarizer-injection.js';
 import { CJK_TOKENIZER_MODES, setCjkTokenizerMode, ensureJiebaTokenizerLoaded, ensureJiebaTwLoaded } from './core/bm25-scorer.js';
+import { getPluginUrl } from './utils/similharity-url.js';
 
 // SillyTavern display label — NOT the settings key. For settings, use 'vectfox' (lowercase).
 const MODULE_NAME = 'VectFox';
@@ -62,6 +63,7 @@ const defaultSettings = {
     // Core vector settings
     embedding_provider: 'transformers', // embedding provider selection (was `source` pre-Phase-B)
     vector_backend: 'qdrant', // Backend: 'standard' (ST Vectra) | 'qdrant'
+    similharity_url: '', // Similharity bridge URL (e.g. https://192.168.1.100:8443)
     qdrant_host: '127.0.0.1',
     qdrant_port: 6333,
     qdrant_url: '',
@@ -69,7 +71,7 @@ const defaultSettings = {
     // post-2026-05-26 migration. NOT in defaults — keeping it here would cause
     // the Object.assign re-introduction loop documented on the vLLM keys. The
     // Similharity plugin reads the slot server-side; the UI presence indicator
-    // round-trips via https://192.168.88.251:8443/api/plugins/similharity/qdrant/key-status. Migration
+    // round-trips via /api/plugins/similharity/qdrant/key-status. Migration
     // drains any legacy settings.qdrant_api_key plaintext on first load.
     // Reader: core/api-keys.js::getQdrantApiKey (transition-fallback only),
     // core/api-keys.js::fetchQdrantApiKeyPresence (canonical presence check).
@@ -493,7 +495,7 @@ async function onPurgeClick() {
         const { getRequestHeaders } = await import('../../../../script.js');
 
         // 1. Delete entire vectors folder
-        await fetch('https://192.168.88.251:8443/api/plugins/similharity/purge-all', {
+        await fetch(getPluginUrl('/api/plugins/similharity/purge-all'), {
             method: 'POST',
             headers: getRequestHeaders(),
         });

@@ -28,6 +28,7 @@ import { eventSource, getRequestHeaders } from '../../../../../script.js';
 import StringUtils from '../utils/string-utils.js';
 import { packTimelineSortKey } from '../core/eventbase-schema.js';
 import { log } from '../core/log.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 // ============================================================================
 // STATE
@@ -340,7 +341,7 @@ async function _loadAndRenderCollectionMetaFooter(collectionId, settings) {
 
     let resp;
     try {
-        resp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/collection-metadata', {
+        resp = await fetch(getPluginUrl('/api/plugins/similharity/chunks/collection-metadata'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({ backend, collectionId: actualCollectionId }),

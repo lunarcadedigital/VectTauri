@@ -63,6 +63,7 @@ import { testConditionalActivation } from './activation-tests.js';
 
 import { runVisualizerTests } from './visualizer-tests.js';
 import { cleanupTestCollections } from '../core/collection-loader.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 /**
  * Runs all diagnostic checks
@@ -99,7 +100,7 @@ export async function runDiagnostics(settings, includeProductionTests = false) {
 
     // Try to get plugin version from health endpoint
     try {
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/health'), {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });

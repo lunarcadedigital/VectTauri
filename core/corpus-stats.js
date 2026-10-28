@@ -31,6 +31,7 @@ import { extension_settings } from '../../../../extensions.js';
 import { tokenize } from './bm25-scorer.js';
 import { getModelFromSettings } from './providers.js';
 import { log } from './log.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 const _cache = new Map(); // collectionId -> { totalDocs, documentFrequencies, avgDocLength, builtAt }
 const _inflight = new Map(); // collectionId -> Promise (dedupe concurrent fetches)
@@ -125,7 +126,7 @@ async function _buildStats(collectionId, settings) {
 
     // Stage 1 — HTTP fetch
     const tFetch = _now();
-    const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
+    const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/list'), {
         method: 'POST',
         headers: getRequestHeaders(),
         body: JSON.stringify({

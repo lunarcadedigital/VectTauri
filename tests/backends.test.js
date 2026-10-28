@@ -61,7 +61,7 @@ vi.mock('../../../../secrets.js', () => ({
 vi.mock('../core/collection-loader.js', () => ({
     checkPluginAvailable: vi.fn(async () => {
         try {
-            const r = await fetch('https://192.168.88.251:8443/api/plugins/similharity/health');
+            const r = await fetch(getPluginUrl('/api/plugins/similharity/health');
             return !!r?.ok;
         } catch {
             return false;
@@ -104,6 +104,7 @@ vi.mock('../core/constants.js', () => ({
 import { StandardBackend } from '../backends/standard.js';
 import { QdrantBackend } from '../backends/qdrant.js';
 import { VectorBackend } from '../backends/backend-interface.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 // =============================================================================
 // TEST UTILITIES
@@ -213,7 +214,7 @@ describe('StandardBackend', () => {
             await backend.initialize(defaultSettings);
 
             expect(backend.pluginAvailable).toBe(true);
-            expect(fetchMock).toHaveBeenCalledWith('https://192.168.88.251:8443/api/plugins/similharity/health');
+            expect(fetchMock).toHaveBeenCalledWith('/api/plugins/similharity/health');
         });
 
         it('should initialize without plugin when health check fails', async () => {
@@ -301,7 +302,7 @@ describe('StandardBackend', () => {
             await backend.insertVectorItems('test-collection', sampleItems, defaultSettings);
 
             expect(fetchMock).toHaveBeenCalledWith(
-                'https://192.168.88.251:8443/api/plugins/similharity/chunks/insert',
+                '/api/plugins/similharity/chunks/insert',
                 expect.objectContaining({
                     method: 'POST',
                 })
@@ -471,7 +472,7 @@ describe('StandardBackend', () => {
         });
 
         const purgeBodies = () => fetchMock.mock.calls
-            .filter(([url]) => url === 'https://192.168.88.251:8443/api/plugins/similharity/chunks/purge')
+            .filter(([url]) => url === '/api/plugins/similharity/chunks/purge')
             .map(([, opts]) => JSON.parse(opts.body));
 
         it('purges every discovered source folder, not the current embedding provider', async () => {
@@ -524,7 +525,7 @@ describe('StandardBackend', () => {
             fetchMock.mockResolvedValueOnce(mockFetchResponse({ embedding: [0.1, 0.2] }));
 
             await expect(backend.embedQuery('text', defaultSettings)).resolves.toEqual([0.1, 0.2]);
-            expect(fetchMock).toHaveBeenCalledWith('https://192.168.88.251:8443/api/plugins/similharity/get-embedding', expect.objectContaining({ method: 'POST' }));
+            expect(fetchMock).toHaveBeenCalledWith('/api/plugins/similharity/get-embedding', expect.objectContaining({ method: 'POST' }));
         });
     });
 
@@ -726,7 +727,7 @@ describe('QdrantBackend', () => {
             });
 
             expect(fetchMock).toHaveBeenCalledWith(
-                'https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query',
+                '/api/plugins/similharity/chunks/hybrid-query',
                 expect.any(Object)
             );
             expect(result.metadata[0].hybridSearch).toBe(true);
@@ -781,7 +782,7 @@ describe('QdrantBackend', () => {
             await backend.hybridQuery('test-collection', 'search', 5, defaultSettings, {}, {}, queryVector);
 
             const calls = fetchMock.mock.calls.map(([url, opts]) => ({ url, body: opts?.body ? JSON.parse(opts.body) : null }));
-            expect(calls.map(c => c.url)).not.toContain('https://192.168.88.251:8443/api/plugins/similharity/get-embedding');
+            expect(calls.map(c => c.url)).not.toContain('/api/plugins/similharity/get-embedding');
             for (const c of calls.filter(c => /chunks\/(hybrid-query|query)$/.test(c.url))) {
                 expect(c.body.queryVector).toEqual(queryVector);
             }
@@ -800,9 +801,9 @@ describe('QdrantBackend', () => {
             await backend.hybridQueryWithRerank('test-collection', 'search', 5, defaultSettings, { weights: {} }, {}, {}, queryVector);
 
             const calls = fetchMock.mock.calls.map(([url, opts]) => ({ url, body: opts?.body ? JSON.parse(opts.body) : null }));
-            expect(calls.map(c => c.url)).not.toContain('https://192.168.88.251:8443/api/plugins/similharity/get-embedding');
+            expect(calls.map(c => c.url)).not.toContain('/api/plugins/similharity/get-embedding');
             const retrievals = calls.filter(c => /chunks\/(hybrid-query-rerank|hybrid-query|query)$/.test(c.url));
-            expect(retrievals.map(c => c.url)).toContain('https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query'); // the fallback ran
+            expect(retrievals.map(c => c.url)).toContain('/api/plugins/similharity/chunks/hybrid-query'); // the fallback ran
             for (const c of retrievals) {
                 expect(c.body.queryVector).toEqual(queryVector);
             }

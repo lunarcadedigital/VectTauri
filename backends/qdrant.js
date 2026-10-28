@@ -37,6 +37,7 @@ import { getQdrantApiKey } from '../core/api-keys.js';
 import { log } from '../core/log.js';
 import { warnIfEmbeddingSlow } from '../core/embedding-latency-warning.js';
 import { fetchQueryEmbedding } from './query-embedding.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 const BACKEND_TYPE = 'qdrant';
 
@@ -150,7 +151,7 @@ export class QdrantBackend extends VectorBackend {
 
         log.lifecycle('VectFox: Sending Qdrant config to Similharity plugin:', JSON.stringify({ ...config, apiKey: config.apiKey ? '***redacted***' : undefined }));
 
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/init/qdrant', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/backend/init/qdrant'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify(config),
@@ -168,7 +169,7 @@ export class QdrantBackend extends VectorBackend {
 
     async healthCheck() {
         try {
-            const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/backend/health/qdrant', {
+            const response = await fetch(getPluginUrl('/api/plugins/similharity/backend/health/qdrant'), {
                 headers: getRequestHeaders(),
             });
 
@@ -270,7 +271,7 @@ export class QdrantBackend extends VectorBackend {
             };
         }
 
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/list'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify(body),
@@ -312,7 +313,7 @@ export class QdrantBackend extends VectorBackend {
             const batch = batches[batchIndex];
             const batchNum = batchIndex + 1;
 
-            const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/insert', {
+            const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/insert'), {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 signal: abortSignal
@@ -436,7 +437,7 @@ export class QdrantBackend extends VectorBackend {
             };
         }
 
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/delete', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/delete'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify(body),
@@ -489,7 +490,7 @@ export class QdrantBackend extends VectorBackend {
         const tNetStart = performance.now();
         let response;
         try {
-            response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/query', {
+            response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/query'), {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify(body),
@@ -590,7 +591,7 @@ export class QdrantBackend extends VectorBackend {
                     };
                 }
 
-                const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/query', {
+                const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/query'), {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify(body),
@@ -641,7 +642,7 @@ export class QdrantBackend extends VectorBackend {
             body.filters = { sourceId: strippedId };
         }
 
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/purge', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/purge'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify(body),
@@ -674,7 +675,7 @@ export class QdrantBackend extends VectorBackend {
      */
     async getChunk(collectionId, hash, settings) {
         const actualCollectionId = this._stripRegistryPrefix(collectionId);
-        const response = await fetch(`https://192.168.88.251:8443/api/plugins/similharity/chunks/${encodeURIComponent(hash)}?` + new URLSearchParams({
+        const response = await fetch(getPluginUrl(`/api/plugins/similharity/chunks/${encodeURIComponent(hash)}?` + new URLSearchParams({
             backend: BACKEND_TYPE,
             collectionId: actualCollectionId, // Use separate collection per content type
             source: settings.embedding_provider || 'transformers',
@@ -698,7 +699,7 @@ export class QdrantBackend extends VectorBackend {
      */
     async listChunks(collectionId, settings, options = {}) {
         const actualCollectionId = this._stripRegistryPrefix(collectionId);
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/list'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -725,7 +726,7 @@ export class QdrantBackend extends VectorBackend {
      */
     async updateChunkText(collectionId, hash, newText, settings) {
         const actualCollectionId = this._stripRegistryPrefix(collectionId);
-        const response = await fetch(`https://192.168.88.251:8443/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/text`, {
+        const response = await fetch(getPluginUrl(`/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/text`), {
             method: 'PATCH',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -750,7 +751,7 @@ export class QdrantBackend extends VectorBackend {
      */
     async updateChunkMetadata(collectionId, hash, metadata, settings) {
         const actualCollectionId = this._stripRegistryPrefix(collectionId);
-        const response = await fetch(`https://192.168.88.251:8443/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/metadata`, {
+        const response = await fetch(getPluginUrl(`/api/plugins/similharity/chunks/${encodeURIComponent(hash)}/metadata`), {
             method: 'PATCH',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -775,7 +776,7 @@ export class QdrantBackend extends VectorBackend {
      */
     async getStats(collectionId, settings) {
         const actualCollectionId = this._stripRegistryPrefix(collectionId);
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/stats', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/stats'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -983,7 +984,7 @@ export class QdrantBackend extends VectorBackend {
         // still received an empty result it could not distinguish from "no match".
         let response;
         try {
-            response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query', {
+            response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/hybrid-query'), {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify(body),
@@ -1046,7 +1047,7 @@ export class QdrantBackend extends VectorBackend {
     /**
      * Hybrid query + server-side EventBase re-rank in one call.
      *
-     * Posts to `https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query-rerank`, which wraps
+     * Posts to `/api/plugins/similharity/chunks/hybrid-query-rerank`, which wraps
      * the dense + sparse + RRF hybrid in an outer Qdrant `formula` query that
      * computes the EventBase weighted score (cosine × $score + importance + persist
      * + recency decay) server-side, plus min-importance + dedup-depth filters.
@@ -1148,7 +1149,7 @@ export class QdrantBackend extends VectorBackend {
         const tNetStart = performance.now();
 
         try {
-            const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/hybrid-query-rerank', {
+            const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/hybrid-query-rerank'), {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 body: JSON.stringify(body),

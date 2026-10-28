@@ -83,6 +83,7 @@ import {
     RETRY_MAX_DELAY_MS,
     RETRY_BACKOFF_MULTIPLIER
 } from './constants.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 // Get shared WebLLM provider singleton (lazy-initialized)
 const webllmProvider = getWebLlmProvider();
@@ -679,7 +680,7 @@ export async function getSavedHashes(collectionId, settings, includeMetadata = f
     // Use unified chunks API to get full metadata (works with all backends)
     try {
         const backendName = settings.vector_backend || 'standard';
-        const response = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/list', {
+        const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/list'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({

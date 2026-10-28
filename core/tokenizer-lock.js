@@ -20,6 +20,7 @@
 
 import StringUtils from '../utils/string-utils.js';
 import { log } from './log.js';
+import { getPluginUrl } from '../utils/similharity-url.js';
 
 const metadataCache = new Map();
 
@@ -39,7 +40,7 @@ export async function fetchCollectionMetadata(actualCollectionId) {
     }
     try {
         const getRequestHeaders = await getRequestHeadersImport();
-        const resp = await fetch('https://192.168.88.251:8443/api/plugins/similharity/chunks/collection-metadata', {
+        const resp = await fetch(getPluginUrl('/api/plugins/similharity/chunks/collection-metadata'), {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({ backend: 'qdrant', collectionId: actualCollectionId }),
