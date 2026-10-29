@@ -329,7 +329,7 @@ export function _resolveAgenticLLMConfig(settings = {}) {
         return { ok: true, provider, model, apiKey, parameterStyle: resolveModelParameterStyle(settings) };
     }
 
-    if (provider === 'vllm') {
+    if (provider === 'vllm' || provider === 'custom') {
         const vllmUrl = (settings.agent_vllm_url || settings.chat_vllm_url || '').trim();
         if (!vllmUrl) {
             return { ok: false, reason: 'missing_vllm_url' };

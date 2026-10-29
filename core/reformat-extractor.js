@@ -185,7 +185,7 @@ async function _callVLLM(prompt, settings, batchIndex) {
  */
 async function _callProviderWithRetry(prompt, settings, batchIndex) {
     const provider = _resolveProvider(settings);
-    const callFn = provider === 'vllm' ? _callVLLM : _callOpenRouter;
+    const callFn = (provider === 'vllm' || provider === 'custom') ? _callVLLM : _callOpenRouter;
     return AsyncUtils.retry(() => callFn(prompt, settings, batchIndex), {
         maxAttempts: 3,
         delay: 1500,

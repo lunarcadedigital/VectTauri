@@ -115,6 +115,18 @@ describe('postChatCompletion — request body', () => {
         expect(body.custom_url).toBe('http://localhost:8000');
     });
 
+    it('routes provider "custom" identically to vLLM (chat_completion_source=custom + custom_url)', async () => {
+        const fetchMock = vi.fn(async () => okResponse({ content: 'hi' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        await postChatCompletion(baseArgs({ provider: 'custom', vllmUrl: 'https://api.example.com/v1' }));
+
+        const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+        expect(body.chat_completion_source).toBe('custom');
+        expect(body.custom_url).toBe('https://api.example.com/v1');
+        expect(body.model).toBe('test/model');
+    });
+
     it('passes response_format through only when provided', async () => {
         const fetchMock = vi.fn(async () => okResponse({ content: '{}' }));
         vi.stubGlobal('fetch', fetchMock);

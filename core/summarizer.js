@@ -76,10 +76,10 @@ export function validateLLMConfig(settings = {}) {
         if (!key) {
             return { ok: false, reason: 'OpenRouter API key is not set.' };
         }
-    } else if (provider === 'vllm') {
+    } else if (provider === 'vllm' || provider === 'custom') {
         const url = (settings?.chat_vllm_url || '').trim();
         if (!url) {
-            return { ok: false, reason: 'vLLM Base URL is not set.' };
+            return { ok: false, reason: 'Base URL is not set.' };
         }
     } else {
         return { ok: false, reason: `Unknown LLM provider: ${provider}` };
@@ -104,14 +104,14 @@ export function getSummarizationConfigFingerprint(settings = {}) {
         return `openrouter|${keySig}`;
     }
 
-    if (provider === 'vllm') {
+    if (provider === 'vllm' || provider === 'custom') {
         const url = (settings?.chat_vllm_url || '').trim();
         // Key now lives in SECRET_KEYS.CUSTOM (masked client-side). Fingerprint
         // uses the masked-value length + boundary chars — still deterministic for
         // detecting key-rotation, never logs the secret.
         const key = getCustomApiKey(settings);
         const keySig = key ? `${key.length}:${key.slice(0, 2)}:${key.slice(-2)}` : 'missing';
-        return `vllm|${url}|${keySig}`;
+        return `${provider}|${url}|${keySig}`;
     }
 
     return `other|${provider}`;
@@ -166,7 +166,7 @@ export async function summarizeText(text, settings) {
     if (provider === 'openrouter') {
         return await _callOpenRouter(prompt, model, settings, text.length, _estimateSummaryTokenBudget(text));
     }
-    if (provider === 'vllm') {
+    if (provider === 'vllm' || provider === 'custom') {
         return await _callVLLM(prompt, model, settings, _estimateSummaryTokenBudget(text));
     }
     throw new SummarizationFatalError(
@@ -207,7 +207,7 @@ const SUMMARIZE_TEMPERATURE = 0.3;
  */
 function _mapSummarizerError(e) {
     if (!(e instanceof LlmCallError)) return /** @type {Error} */ (e);
-    const provider = e.provider === 'vllm' ? 'vllm' : 'openrouter';
+    const provider = e.provider === 'vllm' || e.provider === 'custom' ? e.provider : 'openrouter';
     switch (e.kind) {
         case 'auth': return new SummarizationFatalError(e.message, provider, 'invalid_api_key');
         case 'model_config': return new SummarizationFatalError(e.message, provider, 'invalid_model_config');

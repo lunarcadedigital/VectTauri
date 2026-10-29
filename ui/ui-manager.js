@@ -415,8 +415,9 @@ export function renderSettings(containerId, settings, callbacks) {
                                 <select id="VectTauri_summarize_provider" class="vecttauri-select">
                                     <option value="openrouter">OpenRouter</option>
                                     <option value="vllm">vLLM</option>
+                                    <option value="custom">Custom (OpenAI-compatible)</option>
                                 </select>
-                                <small class="VectTauri_hint">Provider required for summarization / EventBase extraction LLM calls</small>
+                                <small class="VectTauri_hint">Provider required for summarization / EventBase extraction LLM calls. "Custom" targets any OpenAI-compatible /v1/chat/completions endpoint (OpenAI, Gemini via proxy, LiteLLM, siliconflow, etc.)</small>
 
                                 <div id="VectTauri_summarize_settings" style="display:none; margin-top:12px;">
 
@@ -432,13 +433,13 @@ export function renderSettings(containerId, settings, callbacks) {
 
                                     <div id="VectTauri_summarize_vllm_url_row" style="display:none; margin-bottom:10px;">
                                         <label for="VectTauri_summarize_vllm_url">
-                                            <small>vLLM Base URL</small>
+                                            <small>Base URL (vLLM / Custom OpenAI-compatible)</small>
                                         </label>
                                         <input type="text" id="VectTauri_summarize_vllm_url" class="vecttauri-input"
-                                            placeholder="http://127.0.0.1:8000" />
-                                        <small class="VectTauri_hint">Base URL of your vLLM server (OpenAI-compatible)</small>
+                                            placeholder="http://127.0.0.1:8000/v1" />
+                                        <small class="VectTauri_hint">OpenAI-compatible base URL — include /v1 (e.g. http://127.0.0.1:8000/v1, https://api.example.com/v1)</small>
                                         <label for="VectTauri_summarize_vllm_apikey" style="margin-top:8px;">
-                                            <small>vLLM API Key <span style="opacity:0.6;">(optional — leave blank if not required)</span></small>
+                                            <small>API Key <span style="opacity:0.6;">(optional — leave blank if not required)</span></small>
                                         </label>
                                         <input type="password" id="VectTauri_summarize_vllm_apikey" class="vecttauri-input"
                                             placeholder="Paste key here to save..." autocomplete="off" />
@@ -2784,7 +2785,9 @@ function bindSettingsEvents(settings, callbacks) {
     const updateSummarizeUI = (provider) => {
         $('#VectTauri_summarize_settings').show();
         $('#VectTauri_summarize_openrouter_row').toggle(provider === 'openrouter');
-        $('#VectTauri_summarize_vllm_url_row').toggle(provider === 'vllm');
+        // vLLM and Custom share the same Base URL + API key inputs — both are
+        // OpenAI-compatible endpoints routed through ST's 'custom' source.
+        $('#VectTauri_summarize_vllm_url_row').toggle(provider === 'vllm' || provider === 'custom');
     };
     $('#VectTauri_summarize_provider')
         .val(settings.chat_provider || 'openrouter')
@@ -2852,7 +2855,7 @@ function bindSettingsEvents(settings, callbacks) {
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
                 models = (data?.data || []).map(m => ({ id: m.id, label: m.name ? `${m.id} — ${m.name}` : m.id }));
-            } else if (provider === 'vllm') {
+            } else if (provider === 'vllm' || provider === 'custom') {
                 // Send the URL verbatim (trailing slash trimmed only). ST's /status
                 // does urlJoin(custom_url, '/models'), appending '/models' to exactly
                 // what we pass — it does NOT re-insert a version segment. Stripping a
@@ -2863,7 +2866,7 @@ function bindSettingsEvents(settings, callbacks) {
                 // matches them. See GitHub issue #8.
                 const baseUrl = (settings.chat_vllm_url || '').trim().replace(/\/+$/, '');
                 if (!baseUrl) {
-                    toastr.error('Set the vLLM Base URL first.', 'vLLM not configured');
+                    toastr.error('Set the Base URL first.', 'Provider not configured');
                     return;
                 }
                 // Route through ST's chat-completions /status endpoint, which

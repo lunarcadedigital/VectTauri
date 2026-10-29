@@ -177,7 +177,7 @@ async function _callVLLM(prompt, settings, windowIndex) {
     const baseUrl = (settings.chat_vllm_url || '').trim();
     if (!baseUrl) {
         throw new EventBaseFatalError(
-            'EventBase: vLLM URL not configured. Set the vLLM URL in Core → LLM Summarization settings.',
+            'EventBase: Base URL not configured. Set the Base URL in Core → LLM Summarization settings.',
             'missing_url',
         );
     }
@@ -331,7 +331,7 @@ export async function extractEvents({ messages, windowStart, windowEnd, settings
 
     // Call provider
     let rawReply;
-    if (provider === 'vllm') {
+    if (provider === 'vllm' || provider === 'custom') {
         rawReply = await _callVLLM(prompt, settings, windowIndex);
     } else {
         rawReply = await _callOpenRouter(prompt, settings, windowIndex);
