@@ -61,6 +61,7 @@ import {
 } from '../core/retrieval-budget.js';
 import { log } from '../core/log.js';
 import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
+import { saveLlmConfigFields } from '../utils/llm-config-store.js';
 
 /**
  * Renders the VectTauri settings UI
@@ -2794,6 +2795,9 @@ function bindSettingsEvents(settings, callbacks) {
         .on('change', function() {
             settings.chat_provider = String($(this).val());
             Object.assign(extension_settings.vecttauri, settings);
+            // Write-through mirror (sync): survives app-switch/kill before the
+            // debounced settings save flushes — see utils/llm-config-store.js.
+            saveLlmConfigFields({ chat_provider: settings.chat_provider });
             saveSettingsDebounced();
             updateSummarizeUI(settings.chat_provider);
         });
@@ -2806,6 +2810,7 @@ function bindSettingsEvents(settings, callbacks) {
             // immediately after typing would skip the save.
             settings.chat_model = String($(this).val()).trim();
             Object.assign(extension_settings.vecttauri, settings);
+            saveLlmConfigFields({ chat_model: settings.chat_model });
             saveSettingsDebounced();
         });
 
@@ -2817,6 +2822,7 @@ function bindSettingsEvents(settings, callbacks) {
         .on('change', function() {
             settings.should_send_temperature = $(this).prop('checked');
             Object.assign(extension_settings.vecttauri, settings);
+            saveLlmConfigFields({ should_send_temperature: settings.should_send_temperature });
             saveSettingsDebounced();
         });
 
@@ -2825,6 +2831,7 @@ function bindSettingsEvents(settings, callbacks) {
         .on('change', function() {
             settings.should_use_max_completion_tokens = $(this).prop('checked');
             Object.assign(extension_settings.vecttauri, settings);
+            saveLlmConfigFields({ should_use_max_completion_tokens: settings.should_use_max_completion_tokens });
             saveSettingsDebounced();
         });
 
@@ -2833,6 +2840,7 @@ function bindSettingsEvents(settings, callbacks) {
         .on('change', function() {
             settings.should_disable_thinking = $(this).prop('checked');
             Object.assign(extension_settings.vecttauri, settings);
+            saveLlmConfigFields({ should_disable_thinking: settings.should_disable_thinking });
             saveSettingsDebounced();
         });
 
@@ -2954,6 +2962,7 @@ function bindSettingsEvents(settings, callbacks) {
         .on('change', function() {
             settings.chat_vllm_url = String($(this).val()).trim();
             Object.assign(extension_settings.vecttauri, settings);
+            saveLlmConfigFields({ chat_vllm_url: settings.chat_vllm_url });
             saveSettingsDebounced();
         });
 
