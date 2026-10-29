@@ -1,11 +1,11 @@
 /**
  * ============================================================================
- * VectFox DIAGNOSTICS - PRODUCTION TESTS
+ * VectTauri DIAGNOSTICS - PRODUCTION TESTS
  * ============================================================================
  * Integration tests for embedding, storage, and retrieval
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -22,7 +22,7 @@ const CHAT_NOT_APPLICABLE_MESSAGE = 'Not applicable (EventBase mode — chat is 
 /**
  * Full cleanup for test collections - purges vectors AND unregisters from registry
  * @param {string} collectionId - The test collection to clean up
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  */
 async function cleanupTestCollection(collectionId, settings) {
     try {
@@ -42,8 +42,8 @@ async function cleanupTestCollection(collectionId, settings) {
 // new check pokes a fresh collection name.
 const DIAGNOSTIC_TEST_COLLECTION_PATTERNS = [
     /(^|:)vf_test_/,           // production test temp collections
-    /^VectFox_diag/,           // diagnostic temp collections
-    /(^|:)VectFox_diag(_|$)/, // infrastructure endpoint probes
+    /^VectTauri_diag/,           // diagnostic temp collections
+    /(^|:)VectTauri_diag(_|$)/, // infrastructure endpoint probes
     /(^|:)test$/,              // checkVectorsExtension probe
 ];
 
@@ -53,7 +53,7 @@ function isDiagnosticTestCollection(id) {
 }
 
 /**
- * Sweep any leftover diagnostic probe collections (`vf_test_*`, `VectFox_diag*`,
+ * Sweep any leftover diagnostic probe collections (`vf_test_*`, `VectTauri_diag*`,
  * `test`) that were created by previous diagnostic runs and not cleaned up —
  * either because earlier code lacked try/finally, the process was killed
  * mid-run, or the backend creates the collection on first reference of a
@@ -139,7 +139,7 @@ function getProviderBody(settings) {
 /**
  * Helper: Get provider-specific body parameters for Similharity plugin requests
  * This ensures local-server providers that need special params get them
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {object} Additional body parameters for the request
  */
 function getPluginProviderParams(settings) {
@@ -268,7 +268,7 @@ export async function testVectorStorage(settings) {
     const testCollectionId = `vf_test_storage_${Date.now()}`;
     try {
         const testHash = String(Math.floor(Math.random() * 1000000));
-        const testText = 'VectFox storage test message';
+        const testText = 'VectTauri storage test message';
         const backend = settings.vector_backend || 'standard';
         const backendType = backend === 'standard' ? 'vectra' : backend;
 
@@ -553,7 +553,7 @@ export async function fixDuplicateHashes(duplicates, collectionId, settings) {
                     }
                 }
             } catch (e) {
-                console.warn(`VectFox: Failed to get data for hash ${hash}:`, e);
+                console.warn(`VectTauri: Failed to get data for hash ${hash}:`, e);
             }
         }
 
@@ -561,9 +561,9 @@ export async function fixDuplicateHashes(duplicates, collectionId, settings) {
         const hashesToDelete = duplicates.map(d => d.hash);
         try {
             await deleteVectorItems(collectionId, hashesToDelete, settings);
-            console.log(`VectFox: Deleted ${hashesToDelete.length} duplicate hashes`);
+            console.log(`VectTauri: Deleted ${hashesToDelete.length} duplicate hashes`);
         } catch (e) {
-            console.warn('VectFox: Delete failed:', e);
+            console.warn('VectTauri: Delete failed:', e);
             return {
                 success: false,
                 message: `Failed to delete duplicates: ${e.message}`
@@ -575,9 +575,9 @@ export async function fixDuplicateHashes(duplicates, collectionId, settings) {
             try {
                 await insertVectorItems(collectionId, chunksToReinsert, settings);
                 fixed = chunksToReinsert.length;
-                console.log(`VectFox: Re-inserted ${fixed} chunks (deduplicated)`);
+                console.log(`VectTauri: Re-inserted ${fixed} chunks (deduplicated)`);
             } catch (e) {
-                console.warn('VectFox: Re-insert failed:', e);
+                console.warn('VectTauri: Re-insert failed:', e);
                 return {
                     success: false,
                     message: `Deleted duplicates but failed to re-insert: ${e.message}. Re-vectorize chat to restore.`

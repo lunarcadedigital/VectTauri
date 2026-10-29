@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VectFox CONTENT TYPES REGISTRY
+ * VectTauri CONTENT TYPES REGISTRY
  * ============================================================================
  * Unified system for handling different content types with type-appropriate
  * features while sharing the same pipeline infrastructure.
@@ -9,8 +9,8 @@
  * - "unit" strategies (per_message, conversation_turns, message_batch, per_entry, per_field) = no size controls
  * - "text" strategies (adaptive, paragraph, section, sentence) = show size controls where applicable
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 

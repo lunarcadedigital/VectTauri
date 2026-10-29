@@ -1,11 +1,11 @@
 /**
  * ============================================================================
- * VectFox DIAGNOSTICS - CONFIGURATION
+ * VectTauri DIAGNOSTICS - CONFIGURATION
  * ============================================================================
  * Settings validation and configuration checks
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 

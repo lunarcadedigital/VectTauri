@@ -1,5 +1,5 @@
 {
-  "_comment": "SigMap config for VectFox. Tuned 2026-07-30 to fix coverage grade D (38%).",
+  "_comment": "SigMap config for VectTauri. Tuned 2026-07-30 to fix coverage grade D (38%).",
 
   "output": ".github/copilot-instructions.md",
 

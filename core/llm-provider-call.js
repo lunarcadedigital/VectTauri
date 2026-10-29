@@ -3,7 +3,7 @@
  * LLM PROVIDER CALL (shared)
  * ============================================================================
  * Single home for the OpenAI-compatible chat-completions plumbing that four
- * VectFox features previously each re-implemented (summarizer.js,
+ * VectTauri features previously each re-implemented (summarizer.js,
  * eventbase-extractor.js, agentic-retrieval.js, and reformat-extractor.js):
  * build request body → POST through ST's proxy → classify the response
  * (auth / model-config / connection / generic) → extract the reply → classify
@@ -108,7 +108,7 @@ function _upstreamRejectionDetail(data) {
  * chain-of-thought (DeepSeek's direct API uses `reasoning_content`, OpenRouter
  * normalises to `reasoning`) hit the second branch.
  *
- * VectFox must NOT substitute thinking for the answer where it is visible.
+ * VectTauri must NOT substitute thinking for the answer where it is visible.
  * Chain-of-thought is the model's scratch work, not output it committed to:
  * parsing it would mint events, chunks, or summaries the model never asserted.
  * This is a failure to report, never a source to fall back on.
@@ -135,7 +135,7 @@ function _budgetSpentWithoutAnswerDetail(data) {
 
 /**
  * Resolve the two request-shape switches every chat-completion call needs, from
- * the VectFox settings object the caller already holds.
+ * the VectTauri settings object the caller already holds.
  *
  * WHY THIS EXISTS — reasoning models (OpenAI's gpt-5 family, o1/o3/o4, and the
  * hosted variants built on them) reject the classic sampling parameters:
@@ -146,7 +146,7 @@ function _budgetSpentWithoutAnswerDetail(data) {
  * NOTHING ELSE IN THE STACK WILL FIX THIS FOR US — verified against SillyTavern
  * 1.18.0:
  *   - The server's /api/backends/chat-completions/generate handler is a raw
- *     passthrough for both sources VectFox uses: it copies `temperature`,
+ *     passthrough for both sources VectTauri uses: it copies `temperature`,
  *     `max_tokens` and `max_completion_tokens` verbatim out of the request body
  *     (src/endpoints/backends/chat-completions.js, the generic requestBody block).
  *   - ST's OWN client does perform exactly this rewrite —
@@ -154,13 +154,13 @@ function _budgetSpentWithoutAnswerDetail(data) {
  *     generate_data.max_tokens; … delete generate_data.temperature;` for /gpt-5/
  *     and /^(o1|o3|o4)/ (public/scripts/openai.js) — but only for its `gptSources`
  *     list: OPENAI, AZURE_OPENAI, OPENROUTER. `custom` is NOT in that list, and
- *     VectFox never goes through that client path anyway.
- * So VectFox reaching a reasoning model has to shape the body itself. This helper
+ *     VectTauri never goes through that client path anyway.
+ * So VectTauri reaching a reasoning model has to shape the body itself. This helper
  * mirrors what ST's client does for its own requests.
  *
  * These are deliberately USER-SET switches, not model-name sniffing: the model-id
  * list rots every time a vendor ships a name (ST's own regexes already carry
- * special cases for gpt-5-chat-latest and gpt-5.1–5.4), and VectFox sees arbitrary
+ * special cases for gpt-5-chat-latest and gpt-5.1–5.4), and VectTauri sees arbitrary
  * ids from proxies and custom gateways where a name tells you nothing about the
  * API shape.
  *
@@ -168,7 +168,7 @@ function _budgetSpentWithoutAnswerDetail(data) {
  * across all four LLM features, so per-feature copies would be four ways to get the
  * same answer wrong.
  *
- * @param {object} [settings] - VectFox settings object
+ * @param {object} [settings] - VectTauri settings object
  * @returns {{sendTemperature: boolean, tokenLimitParameter: string}} spread straight
  *          into the postChatCompletion argument object
  */
@@ -337,7 +337,7 @@ export async function postChatCompletion({
             throw new LlmCallError(
                 `${contextLabel}: model "${model}" used its entire ${maxTokens}-token limit without answering `
                 + `(finish_reason "${noAnswer.finishReason}") — spending ${spent}. Raise the ${contextLabel} token `
-                + `limit, or pick a model that does not think before replying. VectFox cannot use chain-of-thought `
+                + `limit, or pick a model that does not think before replying. VectTauri cannot use chain-of-thought `
                 + `as output — it is the model's scratch work, not an answer it stands behind.`,
                 { kind: 'model_config', status: response.status, provider },
             );
@@ -381,7 +381,7 @@ export async function postChatCompletion({
                 `[${contextLabel}] ${label} rejected the request for model "${model}" (HTTP ${response.status} from ST, `
                 + `upstream status text "${upstreamDetail}"). Request shape sent: ${shapeSent}. ST forwards only the status `
                 + `text, so the provider's full error is in the SillyTavern server console. If reasoning_effort=none, try `
-                + `unchecking "Turn off model thinking" in the VectFox Core tab — newer Gemini models reject that value on `
+                + `unchecking "Turn off model thinking" in the VectTauri Core tab — newer Gemini models reject that value on `
                 + `every call. Raw body: ${bodyText.slice(0, 500)}`,
             );
             throw new LlmCallError(

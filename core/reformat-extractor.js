@@ -7,7 +7,7 @@
  * core/reformat-schema.js for the record shape).
  *
  * Provider calling + LLM-output JSON parsing are shared with the other three
- * VectFox LLM features via core/llm-provider-call.js (postChatCompletion +
+ * VectTauri LLM features via core/llm-provider-call.js (postChatCompletion +
  * parseJsonArrayFromLlm) — this file no longer re-implements them, and still
  * imports nothing from EventBase. The reformat-specific policy stays here:
  * config resolution, per-batch retry (AsyncUtils.retry — transient failures on
@@ -365,7 +365,7 @@ async function _processChain(chain, settings, chainIndex, warnings) {
  * @param {string} params.text - Full prepared source text (document/url, or
  *        wiki text with per_page strategy overridden away — see caller)
  * @param {string} params.contentType - 'document' | 'url' | 'wiki'
- * @param {object} params.settings - VectFox settings
+ * @param {object} params.settings - VectTauri settings
  * @param {(processed: number, total: number) => void} [params.onProgress]
  * @param {AbortSignal} [params.abortSignal]
  * @returns {Promise<{chunks: object[], warnings: string[], batchesProcessed: number, batchesFailed: number, totalBatches: number}>}

@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path';
 // text-cleaning.js (and its log.js dependency) import the SillyTavern host path.
 // Mock it so the module graph loads under node.
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
 }));
 vi.mock('../../../../utils.js', () => ({
     uuidv4: () => 'test-uuid',

@@ -4,13 +4,13 @@
  * ============================================================================
  */
 
-.vectfox-text-cleaning-content {
+.vecttauri-text-cleaning-content {
     width: 90%;
     max-width: 850px;
-    /* Inherits max-height, flex, overflow from .vectfox-modal-content in modals.css */
+    /* Inherits max-height, flex, overflow from .vecttauri-modal-content in modals.css */
 }
 
-.vectfox-tcm-body {
+.vecttauri-tcm-body {
     flex: 1;
     min-height: 0; /* CRITICAL for flex overflow */
     overflow-y: auto;
@@ -20,19 +20,19 @@
     gap: 20px;
 }
 
-.vectfox-tcm-intro {
+.vecttauri-tcm-intro {
     font-size: 0.9em;
     opacity: 0.8;
     line-height: 1.5;
     margin: 0;
     padding: 12px 16px;
-    background: color-mix(in srgb, var(--vectfox-primary) 8%, transparent);
+    background: color-mix(in srgb, var(--vecttauri-primary) 8%, transparent);
     border-radius: 8px;
-    border-left: 3px solid var(--vectfox-primary);
+    border-left: 3px solid var(--vecttauri-primary);
 }
 
 /* Sections */
-.vectfox-tcm-section {
+.vecttauri-tcm-section {
     background: color-mix(in srgb, var(--SmartThemeBlurTintColor) 50%, transparent);
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 10px;
@@ -40,7 +40,7 @@
     flex-shrink: 0; /* Don't collapse sections */
 }
 
-.vectfox-tcm-section-header {
+.vecttauri-tcm-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -49,32 +49,32 @@
     border-bottom: 1px solid color-mix(in srgb, var(--SmartThemeBorderColor) 50%, transparent);
 }
 
-.vectfox-tcm-section-header h4 {
+.vecttauri-tcm-section-header h4 {
     margin: 0;
     font-size: 1em;
     font-weight: 600;
 }
 
-.vectfox-tcm-hint {
+.vecttauri-tcm-hint {
     font-size: 0.8em;
     opacity: 0.6;
     font-style: italic;
 }
 
-.vectfox-tcm-actions {
+.vecttauri-tcm-actions {
     display: flex;
     gap: 8px;
 }
 
 /* Preset Selection */
-.vectfox-tcm-preset-info {
+.vecttauri-tcm-preset-info {
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.vectfox-tcm-preset-info select {
+.vecttauri-tcm-preset-info select {
     padding: 10px 14px;
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 8px;
@@ -83,14 +83,14 @@
     font-size: 1em;
 }
 
-.vectfox-tcm-preset-desc {
+.vecttauri-tcm-preset-desc {
     font-size: 0.85em;
     opacity: 0.7;
     font-style: italic;
 }
 
 /* Built-in Patterns Grid */
-.vectfox-tcm-patterns-grid {
+.vecttauri-tcm-patterns-grid {
     padding: 12px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -99,7 +99,7 @@
     overflow-y: auto;
 }
 
-.vectfox-tcm-pattern-item {
+.vecttauri-tcm-pattern-item {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -111,39 +111,39 @@
     transition: all 0.15s;
 }
 
-.vectfox-tcm-pattern-item:hover {
-    background: color-mix(in srgb, var(--vectfox-primary) 10%, var(--SmartThemeBlurTintColor));
-    border-color: color-mix(in srgb, var(--vectfox-primary) 30%, var(--SmartThemeBorderColor));
+.vecttauri-tcm-pattern-item:hover {
+    background: color-mix(in srgb, var(--vecttauri-primary) 10%, var(--SmartThemeBlurTintColor));
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 30%, var(--SmartThemeBorderColor));
 }
 
-.vectfox-tcm-pattern-item:has(input:checked) {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, var(--SmartThemeBlurTintColor));
-    border-color: var(--vectfox-primary);
+.vecttauri-tcm-pattern-item:has(input:checked) {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, var(--SmartThemeBlurTintColor));
+    border-color: var(--vecttauri-primary);
 }
 
 /* Locked: a non-Custom preset controls the grid; boxes mirror the preset
    and are read-only. Dim and disable the hover/cursor affordances. */
-.vectfox-tcm-pattern-locked {
+.vecttauri-tcm-pattern-locked {
     cursor: default;
     opacity: 0.7;
 }
 
-.vectfox-tcm-pattern-locked:hover {
+.vecttauri-tcm-pattern-locked:hover {
     background: var(--SmartThemeBlurTintColor);
     border-color: var(--SmartThemeBorderColor);
 }
 
-.vectfox-tcm-pattern-locked:has(input:checked) {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, var(--SmartThemeBlurTintColor));
-    border-color: var(--vectfox-primary);
+.vecttauri-tcm-pattern-locked:has(input:checked) {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, var(--SmartThemeBlurTintColor));
+    border-color: var(--vecttauri-primary);
 }
 
-.vectfox-tcm-pattern-item input[type="checkbox"] {
+.vecttauri-tcm-pattern-item input[type="checkbox"] {
     margin: 2px 0 0 0;
     flex-shrink: 0;
 }
 
-.vectfox-tcm-pattern-info {
+.vecttauri-tcm-pattern-info {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -151,12 +151,12 @@
     min-width: 0;
 }
 
-.vectfox-tcm-pattern-name {
+.vecttauri-tcm-pattern-name {
     font-weight: 500;
     font-size: 0.9em;
 }
 
-.vectfox-tcm-pattern-regex {
+.vecttauri-tcm-pattern-regex {
     font-family: monospace;
     font-size: 0.7em;
     opacity: 0.5;
@@ -169,7 +169,7 @@
 }
 
 /* Custom Patterns List */
-.vectfox-tcm-custom-list {
+.vecttauri-tcm-custom-list {
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -178,14 +178,14 @@
     overflow-y: auto;
 }
 
-.vectfox-tcm-empty {
+.vecttauri-tcm-empty {
     text-align: center;
     padding: 30px 20px;
     opacity: 0.5;
     font-style: italic;
 }
 
-.vectfox-tcm-custom-item {
+.vecttauri-tcm-custom-item {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -195,11 +195,11 @@
     border-radius: 8px;
 }
 
-.vectfox-tcm-custom-item .vectfox-tcm-custom-enabled {
+.vecttauri-tcm-custom-item .vecttauri-tcm-custom-enabled {
     flex-shrink: 0;
 }
 
-.vectfox-tcm-custom-item input[type="text"] {
+.vecttauri-tcm-custom-item input[type="text"] {
     padding: 8px 10px;
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 6px;
@@ -208,42 +208,42 @@
     font-size: 0.85em;
 }
 
-.vectfox-tcm-custom-item input[type="text"]:focus {
-    border-color: var(--vectfox-primary);
+.vecttauri-tcm-custom-item input[type="text"]:focus {
+    border-color: var(--vecttauri-primary);
     outline: none;
 }
 
-.vectfox-tcm-custom-name {
+.vecttauri-tcm-custom-name {
     width: 90px;
     flex-shrink: 0;
 }
 
-.vectfox-tcm-custom-pattern {
+.vecttauri-tcm-custom-pattern {
     flex: 2;
     min-width: 140px;
     font-family: monospace;
 }
 
-.vectfox-tcm-custom-replacement {
+.vecttauri-tcm-custom-replacement {
     flex: 1;
     min-width: 80px;
 }
 
 /* Pattern Tester */
-.vectfox-tcm-tester {
+.vecttauri-tcm-tester {
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.vectfox-tcm-tester-row {
+.vecttauri-tcm-tester-row {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.vectfox-tcm-tester .vectfox-input {
+.vecttauri-tcm-tester .vecttauri-input {
     flex: 1;
     padding: 10px 12px;
     border: 1px solid var(--SmartThemeBorderColor);
@@ -253,12 +253,12 @@
     font-size: 0.9em;
 }
 
-.vectfox-tcm-tester .vectfox-input:focus {
-    border-color: var(--vectfox-primary);
+.vecttauri-tcm-tester .vecttauri-input:focus {
+    border-color: var(--vecttauri-primary);
     outline: none;
 }
 
-.vectfox-tcm-tester .vectfox-textarea {
+.vecttauri-tcm-tester .vecttauri-textarea {
     width: 100%;
     min-height: 60px;
     padding: 10px 12px;
@@ -270,23 +270,23 @@
     resize: vertical;
 }
 
-.vectfox-tcm-tester .vectfox-textarea:focus {
-    border-color: var(--vectfox-primary);
+.vecttauri-tcm-tester .vecttauri-textarea:focus {
+    border-color: var(--vecttauri-primary);
     outline: none;
 }
 
-.vectfox-tcm-test-result {
+.vecttauri-tcm-test-result {
     min-height: 60px;
 }
 
-.vectfox-tcm-test-success {
+.vecttauri-tcm-test-success {
     padding: 12px;
-    background: color-mix(in srgb, var(--vectfox-success) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--vectfox-success) 30%, transparent);
+    background: color-mix(in srgb, var(--vecttauri-success) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-success) 30%, transparent);
     border-radius: 8px;
 }
 
-.vectfox-tcm-test-success pre {
+.vecttauri-tcm-test-success pre {
     margin: 8px 0 0 0;
     padding: 10px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
@@ -298,12 +298,12 @@
     overflow-y: auto;
 }
 
-.vectfox-tcm-test-error {
+.vecttauri-tcm-test-error {
     padding: 12px;
-    background: color-mix(in srgb, var(--vectfox-danger) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--vectfox-danger) 30%, transparent);
+    background: color-mix(in srgb, var(--vecttauri-danger) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-danger) 30%, transparent);
     border-radius: 8px;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -311,75 +311,75 @@
 
 /* Responsive */
 @media (max-width: 700px) {
-    .vectfox-text-cleaning-content {
+    .vecttauri-text-cleaning-content {
         width: 95%;
         max-width: none;
     }
 
-    .vectfox-tcm-body {
+    .vecttauri-tcm-body {
         padding: 12px;
         gap: 12px;
     }
 
-    .vectfox-tcm-patterns-grid {
+    .vecttauri-tcm-patterns-grid {
         grid-template-columns: 1fr;
         max-height: 180px;
     }
 
-    .vectfox-tcm-custom-list {
+    .vecttauri-tcm-custom-list {
         max-height: 160px;
     }
 
-    .vectfox-tcm-custom-item {
+    .vecttauri-tcm-custom-item {
         flex-wrap: wrap;
     }
 
-    .vectfox-tcm-custom-name {
+    .vecttauri-tcm-custom-name {
         width: 80px;
     }
 
-    .vectfox-tcm-custom-pattern {
+    .vecttauri-tcm-custom-pattern {
         flex: 1 1 100%;
         order: 10;
         margin-top: 6px;
         min-width: 100%;
     }
 
-    .vectfox-tcm-custom-replacement {
+    .vecttauri-tcm-custom-replacement {
         flex: 1;
         min-width: 60px;
     }
 
-    .vectfox-tcm-tester-row {
+    .vecttauri-tcm-tester-row {
         flex-direction: column;
         align-items: stretch;
         gap: 8px;
     }
 
-    .vectfox-tcm-tester-row .vectfox-input {
+    .vecttauri-tcm-tester-row .vecttauri-input {
         width: 100%;
     }
 }
 
 /* Very small screens */
 @media (max-width: 480px) {
-    .vectfox-tcm-section-header {
+    .vecttauri-tcm-section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 6px;
     }
 
-    .vectfox-tcm-actions {
+    .vecttauri-tcm-actions {
         width: 100%;
         flex-wrap: wrap;
     }
 
-    .vectfox-tcm-actions button {
+    .vecttauri-tcm-actions button {
         flex: 1;
         min-width: 70px;
     }
 
-    .vectfox-tcm-custom-name {
+    .vecttauri-tcm-custom-name {
         width: 70px;
     }
 }

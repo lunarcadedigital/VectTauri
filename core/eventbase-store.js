@@ -41,7 +41,7 @@ const _windowCacheSet = new Map(); // chatUUID → Set<fingerprint>
 //
 // Lifecycle:
 //   - written by the ingestion loop after each successful markWindowExtracted
-//   - persisted to extension_settings.vectfox.eventbase_vectorization_tip so the
+//   - persisted to extension_settings.vecttauri.eventbase_vectorization_tip so the
 //     value survives reload WITHOUT a backend probe (benefits standard+plugin and
 //     qdrant+plugin users; standard-no-plugin can't probe anyway). See getter.
 //   - probed via ensureVectorizationTip only when neither the in-memory cache nor
@@ -58,7 +58,7 @@ export function getVectorizationTip(chatUUID) {
     if (!chatUUID) return undefined;
     const cached = _vectorizationTipByUuid.get(chatUUID);
     if (typeof cached === 'number') return cached;
-    const persisted = extension_settings?.vectfox?.eventbase_vectorization_tip?.[chatUUID];
+    const persisted = extension_settings?.vecttauri?.eventbase_vectorization_tip?.[chatUUID];
     if (typeof persisted === 'number') {
         _vectorizationTipByUuid.set(chatUUID, persisted);
         return persisted;
@@ -72,7 +72,7 @@ export function setVectorizationTip(chatUUID, tip) {
     const current = _vectorizationTipByUuid.get(chatUUID) ?? -1;
     if (tip > current) _vectorizationTipByUuid.set(chatUUID, tip);
     // Persist (also monotonic) so the value survives reload without a probe.
-    const store = extension_settings?.vectfox;
+    const store = extension_settings?.vecttauri;
     if (store) {
         if (!store.eventbase_vectorization_tip) store.eventbase_vectorization_tip = {};
         if (tip > (store.eventbase_vectorization_tip[chatUUID] ?? -1)) {
@@ -86,14 +86,14 @@ export function setVectorizationTip(chatUUID, tip) {
 export function clearVectorizationTip(chatUUID) {
     if (!chatUUID) return;
     _vectorizationTipByUuid.delete(chatUUID);
-    const store = extension_settings?.vectfox?.eventbase_vectorization_tip;
+    const store = extension_settings?.vecttauri?.eventbase_vectorization_tip;
     if (store && Object.prototype.hasOwnProperty.call(store, chatUUID)) {
         delete store[chatUUID];
         saveSettingsDebounced();
     }
 }
 
-// Per-chat maps in extension_settings.vectfox that are keyed by chat UUID and only
+// Per-chat maps in extension_settings.vecttauri that are keyed by chat UUID and only
 // shrink via explicit clear paths (collection delete / fresh-extraction). Without a
 // sweep they accumulate one stale entry per chat deleted OUTSIDE the EventBase flow.
 const _ORPHANABLE_CHAT_MAPS = [
@@ -115,7 +115,7 @@ const _ORPHANABLE_CHAT_MAPS = [
  */
 export function pruneOrphanedChatMaps(liveUuids) {
     if (!(liveUuids instanceof Set)) return 0;
-    const store = extension_settings?.vectfox;
+    const store = extension_settings?.vecttauri;
     if (!store) return 0;
 
     let removed = 0;
@@ -186,7 +186,7 @@ export async function ensureVectorizationTip(chatUUID, collectionId, settings) {
  * Each event gets its own Qdrant point (vector = embedText embedding, payload = full record).
  *
  * @param {object[]} events      - Array of full EventRecord objects (with ingestion metadata)
- * @param {object}   settings    - VectFox settings
+ * @param {object}   settings    - VectTauri settings
  * @param {AbortSignal|null} [abortSignal]
  * @returns {Promise<void>}
  */
@@ -400,7 +400,7 @@ export async function deleteEventByHash(hash, settings, chatUUID) {
  */
 export function getAutoSyncMarker(chatUUID) {
     if (!chatUUID) return undefined;
-    return extension_settings?.vectfox?.eventbase_autosync_start_marker?.[chatUUID];
+    return extension_settings?.vecttauri?.eventbase_autosync_start_marker?.[chatUUID];
 }
 
 /**
@@ -409,7 +409,7 @@ export function getAutoSyncMarker(chatUUID) {
  * @param {string} chatUUID
  */
 export function clearAutoSyncMarker(chatUUID) {
-    const store = extension_settings?.vectfox?.eventbase_autosync_start_marker;
+    const store = extension_settings?.vecttauri?.eventbase_autosync_start_marker;
     if (!store || !chatUUID) return;
     if (Object.prototype.hasOwnProperty.call(store, chatUUID)) {
         delete store[chatUUID];
@@ -440,7 +440,7 @@ export function clearAutoSyncMarker(chatUUID) {
  */
 export async function stampAutoSyncMarker(chatUUID, settings, options = {}) {
     if (!chatUUID) return 0;
-    const store = extension_settings?.vectfox;
+    const store = extension_settings?.vecttauri;
     if (!store) return 0;
 
     const chatLength = getContext()?.chat?.length ?? 0;
@@ -497,7 +497,7 @@ export async function stampAutoSyncMarker(chatUUID, settings, options = {}) {
  */
 export function getLastUsedWindowSize(chatUUID) {
     if (!chatUUID) return undefined;
-    return extension_settings?.vectfox?.eventbase_last_used_window_size?.[chatUUID];
+    return extension_settings?.vecttauri?.eventbase_last_used_window_size?.[chatUUID];
 }
 
 /**
@@ -506,7 +506,7 @@ export function getLastUsedWindowSize(chatUUID) {
  * @param {number} windowSize
  */
 export function setLastUsedWindowSize(chatUUID, windowSize) {
-    const store = extension_settings?.vectfox;
+    const store = extension_settings?.vecttauri;
     if (!store || !chatUUID || !Number.isFinite(windowSize)) return;
     if (!store.eventbase_last_used_window_size) store.eventbase_last_used_window_size = {};
     if (store.eventbase_last_used_window_size[chatUUID] !== windowSize) {
@@ -624,7 +624,7 @@ export function markWindowExtracted(sourceHashes, chatUUID) {
     const uuid = chatUUID || getChatUUID();
     if (!uuid) return;
 
-    const store = extension_settings.vectfox;
+    const store = extension_settings.vecttauri;
     if (!store) return;
     if (!store.eventbase_extracted_windows) store.eventbase_extracted_windows = {};
     if (!store.eventbase_extracted_windows[uuid]) store.eventbase_extracted_windows[uuid] = [];
@@ -652,7 +652,7 @@ export function markWindowExtracted(sourceHashes, chatUUID) {
 export function clearWindowCacheForChat(chatUUID) {
     const uuid = chatUUID || getChatUUID();
     if (!uuid) return;
-    const store = extension_settings?.vectfox;
+    const store = extension_settings?.vecttauri;
     if (!store?.eventbase_extracted_windows) return;
     delete store.eventbase_extracted_windows[uuid];
     _windowCacheSet.delete(uuid);
@@ -710,7 +710,7 @@ export function isLastWindowExtracted(messages, windowSize, step, chatUUID, hash
     const hashes = lastMsgs.map(hashFn);
 
     if (!_windowCacheSet.has(uuid)) {
-        const arr = extension_settings?.vectfox?.eventbase_extracted_windows?.[uuid];
+        const arr = extension_settings?.vecttauri?.eventbase_extracted_windows?.[uuid];
         _windowCacheSet.set(uuid, new Set(Array.isArray(arr) ? arr : []));
     }
 
@@ -734,7 +734,7 @@ export async function isWindowAlreadyExtracted(sourceHashes, messageIds, setting
 
     // Build the Set from the persisted array on first access for this chat
     if (!_windowCacheSet.has(uuid)) {
-        const arr = extension_settings?.vectfox?.eventbase_extracted_windows?.[uuid];
+        const arr = extension_settings?.vecttauri?.eventbase_extracted_windows?.[uuid];
         _windowCacheSet.set(uuid, new Set(Array.isArray(arr) ? arr : []));
     }
 
@@ -772,7 +772,7 @@ export function findEventBaseCollectionsForChat(uuid, preferredBackend) {
     for (const registryKey of getCollectionRegistry()) {
         const parsed = parseRegistryKey(registryKey);
         const colId = parsed.collectionId;
-        if (!colId?.startsWith(COLLECTION_PREFIXES.VECTFOX_EVENTBASE)) continue;
+        if (!colId?.startsWith(COLLECTION_PREFIXES.VECTTAURI_EVENTBASE)) continue;
         if (!colId.endsWith(uuid)) continue;
         matches.push({ registryKey, collectionId: colId, backend: parsed.backend });
     }
@@ -828,14 +828,14 @@ export function findEventBaseCollectionsForChat(uuid, preferredBackend) {
  * eventbase-injection.js). Write callers go through
  * {@link resolveEventBaseWriteTarget}, which passes `requireUuidMatch`.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @param {string} [chatUUID] - defaults to the current chat's UUID
  * @param {{ requireUuidMatch?: boolean, shouldLogResolution?: boolean }} [options]
  *   `requireUuidMatch` — write mode: reject collections whose embedded chat UUID
  *   differs from this chat (a foreign lock can never become a write target) or
  *   that are registered on a backend other than `vector_backend`.
  *   `shouldLogResolution` — false skips the `[EventBase][resolve]` lifecycle
- *   diagnostics, for passive UI refreshes while VectFox is disabled.
+ *   diagnostics, for passive UI refreshes while VectTauri is disabled.
  * @returns {{ collectionId: string, registryKey: string } | null}
  */
 export function resolveActiveEventBaseCollection(settings, chatUUID, { requireUuidMatch = false, shouldLogResolution = true } = {}) {
@@ -943,7 +943,7 @@ export function resolveActiveEventBaseCollection(settings, chatUUID, { requireUu
  * backend yet; the caller is expected to fall back to `buildEventBaseCollectionId`
  * and create one.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @param {string} [chatUUID] - defaults to the current chat's UUID
  * @param {{ shouldLogResolution?: boolean }} [options] - see resolveActiveEventBaseCollection
  * @returns {{ collectionId: string, registryKey: string } | null}
@@ -1003,12 +1003,12 @@ async function _resolveEventBaseCollectionIdForRead(settings, chatUUID) {
  *
  * Non-blocking — errors are caught and logged, toastr shown, never bubbles up.
  *
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<void>}
  */
 export async function ensureEventBaseIndexes(settings) {
     if (settings?.vector_backend !== 'qdrant') return;
-    if (extension_settings?.vectfox?.eventbase_indexes_v1_backfilled) return;
+    if (extension_settings?.vecttauri?.eventbase_indexes_v1_backfilled) return;
 
     // Collect all EventBase + ArchiveEvent Qdrant collections from the registry.
     const qdrantCollections = [];
@@ -1018,8 +1018,8 @@ export async function ensureEventBaseIndexes(settings) {
         const colId = parsed.collectionId;
         if (!colId) continue;
         if (
-            colId.startsWith(COLLECTION_PREFIXES.VECTFOX_EVENTBASE) ||
-            colId.startsWith(COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT)
+            colId.startsWith(COLLECTION_PREFIXES.VECTTAURI_EVENTBASE) ||
+            colId.startsWith(COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT)
         ) {
             qdrantCollections.push(colId);
         }
@@ -1027,8 +1027,8 @@ export async function ensureEventBaseIndexes(settings) {
 
     if (qdrantCollections.length === 0) {
         // No EventBase collections yet — mark done so we don't re-check every load.
-        if (extension_settings?.vectfox) {
-            extension_settings.vectfox.eventbase_indexes_v1_backfilled = true;
+        if (extension_settings?.vecttauri) {
+            extension_settings.vecttauri.eventbase_indexes_v1_backfilled = true;
             saveSettingsDebounced();
         }
         return;
@@ -1037,8 +1037,8 @@ export async function ensureEventBaseIndexes(settings) {
     // Show a non-blocking start toast only when there is actually work to do.
     if (typeof toastr !== 'undefined') {
         toastr.info(
-            `VectFox: upgrading EventBase index (one-time, ~${Math.ceil(qdrantCollections.length * 5)}s)…`,
-            'VectFox',
+            `VectTauri: upgrading EventBase index (one-time, ~${Math.ceil(qdrantCollections.length * 5)}s)…`,
+            'VectTauri',
             { timeOut: 8000 },
         );
     }
@@ -1061,23 +1061,23 @@ export async function ensureEventBaseIndexes(settings) {
     }
 
     if (errors.length === 0) {
-        if (extension_settings?.vectfox) {
-            extension_settings.vectfox.eventbase_indexes_v1_backfilled = true;
+        if (extension_settings?.vecttauri) {
+            extension_settings.vecttauri.eventbase_indexes_v1_backfilled = true;
             saveSettingsDebounced();
         }
         if (typeof toastr !== 'undefined') {
             toastr.success(
-                `VectFox: EventBase index upgrade complete (${qdrantCollections.length} collection(s)).`,
-                'VectFox',
+                `VectTauri: EventBase index upgrade complete (${qdrantCollections.length} collection(s)).`,
+                'VectTauri',
                 { timeOut: 5000 },
             );
         }
     } else {
-        log.warn('[VectFox] EventBase index backfill errors:', errors);
+        log.warn('[VectTauri] EventBase index backfill errors:', errors);
         if (typeof toastr !== 'undefined') {
             toastr.warning(
-                `VectFox: EventBase index upgrade failed for ${errors.length} collection(s) — see console. AgentMode filters may run slower.`,
-                'VectFox',
+                `VectTauri: EventBase index upgrade failed for ${errors.length} collection(s) — see console. AgentMode filters may run slower.`,
+                'VectTauri',
                 { timeOut: 10000 },
             );
         }

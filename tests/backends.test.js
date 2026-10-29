@@ -630,7 +630,7 @@ describe('QdrantBackend', () => {
     });
 
     describe('_parseCollectionId', () => {
-        it('should parse VectFox format (vf_type_id)', () => {
+        it('should parse VectTauri format (vf_type_id)', () => {
             const result = backend._parseCollectionId('vf_chat_abc123');
             expect(result.type).toBe('chat');
             expect(result.sourceId).toBe('abc123');
@@ -651,7 +651,7 @@ describe('QdrantBackend', () => {
             await backend.getSavedHashes('vf_chat_abc123', settings);
 
             const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-            expect(callBody.collectionId).toBe('vectfox_main');
+            expect(callBody.collectionId).toBe('vecttauri_main');
             expect(callBody.filter).toBeDefined();
             expect(callBody.filter.must[0].key).toBe('content_type');
         });

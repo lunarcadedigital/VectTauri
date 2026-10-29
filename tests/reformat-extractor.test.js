@@ -22,7 +22,7 @@ vi.mock('../core/api-keys.js', () => ({
 // core/log.js reads extension_settings for verbosity/domain gating — mock the
 // same way chunk-metadata-persistence.test.js mocks it for collection-metadata.js.
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
 }));
 
 import { reformatDocument, expandOversizedChunk } from '../core/reformat-extractor.js';

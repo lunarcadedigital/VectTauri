@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox CONTENT VECTORIZATION
+ * VectTauri CONTENT VECTORIZATION
  * ============================================================================
  * Unified vectorization handler for all content types.
  * Uses the same pipeline infrastructure, just with type-appropriate settings.
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -39,7 +39,7 @@ import { getStringHash } from '../../../../utils.js';
 import { log } from './log.js';
 
 /**
- * Merge per-call settings on top of the user's global VectFox settings.
+ * Merge per-call settings on top of the user's global VectTauri settings.
  * Single source of truth for "effective settings": callers pass only the keys
  * they want to override (vector_backend, source, model, content-type defaults),
  * and globals supply the rest (qdrant_url, custom_stopwords, summarize_*, etc.).
@@ -52,7 +52,7 @@ import { log } from './log.js';
  * @returns {object} merged settings — globals first, overrides win
  */
 export function resolveEffectiveSettings(callerSettings) {
-    return { ...(extension_settings.vectfox || {}), ...(callerSettings || {}) };
+    return { ...(extension_settings.vecttauri || {}), ...(callerSettings || {}) };
 }
 
 /**
@@ -128,14 +128,14 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
             const currentHash = getStringHash(normalizedText);
 
             if (currentHash !== settings.reformat.sourceHash) {
-                log.warn(`VectFox: Auto-Reformat was accepted for different content than what's loaded now (hash mismatch) — falling back to mechanical chunking. Re-run Auto-Reformat if you want it applied to the current content.`);
+                log.warn(`VectTauri: Auto-Reformat was accepted for different content than what's loaded now (hash mismatch) — falling back to mechanical chunking. Re-run Auto-Reformat if you want it applied to the current content.`);
             } else {
                 const frozen = getReformatCache(settings.reformat.sourceHash);
                 if (frozen?.chunks?.length) {
                     chunks = frozen.chunks;
-                    log.lifecycle(`VectFox: Using frozen Auto-Reformat chunks for "${sourceName}" (${chunks.length} chunks) — LLM not re-invoked`);
+                    log.lifecycle(`VectTauri: Using frozen Auto-Reformat chunks for "${sourceName}" (${chunks.length} chunks) — LLM not re-invoked`);
                 } else {
-                    log.warn(`VectFox: Auto-Reformat marked accepted but no frozen cache found for hash ${settings.reformat.sourceHash} — falling back to mechanical chunking`);
+                    log.warn(`VectTauri: Auto-Reformat marked accepted but no frozen cache found for hash ${settings.reformat.sourceHash} — falling back to mechanical chunking`);
                 }
             }
         }
@@ -163,7 +163,7 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
             const glossary = extractGlossary(preparedContent.text || '');
             if (glossary.length > 0) {
                 chunks = injectGlossary(chunks, glossary);
-                log.verbose(`VectFox: Glossary injection found ${glossary.length} acronym(s): ${glossary.map(g => g.acronym).join(', ')}`);
+                log.verbose(`VectTauri: Glossary injection found ${glossary.length} acronym(s): ${glossary.map(g => g.acronym).join(', ')}`);
             }
         }
 
@@ -171,7 +171,7 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
         const chunkLengths = chunks.map(c => (typeof c === 'string' ? c : c.text || '').length);
         const maxChunkLen = Math.max(...chunkLengths);
         const avgChunkLen = Math.round(chunkLengths.reduce((a, b) => a + b, 0) / chunkLengths.length);
-        log.lifecycle(`VectFox: Chunked "${sourceName}" into ${chunks.length} chunks (avg: ${avgChunkLen} chars, max: ${maxChunkLen} chars)`);
+        log.lifecycle(`VectTauri: Chunked "${sourceName}" into ${chunks.length} chunks (avg: ${avgChunkLen} chars, max: ${maxChunkLen} chars)`);
 
         progressTracker.updateChunks(chunks.length);
 
@@ -194,12 +194,12 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
         }
 
         // Get full extension settings for keyword extraction (includes custom_stopwords)
-        const VectFoxSettings = extension_settings.vectfox;
+        const VectTauriSettings = extension_settings.vecttauri;
 
         // Per-call overrides merged on top of globals (see resolveEffectiveSettings).
         const effectiveSettings = resolveEffectiveSettings(settings);
         
-        const enrichedChunks = enrichChunks(chunks, contentType, source, settings, preparedContent, VectFoxSettings);
+        const enrichedChunks = enrichChunks(chunks, contentType, source, settings, preparedContent, VectTauriSettings);
         const hashedChunks = enrichedChunks.map(chunk => ({
             ...chunk,
             hash: getStringHash(chunk.text),
@@ -215,15 +215,15 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
                 const before = hashedChunks.length;
                 finalChunks = hashedChunks.filter(c => !savedSet.has(c.hash));
                 const skipped = before - finalChunks.length;
-                log.lifecycle(`VectFox: Continue mode — ${skipped} chunks already in DB, ${finalChunks.length} remaining`);
+                log.lifecycle(`VectTauri: Continue mode — ${skipped} chunks already in DB, ${finalChunks.length} remaining`);
                 progressTracker.updateChunks(finalChunks.length);
                 if (finalChunks.length === 0) {
                     progressTracker.complete(true, 'Already up to date — no new chunks to insert');
                     return { success: true, chunkCount: 0, collectionId };
                 }
-                toastr.info(`Continuing: ${skipped} chunks skipped, ${finalChunks.length} to insert`, 'VectFox');
+                toastr.info(`Continuing: ${skipped} chunks skipped, ${finalChunks.length} to insert`, 'VectTauri');
             } catch (e) {
-                log.warn('VectFox: Could not fetch saved hashes for dedup, inserting all:', e.message);
+                log.warn('VectTauri: Could not fetch saved hashes for dedup, inserting all:', e.message);
                 finalChunks = hashedChunks;
             }
         } else {
@@ -252,17 +252,17 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
         /* ----- BEGIN: summarize-before-store pipeline (DISABLED, kept for future use) -----
         if (contentType === 'chat') {
             progressTracker.updateProgress(3, `Summarizing and inserting ${finalChunks.length} chunks...`);
-            log.lifecycle(`[VectFox Summarizer] Pipelining ${finalChunks.length} chat chunks via ${VectFoxSettings.chat_provider}...`);
+            log.lifecycle(`[VectTauri Summarizer] Pipelining ${finalChunks.length} chat chunks via ${VectTauriSettings.chat_provider}...`);
 
             // Pre-init backend once before pipeline starts
             try {
-                await getBackend(VectFoxSettings);
+                await getBackend(VectTauriSettings);
             } catch (e) {
-                log.warn('VectFox: Backend init failed before pipeline insert, will still attempt:', e.message);
+                log.warn('VectTauri: Backend init failed before pipeline insert, will still attempt:', e.message);
             }
 
             let pipelined = 0;
-            const keywordLevel = VectFoxSettings?.keywordLevel || 'balanced';
+            const keywordLevel = VectTauriSettings?.keywordLevel || 'balanced';
 
             {
                 for (const chunk of finalChunks) {
@@ -270,10 +270,10 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
 
                     let summaryText;
                     try {
-                        summaryText = await summarizeText(chunk.text, VectFoxSettings);
+                        summaryText = await summarizeText(chunk.text, VectTauriSettings);
                     } catch (err) {
                         if (isSummarizationFatalError(err)) {
-                            const providerLabel = (VectFoxSettings?.chat_provider || 'summarizer').toUpperCase();
+                            const providerLabel = (VectTauriSettings?.chat_provider || 'summarizer').toUpperCase();
                             const msg = `Summarization is enabled but misconfigured: ${err.message}`;
                             try { toastr.error(msg, `${providerLabel} configuration error`); } catch (_) {}
                             throw new Error(msg);
@@ -283,18 +283,18 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
                     const summaryKeywords = keywordLevel !== 'off'
                         ? extractBM25Keywords(summaryText, {
                             level: keywordLevel,
-                            baseWeight: VectFoxSettings?.keywordBaseWeight || 1.5,
-                            settings: VectFoxSettings,
+                            baseWeight: VectTauriSettings?.keywordBaseWeight || 1.5,
+                            settings: VectTauriSettings,
                         })
                         : [];
                     const summarizedChunk = { ...chunk, text: summaryText, keywords: summaryKeywords };
 
                     try {
                         throwIfAborted();
-                        await insertVectorItems(collectionId, [summarizedChunk], VectFoxSettings, null, abortSignal);
+                        await insertVectorItems(collectionId, [summarizedChunk], VectTauriSettings, null, abortSignal);
                     } catch (insertErr) {
                         if (insertErr?.name === 'AbortError') throw insertErr;
-                        log.error('VectFox: Pipeline insert failed for chunk, skipping:', insertErr.message);
+                        log.error('VectTauri: Pipeline insert failed for chunk, skipping:', insertErr.message);
                         progressTracker.addError(`Chunk ${pipelined + 1}: ${insertErr.message}`);
                     }
 
@@ -304,7 +304,7 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
                 }
             }
 
-            log.lifecycle(`[VectFox Summarizer] Pipeline complete: ${pipelined} chunks processed`);
+            log.lifecycle(`[VectTauri Summarizer] Pipeline complete: ${pipelined} chunks processed`);
 
         }
         ----- END: summarize-before-store pipeline ----- */
@@ -316,9 +316,9 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
             try {
                 await getBackend(effectiveSettings);
             } catch (e) {
-                log.warn('VectFox: Backend initialization failed before insert, will still attempt insert:', e.message);
+                log.warn('VectTauri: Backend initialization failed before insert, will still attempt insert:', e.message);
                 try { progressTracker.addError(`Backend init failed: ${e.message}`); } catch (_) {}
-                try { toastr.error('Backend initialization failed: ' + e.message, 'VectFox'); } catch (_) {}
+                try { toastr.error('Backend initialization failed: ' + e.message, 'VectTauri'); } catch (_) {}
             }
 
             try {
@@ -329,7 +329,7 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
                     progressTracker.updateCurrentItem(`Processing: ${embedded}/${total} chunks (${total - embedded} remaining)`);
                 }, abortSignal);
             } catch (error) {
-                log.error('VectFox: insertVectorItems failed', error);
+                log.error('VectTauri: insertVectorItems failed', error);
                 try { progressTracker.addError(error.message || String(error)); } catch (_) {}
                 // Distinguish an embedder-call failure from a storage-write failure
                 // (#4): they were both reported as "Failed to write embeddings",
@@ -342,7 +342,7 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
                     const headline = isEmbedFail
                         ? 'Failed to generate embeddings (check your embedding provider URL and model): '
                         : 'Failed to write embeddings to storage: ';
-                    try { toastr.error(headline + (error.message || String(error)), 'VectFox'); } catch (_) {}
+                    try { toastr.error(headline + (error.message || String(error)), 'VectTauri'); } catch (_) {}
                 }
                 throw error;
             }
@@ -375,7 +375,7 @@ export async function vectorizeContent({ contentType, source, settings, abortSig
 
         // Register collection in the registry so it's discoverable
         registerCollection(registryKey);
-        log.lifecycle(`VectFox: Registered collection ${registryKey}`);
+        log.lifecycle(`VectTauri: Registered collection ${registryKey}`);
 
 
         throwIfAborted();
@@ -529,7 +529,7 @@ async function loadLorebookContent(lorebookName, context) {
 
         const entries = Object.values(data.entries).filter(e => e.content);
 
-        log.lifecycle(`VectFox: Loaded lorebook "${lorebookName}" with ${entries.length} entries`);
+        log.lifecycle(`VectTauri: Loaded lorebook "${lorebookName}" with ${entries.length} entries`);
 
         return {
             content: entries,
@@ -538,7 +538,7 @@ async function loadLorebookContent(lorebookName, context) {
         };
 
     } catch (e) {
-        log.error('VectFox: Failed to load lorebook:', e);
+        log.error('VectTauri: Failed to load lorebook:', e);
         throw new Error(`Failed to load lorebook "${lorebookName}": ${e.message}`);
     }
 }
@@ -813,7 +813,7 @@ function generateCollectionId(contentType, source, settings) {
     switch (contentType) {
         case 'chat':
             throw new Error(
-                'VectFox: generateCollectionId(contentType="chat") is disabled. ' +
+                'VectTauri: generateCollectionId(contentType="chat") is disabled. ' +
                 'Chat history must go through eventbase-workflow.js, not the chunk content pipeline.'
             );
 
@@ -860,7 +860,7 @@ function generateCollectionId(contentType, source, settings) {
         scopePrefix = `chat_${context.chatId}_`;
     }
 
-    return `VectFox_${contentType}_${scopePrefix}${sanitizedName}_${timestamp}`;
+    return `VectTauri_${contentType}_${scopePrefix}${sanitizedName}_${timestamp}`;
 }
 
 /**
@@ -870,9 +870,9 @@ function generateCollectionId(contentType, source, settings) {
  * @param {object} source - Source info
  * @param {object} settings - Vectorization settings including keyword options
  * @param {object} preparedContent - Prepared content data
- * @param {object} VectFoxSettings - Full VectFox extension settings (includes custom_stopwords)
+ * @param {object} VectTauriSettings - Full VectTauri extension settings (includes custom_stopwords)
  */
-function enrichChunks(chunks, contentType, source, settings, preparedContent, VectFoxSettings) {
+function enrichChunks(chunks, contentType, source, settings, preparedContent, VectTauriSettings) {
     // Get keyword extraction settings
     const keywordLevel = settings.keywordLevel || 'balanced';
     const keywordBaseWeight = settings.keywordBaseWeight || 1.5;
@@ -890,7 +890,7 @@ function enrichChunks(chunks, contentType, source, settings, preparedContent, Ve
             entryUid = entry.uid;
 
             // Get explicit trigger keys (these are manually set, so use base weight)
-            const triggerKeys = extractLorebookKeywords(entry, VectFoxSettings);
+            const triggerKeys = extractLorebookKeywords(entry, VectTauriSettings);
             keywords = triggerKeys.map(k => ({ text: k, weight: keywordBaseWeight }));
 
             // Also get auto-extracted keywords with frequency-based weights
@@ -898,7 +898,7 @@ function enrichChunks(chunks, contentType, source, settings, preparedContent, Ve
                 const autoKeywords = extractTextKeywords(entry.content || chunkText, {
                     level: keywordLevel,
                     baseWeight: keywordBaseWeight,
-                    settings: VectFoxSettings,
+                    settings: VectTauriSettings,
                 });
                 keywords = keywords.concat(autoKeywords);
             }
@@ -908,7 +908,7 @@ function enrichChunks(chunks, contentType, source, settings, preparedContent, Ve
                 keywords = extractBM25Keywords(chunkText, {
                     level: keywordLevel,
                     baseWeight: keywordBaseWeight,
-                    settings: VectFoxSettings,
+                    settings: VectTauriSettings,
                 });
             }
         } else {
@@ -917,7 +917,7 @@ function enrichChunks(chunks, contentType, source, settings, preparedContent, Ve
                 keywords = extractTextKeywords(chunkText, {
                     level: keywordLevel,
                     baseWeight: keywordBaseWeight,
-                    settings: VectFoxSettings,
+                    settings: VectTauriSettings,
                 });
             }
         }
@@ -1000,7 +1000,7 @@ function enrichChunks(chunks, contentType, source, settings, preparedContent, Ve
  * actually holds the data — never the user's currently-selected global.
  *
  * Without this auto-detection, the previous code routed every cleanup
- * through `extension_settings.vectfox.vector_backend`. If the user's global
+ * through `extension_settings.vecttauri.vector_backend`. If the user's global
  * was `standard` while the data lived in qdrant (e.g. tests overriding
  * `vector_backend: 'qdrant'` for one call), the purge silently no-op'd
  * against vectra and the qdrant folder leaked on disk. Accumulated orphans
@@ -1019,5 +1019,5 @@ export async function deleteContentCollection(collectionId, callerSettings = nul
     }
     const effectiveSettings = resolveEffectiveSettings(baseSettings);
     await purgeVectorIndex(collectionId, effectiveSettings);
-    log.lifecycle(`VectFox: Deleted collection: ${collectionId} (routed via ${effectiveSettings.vector_backend})`);
+    log.lifecycle(`VectTauri: Deleted collection: ${collectionId} (routed via ${effectiveSettings.vector_backend})`);
 }

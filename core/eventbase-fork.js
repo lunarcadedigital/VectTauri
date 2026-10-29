@@ -55,7 +55,7 @@ import { log } from './log.js';
  * chat that is locked to this chat is read and matched by its events' stored
  * source hashes.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @returns {Promise<EventBaseForkSource|null>} null when nothing can be forked
  */
 export async function findEventBaseForkSource(settings) {
@@ -72,7 +72,7 @@ export async function findEventBaseForkSource(settings) {
     const backend = getRegistryBackend(settings?.vector_backend);
 
     const ranked = rankForkSourcesFromWindowRecord(
-        extension_settings?.vectfox?.eventbase_extracted_windows, branchHashes, chatUUID);
+        extension_settings?.vecttauri?.eventbase_extracted_windows, branchHashes, chatUUID);
     for (const candidate of ranked) {
         const collection = resolveActiveEventBaseCollection(settings, candidate.chatUUID, { shouldLogResolution: false });
         if (!collection || parseRegistryKey(collection.registryKey).backend !== backend) continue;
@@ -90,7 +90,7 @@ export async function findEventBaseForkSource(settings) {
 
     for (const lockKey of getChatLockedCollections(chatId)) {
         const { backend: lockBackend, collectionId } = parseRegistryKey(lockKey);
-        if (!collectionId.startsWith(COLLECTION_PREFIXES.VECTFOX_EVENTBASE) || collectionId.endsWith(chatUUID)) continue;
+        if (!collectionId.startsWith(COLLECTION_PREFIXES.VECTTAURI_EVENTBASE) || collectionId.endsWith(chatUUID)) continue;
         if (lockBackend && lockBackend !== backend) continue;
         const chunks = await fetchPortableChunks(collectionId, settings);
         const sharedPrefixLength = measureSharedPrefix(branchHashes, collectSourceMessageHashes(chunks));
@@ -122,7 +122,7 @@ export async function findEventBaseForkSource(settings) {
  * Shows the progress panel and can be stopped from it. On failure or stop during
  * the copy, the partially written collection is purged.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @param {EventBaseForkSource} source - From findEventBaseForkSource
  * @returns {Promise<{ collectionId: string, registryKey: string, eventCount: number, tip: number }>}
  * @throws {Error} When nothing can be copied, vectors are missing, the embedding

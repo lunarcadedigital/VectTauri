@@ -1,13 +1,13 @@
 /**
  * ============================================================================
- * VectFox DIAGNOSTICS - ACTIVATION TESTS
+ * VectTauri DIAGNOSTICS - ACTIVATION TESTS
  * ============================================================================
  * Comprehensive tests for conditional activation system
  * Tests all 10 condition types + activation triggers + chunk-only features
  * Returns individual test results for each condition type
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 

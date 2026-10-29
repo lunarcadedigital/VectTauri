@@ -1,5 +1,5 @@
 /**
- * Eventbase-test.spec.js — Playwright integration tests for VectFox
+ * Eventbase-test.spec.js — Playwright integration tests for VectTauri
  *
  * Run all:      npm run test:e2e
  * Run one:      npx playwright test --grep "TEST 001"
@@ -78,7 +78,7 @@ test.beforeAll(async ({ browser }) => {
 
     // Force-disable HTTP cache via Chrome DevTools Protocol BEFORE the first
     // navigation. Without this, the browser will happily reuse a cached copy
-    // of VectFox's JS files across test runs, masking code changes — leading
+    // of VectTauri's JS files across test runs, masking code changes — leading
     // to "the fix is on disk but the test still sees the old behavior".
     try {
         const cdp = await sharedContext.newCDPSession(sharedPage);
@@ -129,7 +129,7 @@ test.beforeAll(async ({ browser }) => {
             'font:15px/1.5 sans-serif', 'text-align:center',
             'box-shadow:0 2px 8px rgba(0,0,0,0.6)',
         ].join(';');
-        el.innerHTML = '🧪 <b>VectFox Tests</b> — log in (if needed), then open the chat that has your locked collections. Tests start automatically once the chat is open.';
+        el.innerHTML = '🧪 <b>VectTauri Tests</b> — log in (if needed), then open the chat that has your locked collections. Tests start automatically once the chat is open.';
         document.body.prepend(el);
     }).catch(() => {});
 
@@ -158,7 +158,7 @@ test.beforeAll(async ({ browser }) => {
     await sharedContext.storageState({ path: AUTH_FILE });
     console.log(`[setup] Auth state saved → ${AUTH_FILE}`);
 
-    // Let VectFox and other extensions finish initialising
+    // Let VectTauri and other extensions finish initialising
     await sharedPage.waitForTimeout(2000);
 
     // Pre-test cleanup: remove leftover *playwright_test* collections from
@@ -174,13 +174,13 @@ test.beforeAll(async ({ browser }) => {
     // The marker is unique enough that a real user collection would never
     // contain it accidentally.
     const cleanupReport = await sharedPage.evaluate(async () => {
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { getCollectionListing, unregisterCollection } = await import(base + 'core/collection-loader.js');
         const { deleteCollectionMeta } = await import(base + 'core/collection-metadata.js');
         const { deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { extension_settings } = await import('/scripts/extensions.js');
         const { saveSettingsDebounced } = await import('/script.js');
-        const vf = extension_settings?.vectfox;
+        const vf = extension_settings?.vecttauri;
         if (!vf) return { leftover: [], indexOrphans: 0, indexChatsScanned: 0 };
 
         const listing = getCollectionListing(vf);
@@ -364,7 +364,7 @@ async function hasQdrantConfig() {
     try {
         const result = await sharedPage.evaluate(async () => {
             const { extension_settings } = await import('/scripts/extensions.js');
-            const vf = extension_settings?.vectfox;
+            const vf = extension_settings?.vecttauri;
             return {
                 hasConfig: !!(vf?.qdrant_url || vf?.qdrant_host),
                 qdrant_url: vf?.qdrant_url || null,
@@ -384,7 +384,7 @@ async function hasQdrantConfig() {
 
 /**
  * Probe whether qdrant is actually reachable. Sends the user's qdrant
- * config (URL/host/port from VectFox settings) to the plugin's
+ * config (URL/host/port from VectTauri settings) to the plugin's
  * `/backend/init/qdrant` route — this is the same init flow QdrantBackend
  * uses on every fresh page load. If init succeeds, qdrant is reachable.
  * If it fails (qdrant server down, wrong port, container not running),
@@ -395,7 +395,7 @@ async function hasQdrantConfig() {
  * users in case 2 (plugin installed, qdrant config present but not used)
  * shouldn't see test FAILURES when they don't even care about qdrant.
  * A common scenario: user set up qdrant once, took it down, kept the
- * config in VectFox settings. They're now a pure standard-backend user.
+ * config in VectTauri settings. They're now a pure standard-backend user.
  * Hard-failing on qdrant tests would be confusing UX.
  *
  * Cached per page like the plugin probe.
@@ -407,13 +407,13 @@ async function isQdrantReachable() {
         const probe = await sharedPage.evaluate(async () => {
             try {
                 const { extension_settings } = await import('/scripts/extensions.js');
-                const vf = extension_settings?.vectfox;
+                const vf = extension_settings?.vecttauri;
                 if (!vf) return { ok: false, reason: 'no_settings' };
                 // Use ST's getRequestHeaders — it includes the CSRF token that
                 // ST's auth middleware requires for POST. Without this, the
                 // probe gets 403 Forbidden from Express's CSRF guard and
                 // misclassifies qdrant as "unreachable" even when it's up.
-                // This is the same header-source every other VectFox plugin
+                // This is the same header-source every other VectTauri plugin
                 // call uses (qdrant.js, standard.js, collection-export.js...).
                 const { getRequestHeaders } = await import('/script.js');
                 // Mirror QdrantBackend.initialize's config-building logic.
@@ -453,7 +453,7 @@ async function isQdrantReachable() {
  *
  *   1. The Similharity plugin isn't installed — qdrant requires it
  *      (see Doc/dev_helper.md §15 plugin-dependency policy).
- *   2. VectFox settings have no `qdrant_url` / `qdrant_host` configured —
+ *   2. VectTauri settings have no `qdrant_url` / `qdrant_host` configured —
  *      this is case 2 in §15's 3-environment matrix (plugin installed but
  *      user runs standard backend only).
  *   3. Qdrant config is present but qdrant is not reachable — user had
@@ -468,7 +468,7 @@ async function skipIfQdrantUnavailable() {
         test.skip(true, 'Similharity plugin not installed — qdrant requires it. See Doc/dev_helper.md §15.');
     }
     if (!(await hasQdrantConfig())) {
-        test.skip(true, 'Qdrant URL/host not configured in VectFox settings (case 2: plugin-only standard backend usage).');
+        test.skip(true, 'Qdrant URL/host not configured in VectTauri settings (case 2: plugin-only standard backend usage).');
     }
     if (!(await isQdrantReachable())) {
         test.skip(true, 'WARNING: Qdrant config present but server is unreachable — user not actively running qdrant. Skipping qdrant tests cleanly so the rest of the suite continues. If you DO want qdrant tests to run, check that your qdrant container/server is up.');
@@ -492,12 +492,12 @@ async function skipIfNoPlugin() {
 // ═══════════════════════════════════════════════════════════════════
 // Self-contained: creates its own test lorebook, vectorizes it with Qdrant,
 // locks it to the current chat, runs a dry-run query, then cleans up.
-// No external setup required — just needs Qdrant configured in VectFox settings.
+// No external setup required — just needs Qdrant configured in VectTauri settings.
 test('TEST 001 — Qdrant lorebook: lock + query isolation', async () => {
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 001 [QdrantLorebook]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { shouldCollectionActivate, deleteCollectionMeta } = await import(base + 'core/collection-metadata.js');
         const { unregisterCollection } = await import(base + 'core/collection-loader.js');
@@ -505,8 +505,8 @@ test('TEST 001 — Qdrant lorebook: lock + query isolation', async () => {
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
         const currentChatId = ctx.chatId ? String(ctx.chatId) : null;
@@ -516,7 +516,7 @@ test('TEST 001 — Qdrant lorebook: lock + query isolation', async () => {
         // Defensive in-eval check — spec-level skipIfQdrantUnavailable should
         // have already returned for missing config, but belt-and-suspenders.
         const hasQdrant = !!(vf.qdrant_url || vf.qdrant_host);
-        if (!hasQdrant) { console.warn(`${TEST} [SKIP] Qdrant not configured — set qdrant_url or qdrant_host in VectFox settings`); return; }
+        if (!hasQdrant) { console.warn(`${TEST} [SKIP] Qdrant not configured — set qdrant_url or qdrant_host in VectTauri settings`); return; }
 
         // Synthetic lorebook entries with content that is clearly unique to this test
         const testEntries = [
@@ -636,13 +636,13 @@ test('TEST 002 — Qdrant EventBase: insert + field check', async () => {
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 002 [EventBaseQdrant]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { insertEvents } = await import(base + 'core/eventbase-store.js');
         const { deleteCollection } = await import(base + 'core/collection-loader.js');
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         const settings = { ...vf, vector_backend: 'qdrant' };
         const ts = Date.now();
@@ -778,7 +778,7 @@ test('TEST 003 — E2E qdrant: both locked, both return results', async () => {
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 003 [E2EQuery]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { insertEvents } = await import(base + 'core/eventbase-store.js');
         const { shouldCollectionActivate, deleteCollectionMeta, setLock, getCollectionLocks } = await import(base + 'core/collection-metadata.js');
@@ -787,8 +787,8 @@ test('TEST 003 — E2E qdrant: both locked, both return results', async () => {
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
         if (!(vf.qdrant_url || vf.qdrant_host)) { console.warn(`${TEST} [SKIP] Qdrant not configured`); return; }
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
@@ -961,15 +961,15 @@ test('TEST 004 — DB Browser: listing + delete (any backend)', async () => {
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 004 [DBBrowser]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { deleteCollectionMeta } = await import(base + 'core/collection-metadata.js');
         const { unregisterCollection } = await import(base + 'core/collection-loader.js');
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
         if (!(vf.qdrant_url || vf.qdrant_host)) { console.warn(`${TEST} [SKIP] Qdrant not configured`); return; }
 
         const testEntries = [
@@ -1087,7 +1087,7 @@ test('TEST 004 — DB Browser: listing + delete (any backend)', async () => {
 test('TEST 005 — Standard lorebook: lock + query isolation', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 005 [StdLorebook]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { shouldCollectionActivate, deleteCollectionMeta } = await import(base + 'core/collection-metadata.js');
         const { unregisterCollection } = await import(base + 'core/collection-loader.js');
@@ -1095,8 +1095,8 @@ test('TEST 005 — Standard lorebook: lock + query isolation', async () => {
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
         const currentChatId = ctx.chatId ? String(ctx.chatId) : null;
         if (!currentChatId) { console.warn(`${TEST} [WARN] No active chat — open a chat first`); return; }
@@ -1206,15 +1206,15 @@ test('TEST 005 — Standard lorebook: lock + query isolation', async () => {
 test('TEST 006 — Standard EventBase: insert + parseEmbedText recovery', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 006 [StdEventBase]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { insertEvents } = await import(base + 'core/eventbase-store.js');
         const { deleteCollection } = await import(base + 'core/collection-loader.js');
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { parseEmbedText } = await import(base + 'core/eventbase-schema.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         const settings = { ...vf, vector_backend: 'standard' };
         const ts = Date.now();
@@ -1357,7 +1357,7 @@ test('TEST 007 — E2E standard: both locked, both return results', async () => 
     // Mirrors TEST 003's self-contained pattern with vector_backend='standard'.
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 007 [E2EStd]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { insertEvents } = await import(base + 'core/eventbase-store.js');
         const { shouldCollectionActivate, deleteCollectionMeta, setLock, getCollectionLocks } = await import(base + 'core/collection-metadata.js');
@@ -1366,8 +1366,8 @@ test('TEST 007 — E2E standard: both locked, both return results', async () => 
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
         const currentChatId = ctx.chatId ? String(ctx.chatId) : null;
@@ -1569,15 +1569,15 @@ test('TEST 008 — DB Browser standard + plugin: listing + delete', async () => 
     await skipIfNoPlugin();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 008 [DBBrowserStd]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { deleteCollectionMeta } = await import(base + 'core/collection-metadata.js');
         const { unregisterCollection } = await import(base + 'core/collection-loader.js');
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         const testEntries = [
             {
@@ -1716,15 +1716,15 @@ test('TEST 008 — DB Browser standard + plugin: listing + delete', async () => 
 test('TEST 009 — DB Browser standard, no plugin: graceful degradation', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 009 [DBBrowserStdNoPlugin]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { deleteCollectionMeta } = await import(base + 'core/collection-metadata.js');
         const { unregisterCollection } = await import(base + 'core/collection-loader.js');
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         const testEntries = [
             {
@@ -1750,7 +1750,7 @@ test('TEST 009 — DB Browser standard, no plugin: graceful degradation', async 
         // ───────────────────────────────────────────────────────────────
         //  Boundary rules for this test:
         //
-        //  ✗ DO NOT mutate extension_settings.vectfox — that's the user's
+        //  ✗ DO NOT mutate extension_settings.vecttauri — that's the user's
         //    config and must remain untouched. All settings overrides go
         //    through the `settings: { ...vf, ...override }` parameter on
         //    function calls (e.g. vector_backend, source, model).
@@ -1872,7 +1872,7 @@ test('TEST 009 — DB Browser standard, no plugin: graceful degradation', async 
 // ═══════════════════════════════════════════════════════════════════
 //
 // Why this test exists:
-//   On prod (qdrant) we observed `<VectFoxLorebook>` injection containing
+//   On prod (qdrant) we observed `<VectTauriLorebook>` injection containing
 //   entries from TWO different lorebooks (e.g. Henry from "Your Wives" leaking
 //   into a chat that should only see ArtificRealm content). That's a contract
 //   violation — only collections active for the current chat should appear in
@@ -1892,7 +1892,7 @@ test('TEST 009 — DB Browser standard, no plugin: graceful degradation', async 
 //   conditions and isolated it to one of the two layers above.
 //
 // What we touch (boundary rules — same as TEST 009):
-//   ✗ DO NOT mutate extension_settings.vectfox
+//   ✗ DO NOT mutate extension_settings.vecttauri
 //   ✓ DO mutate collection lock state via canonical `setLock(...)` API
 //     (per Doc/collection_helper.md) — these are user-level lock changes on
 //     our test collections, restored to baseline / removed entirely in finally.
@@ -1905,7 +1905,7 @@ test('TEST 010 — Cross-collection isolation: lock controls lorebook visibility
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 010 [LeakCheck]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { shouldCollectionActivate, deleteCollectionMeta, setLock } = await import(base + 'core/collection-metadata.js');
         const { unregisterCollection } = await import(base + 'core/collection-loader.js');
@@ -1913,8 +1913,8 @@ test('TEST 010 — Cross-collection isolation: lock controls lorebook visibility
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
         if (!(vf.qdrant_url || vf.qdrant_host)) { console.warn(`${TEST} [SKIP] Qdrant not configured — leak test targets Qdrant since prod symptom was there`); return; }
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
@@ -2104,7 +2104,7 @@ test('TEST 010 — Cross-collection isolation: lock controls lorebook visibility
 //     activating regardless of trigger matches.
 //
 // Boundary rules (same as TEST 009/010):
-//   ✗ DO NOT mutate extension_settings.vectfox at a global level
+//   ✗ DO NOT mutate extension_settings.vecttauri at a global level
 //   ✓ DO mutate `creatorHandle` on the TEST collection's meta via
 //     setCollectionMeta (the test owns this collection — we created it).
 //     Restore in finally so cleanup auth passes.
@@ -2116,7 +2116,7 @@ test('TEST 011 — Cross-persona activation isolation', async () => {
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 011 [CrossPersona]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { getCollectionMeta, setCollectionMeta, deleteCollectionMeta } = await import(base + 'core/collection-metadata.js');
         const { getCollectionListing, unregisterCollection } = await import(base + 'core/collection-loader.js');
@@ -2124,8 +2124,8 @@ test('TEST 011 — Cross-persona activation isolation', async () => {
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
         if (!(vf.qdrant_url || vf.qdrant_host)) { console.warn(`${TEST} [SKIP] Qdrant not configured`); return; }
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
@@ -2280,14 +2280,14 @@ test('TEST 011 — Cross-persona activation isolation', async () => {
 //     produces a `_qdrant_`-segment ID.
 //
 // Boundary rules (same as 009/010/011):
-//   ✗ DO NOT mutate extension_settings.vectfox
+//   ✗ DO NOT mutate extension_settings.vecttauri
 //   ✓ DO use sentinel `__vf_playwright_test_012__` in IDs so beforeAll's
 //     orphan cleanup catches anything left behind by a crash.
 test('TEST 012 — Cross-backend import: qdrant ↔ standard rename', async () => {
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 012 [ImportRename]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { importCollection } = await import(base + 'core/collection-export.js');
         const { remapCollectionIdToBackend, getBackendFromCollectionId } = await import(base + 'core/collection-ids.js');
         const { deleteContentCollection } = await import(base + 'core/content-vectorization.js');
@@ -2296,8 +2296,8 @@ test('TEST 012 — Cross-backend import: qdrant ↔ standard rename', async () =
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
         if (!(vf.qdrant_url || vf.qdrant_host)) { console.warn(`${TEST} [SKIP] Qdrant not configured — need both backends to test the rename`); return; }
 
         // ═══ Pure-helper sanity checks (no I/O) ═══════════════════════════
@@ -2481,7 +2481,7 @@ test('TEST 013 — Synthetic E2E qdrant: lorebook + EventBase round-trip', async
     await skipIfQdrantUnavailable();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 013 [SyntheticE2E]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { insertEvents } = await import(base + 'core/eventbase-store.js');
         const { shouldCollectionActivate, deleteCollectionMeta, setLock, getCollectionLocks } = await import(base + 'core/collection-metadata.js');
@@ -2490,8 +2490,8 @@ test('TEST 013 — Synthetic E2E qdrant: lorebook + EventBase round-trip', async
         const { getBackend } = await import(base + 'backends/backend-manager.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
         if (!(vf.qdrant_url || vf.qdrant_host)) { console.warn(`${TEST} [SKIP] Qdrant not configured`); return; }
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
@@ -2681,7 +2681,7 @@ test('TEST 013 — Synthetic E2E qdrant: lorebook + EventBase round-trip', async
 //
 //   This is the "smart marker" that makes auto-sync safe: each completed
 //   window's hashes are joined into a fingerprint string and stored in
-//   `_windowCacheSet` (in-memory Set) + `extension_settings.vectfox
+//   `_windowCacheSet` (in-memory Set) + `extension_settings.vecttauri
 //   .eventbase_extracted_windows[uuid]` (persisted array). On the next
 //   ingestion call, isLastWindowExtracted does a quick-exit, and
 //   isWindowAlreadyExtracted gates each window. Already-done windows are
@@ -2713,14 +2713,14 @@ test('TEST 013 — Synthetic E2E qdrant: lorebook + EventBase round-trip', async
 //   - clearWindowCacheForChat wipes both tiers (cleanup contract).
 //
 // Boundary rules (same as TEST 009/010/011):
-//   ✗ DO NOT mutate extension_settings.vectfox at a global level beyond
+//   ✗ DO NOT mutate extension_settings.vecttauri at a global level beyond
 //     the synthetic test UUID's cache entry (cleaned up in finally).
 //   ✓ DO use a synthetic chat UUID prefixed with __vf_playwright_test_
 //     so beforeAll cleanup catches any leftover from a crashed run.
 test('TEST 014 — Auto-sync backfill: fingerprint cache prevents duplicate windows', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 014 [AutoSyncDedup]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const {
             markWindowExtracted,
             isWindowAlreadyExtracted,
@@ -2820,7 +2820,7 @@ test('TEST 014 — Auto-sync backfill: fingerprint cache prevents duplicate wind
             // The Set is rebuilt from this array on the next page load, so
             // length-correctness here is what makes auto-sync survive a reload.
             console.log(`${TEST} Phase 6: verifying persisted array on disk matches the in-memory Set`);
-            const persisted = extension_settings?.vectfox?.eventbase_extracted_windows?.[testUUID];
+            const persisted = extension_settings?.vecttauri?.eventbase_extracted_windows?.[testUUID];
             if (!Array.isArray(persisted)) {
                 console.error(`${TEST} [FAIL] Phase 6: persisted entry is not an array — type=${typeof persisted}`);
                 return;
@@ -2837,7 +2837,7 @@ test('TEST 014 — Auto-sync backfill: fingerprint cache prevents duplicate wind
             // Real user data is never touched — testUUID is synthetic and unique.
             try {
                 clearWindowCacheForChat(testUUID);
-                const after = extension_settings?.vectfox?.eventbase_extracted_windows?.[testUUID];
+                const after = extension_settings?.vecttauri?.eventbase_extracted_windows?.[testUUID];
                 if (after !== undefined) {
                     console.warn(`${TEST} [WARN] clearWindowCacheForChat left a stale entry: ${JSON.stringify(after)}`);
                 } else {
@@ -2867,7 +2867,7 @@ test('TEST 014 — Auto-sync backfill: fingerprint cache prevents duplicate wind
 //
 //   The AUTO-SYNC START MARKER prevents this. When the user enables
 //   auto-sync, `stampAutoSyncMarker` records a message-index threshold in
-//   `extension_settings.vectfox.eventbase_autosync_start_marker[chatUUID]`.
+//   `extension_settings.vecttauri.eventbase_autosync_start_marker[chatUUID]`.
 //   On every auto-sync run, `runEventBaseIngestion` filters its window
 //   list with `windows.filter(w => w.start >= marker)` — only windows that
 //   START at or after the marker get processed. Windows from the
@@ -2898,13 +2898,13 @@ test('TEST 014 — Auto-sync backfill: fingerprint cache prevents duplicate wind
 //     stamps a fresh value for the current chat state.
 //
 // Boundary rules:
-//   ✗ DO NOT mutate extension_settings.vectfox at a global level beyond
+//   ✗ DO NOT mutate extension_settings.vecttauri at a global level beyond
 //     the synthetic test UUID's marker entry (cleaned up in finally).
 //   ✓ DO use a synthetic chat UUID prefixed with __vf_playwright_test_.
 test('TEST 015 — Auto-sync window-size change: start marker filters obsolete windows', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 015 [AutoSyncMarker]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const {
             getAutoSyncMarker,
             clearAutoSyncMarker,
@@ -2932,10 +2932,10 @@ test('TEST 015 — Auto-sync window-size change: start marker filters obsolete w
             // We simulate the result directly (the math itself is trivial;
             // what we're testing here is the get/filter contract).
             const stampedValue = 2;
-            if (!extension_settings.vectfox.eventbase_autosync_start_marker) {
-                extension_settings.vectfox.eventbase_autosync_start_marker = {};
+            if (!extension_settings.vecttauri.eventbase_autosync_start_marker) {
+                extension_settings.vecttauri.eventbase_autosync_start_marker = {};
             }
-            extension_settings.vectfox.eventbase_autosync_start_marker[testUUID] = stampedValue;
+            extension_settings.vecttauri.eventbase_autosync_start_marker[testUUID] = stampedValue;
 
             const readBack = getAutoSyncMarker(testUUID);
             if (readBack !== stampedValue) {
@@ -3065,7 +3065,7 @@ test('TEST 015 — Auto-sync window-size change: start marker filters obsolete w
 test('TEST 016 — stampAutoSyncMarker smart placement (production-function smoke)', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 016 [AutoSyncStamp]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const {
             stampAutoSyncMarker,
             getAutoSyncMarker,
@@ -3078,7 +3078,7 @@ test('TEST 016 — stampAutoSyncMarker smart placement (production-function smok
         const { extension_settings } = await import('/scripts/extensions.js');
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
-        const settings = extension_settings?.vectfox || {};
+        const settings = extension_settings?.vecttauri || {};
         const backend = (settings.vector_backend || 'standard').toLowerCase();
 
         // Two distinct UUIDs so Phase 2 (no candidates) and Phase 3 (synthetic
@@ -3092,7 +3092,7 @@ test('TEST 016 — stampAutoSyncMarker smart placement (production-function smok
             // ═══ Phase 1 — Branch A: empty chatUUID returns 0, no write ═══
             console.log(`${TEST} Phase 1: stampAutoSyncMarker('') should return 0 and NOT touch the marker store`);
             // Capture any pre-existing keys so we can prove no spurious write happened.
-            const storeBefore = extension_settings?.vectfox?.eventbase_autosync_start_marker || {};
+            const storeBefore = extension_settings?.vecttauri?.eventbase_autosync_start_marker || {};
             const keysBefore  = Object.keys(storeBefore).slice().sort();
 
             const sentinel = await stampAutoSyncMarker('', settings);
@@ -3100,7 +3100,7 @@ test('TEST 016 — stampAutoSyncMarker smart placement (production-function smok
                 console.error(`${TEST} [FAIL] Phase 1: empty UUID returned ${sentinel} instead of 0`);
                 return;
             }
-            const storeAfter = extension_settings?.vectfox?.eventbase_autosync_start_marker || {};
+            const storeAfter = extension_settings?.vecttauri?.eventbase_autosync_start_marker || {};
             const keysAfter  = Object.keys(storeAfter).slice().sort();
             if (keysBefore.length !== keysAfter.length ||
                 keysBefore.some((k, i) => k !== keysAfter[i])) {
@@ -3150,7 +3150,7 @@ test('TEST 016 — stampAutoSyncMarker smart placement (production-function smok
             console.log(`${TEST} Phase 4: re-stamping Branch B UUID overwrites the persisted value cleanly`);
             // Mutate the persisted value to a sentinel so we can prove the
             // re-stamp actually wrote (not just left a stale equal value).
-            extension_settings.vectfox.eventbase_autosync_start_marker[uuidBranchB] = -999;
+            extension_settings.vecttauri.eventbase_autosync_start_marker[uuidBranchB] = -999;
             // Read back the sentinel via the canonical getter — if this fails,
             // the pre-condition wasn't met (frozen object, missing nested key)
             // and the rest of Phase 4 would silently pass on a no-op overwrite.
@@ -3175,7 +3175,7 @@ test('TEST 016 — stampAutoSyncMarker smart placement (production-function smok
             // chat length directly (skipping the coverage scan) regardless of state.
             console.log(`${TEST} Phase 5: stampAutoSyncMarker(..., { floor: 'chatLength' }) stamps chat length directly`);
             const chatLenNow = ctx?.chat?.length ?? 0;
-            extension_settings.vectfox.eventbase_autosync_start_marker[uuidBranchB] = -777;
+            extension_settings.vecttauri.eventbase_autosync_start_marker[uuidBranchB] = -777;
             const floored = await stampAutoSyncMarker(uuidBranchB, settings, { floor: 'chatLength' });
             if (floored !== chatLenNow) {
                 console.error(`${TEST} [FAIL] Phase 5: floor override returned ${floored}, expected chatLength=${chatLenNow}`);
@@ -3252,7 +3252,7 @@ test('TEST 016 — stampAutoSyncMarker smart placement (production-function smok
 test('TEST 017 — Pause button (enabled=false) blocks activation even when locked', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 017 [PauseButton]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const {
             isCollectionEnabled,
             setCollectionEnabled,
@@ -3267,7 +3267,7 @@ test('TEST 017 — Pause button (enabled=false) blocks activation even when lock
         const { extension_settings } = await import('/scripts/extensions.js');
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
-        const settings = extension_settings?.vectfox || {};
+        const settings = extension_settings?.vecttauri || {};
         const currentChatId = ctx?.chatId ? String(ctx.chatId) : null;
         const currentCharacterId = ctx?.characterId != null ? String(ctx.characterId) : null;
         if (!currentChatId) {
@@ -3374,7 +3374,7 @@ test('TEST 017 — Pause button (enabled=false) blocks activation even when lock
 //    5. Character lock match → ACTIVE    (this test)
 //    Nothing matched         → BLOCKED   (this test)
 //
-//  Each priority is what's drawing real users into VectFox: lorebook
+//  Each priority is what's drawing real users into VectTauri: lorebook
 //  authors who set keyword triggers, power users who write advanced
 //  conditions, lorebook-per-character setups. If priority 2 or 3 silently
 //  break during a refactor, semantic WI stops activating for everyone who
@@ -3390,7 +3390,7 @@ test('TEST 017 — Pause button (enabled=false) blocks activation even when lock
 //       conditions / no chat lock.
 //    4. Nothing matched — fresh meta, empty context locks → blocked.
 //
-//  Per-phase, the production `[VECTFOX Activation Filter] Collection X: …`
+//  Per-phase, the production `[VECTTAURI Activation Filter] Collection X: …`
 //  debug log will print which priority gate fired (✓ TRIGGERS_MATCHED, ✓
 //  CONDITIONS_PASS, ✓ LOCKED_TO_CURRENT_CHARACTER, ✗ NOT_ACTIVATED) — that's
 //  the false-positive defense: a Phase 1 PASS with the wrong gate log
@@ -3401,7 +3401,7 @@ test('TEST 017 — Pause button (enabled=false) blocks activation even when lock
 test('TEST 018 — shouldCollectionActivate priority chain (triggers / conditions / character lock / nothing)', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 018 [PriorityChain]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const {
             setCollectionMeta,
             deleteCollectionMeta,
@@ -3415,7 +3415,7 @@ test('TEST 018 — shouldCollectionActivate priority chain (triggers / condition
         const { extension_settings } = await import('/scripts/extensions.js');
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
-        const settings = extension_settings?.vectfox || {};
+        const settings = extension_settings?.vecttauri || {};
         const currentChatId = ctx?.chatId ? String(ctx.chatId) : null;
         if (!currentChatId) {
             console.error(`${TEST} [FAIL] No active chat — open a chat first`);
@@ -3542,7 +3542,7 @@ test('TEST 018 — shouldCollectionActivate priority chain (triggers / condition
             }
             console.log(`${TEST} Phase 4 ✓ no priority matched → blocked`);
 
-            console.log(`${TEST} [PASS] Priority chain intact — triggers (P2), conditions (P3), character lock (P5), and "nothing matched" all behave per Doc/collection_helper.md. Each phase's [VECTFOX Activation Filter] log independently confirms which priority gate fired.`);
+            console.log(`${TEST} [PASS] Priority chain intact — triggers (P2), conditions (P3), character lock (P5), and "nothing matched" all behave per Doc/collection_helper.md. Each phase's [VECTTAURI Activation Filter] log independently confirms which priority gate fired.`);
         } finally {
             try {
                 resetMeta();
@@ -3589,7 +3589,7 @@ test('TEST 018 — shouldCollectionActivate priority chain (triggers / condition
 test('TEST 019 — WI / AutoSync refresh smoke: refresh paths do not mutate locks', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 019 [RefreshSmoke]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { refreshWIStatus, refreshAutoSyncCheckbox } = await import(base + 'ui/ui-manager.js');
         const {
             setCollectionMeta,
@@ -3606,7 +3606,7 @@ test('TEST 019 — WI / AutoSync refresh smoke: refresh paths do not mutate lock
         const { extension_settings } = await import('/scripts/extensions.js');
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
-        const settings = extension_settings?.vectfox || {};
+        const settings = extension_settings?.vecttauri || {};
         const currentChatId = ctx?.chatId ? String(ctx.chatId) : null;
         if (!currentChatId) {
             console.error(`${TEST} [FAIL] No active chat — open a chat first`);
@@ -3636,14 +3636,14 @@ test('TEST 019 — WI / AutoSync refresh smoke: refresh paths do not mutate lock
         const snapshot = () => ({
             // The forward lock arrays inside meta.
             lockedToChatIds: JSON.stringify(
-                extension_settings?.vectfox?.collections?.[registryKey]?.lockedToChatIds || []
+                extension_settings?.vecttauri?.collections?.[registryKey]?.lockedToChatIds || []
             ),
             lockedToCharacterIds: JSON.stringify(
-                extension_settings?.vectfox?.collections?.[registryKey]?.lockedToCharacterIds || []
+                extension_settings?.vecttauri?.collections?.[registryKey]?.lockedToCharacterIds || []
             ),
             // The reverse-index entry for our chat (registryKeys locked to currentChatId).
             chatLockIndex: JSON.stringify(
-                (extension_settings?.vectfox?.chat_lock_index?.[currentChatId] || [])
+                (extension_settings?.vecttauri?.chat_lock_index?.[currentChatId] || [])
                     .slice().sort()
             ),
             autoSync: isCollectionAutoSyncEnabled(registryKey),
@@ -3733,9 +3733,9 @@ test('TEST 019 — WI / AutoSync refresh smoke: refresh paths do not mutate lock
                 try { unregisterCollection(collectionId); } catch {}
                 // Restore enabled_world_info — refreshWIStatus may have
                 // toggled it based on our test collection's activation.
-                if (extension_settings?.vectfox && originalEnabledWI !== undefined) {
-                    if (extension_settings.vectfox.enabled_world_info !== originalEnabledWI) {
-                        extension_settings.vectfox.enabled_world_info = originalEnabledWI;
+                if (extension_settings?.vecttauri && originalEnabledWI !== undefined) {
+                    if (extension_settings.vecttauri.enabled_world_info !== originalEnabledWI) {
+                        extension_settings.vecttauri.enabled_world_info = originalEnabledWI;
                         console.log(`${TEST} Restored settings.enabled_world_info to ${originalEnabledWI}`);
                     }
                 }
@@ -3775,7 +3775,7 @@ test('TEST 019 — WI / AutoSync refresh smoke: refresh paths do not mutate lock
 // This pair proves the data-layer half end-to-end against a live backend.
 async function overrideBackendFirstBody({ BACKEND, LABEL }) {
     const TEST = `${LABEL} [BackendFirst:${BACKEND}]`;
-    const base = '/scripts/extensions/third-party/VectFox/';
+    const base = '/scripts/extensions/third-party/VectTauri/';
     const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
     const { deleteCollectionMeta, getChunkMetadata, saveChunkMetadata, deleteChunkMetadata } = await import(base + 'core/collection-metadata.js');
     const { unregisterCollection } = await import(base + 'core/collection-loader.js');
@@ -3783,8 +3783,8 @@ async function overrideBackendFirstBody({ BACKEND, LABEL }) {
     const { getBackend } = await import(base + 'backends/backend-manager.js');
     const { extension_settings } = await import('/scripts/extensions.js');
 
-    const vf = extension_settings?.vectfox;
-    if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+    const vf = extension_settings?.vecttauri;
+    if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
     const settings = { ...vf, vector_backend: BACKEND };
     const ts = Date.now();
@@ -3918,7 +3918,7 @@ test('TEST 022 — Standard+plugin: context/xmlTag wrapping + condition filter t
     await skipIfNoPlugin();
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 022 [InjectionWrap]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { vectorizeContent, deleteContentCollection } = await import(base + 'core/content-vectorization.js');
         const { rearrangeChat } = await import(base + 'core/chat-vectorization.js');
         const { updateChunkMetadata, queryCollection, insertVectorItems } = await import(base + 'core/core-vector-api.js');
@@ -3928,8 +3928,8 @@ test('TEST 022 — Standard+plugin: context/xmlTag wrapping + condition filter t
         const { extension_settings } = await import('/scripts/extensions.js');
         const { getStringHash } = await import('/scripts/utils.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         const ctx = window.SillyTavern?.getContext?.() ?? window.getContext?.() ?? {};
         const currentChatId = ctx.chatId ? String(ctx.chatId) : null;
@@ -4017,10 +4017,10 @@ test('TEST 022 — Standard+plugin: context/xmlTag wrapping + condition filter t
 
             // Phase 1c — does the actual injection wrap the chunk?
             let inj = await dryInject();
-            // DIAG: inspect the chunk mid-pipeline (window.VectFox_LastSearch is set after the
+            // DIAG: inspect the chunk mid-pipeline (window.VectTauri_LastSearch is set after the
             // links stage, before dedup). Tells us if metadata.context survived into the pipeline.
             {
-                const ls = (window.VectFox_LastSearch?.chunks) || [];
+                const ls = (window.VectTauri_LastSearch?.chunks) || [];
                 const lc = ls.find(c => String(c.hash) === String(hash)) || ls[0];
                 console.log(`${TEST} [DIAG] LastSearch chunk: found=${!!lc}, metadata.context=${JSON.stringify(lc?.metadata?.context)}, metadata.xmlTag=${JSON.stringify(lc?.metadata?.xmlTag)}, metaKeys=${lc?.metadata ? Object.keys(lc.metadata).join(',') : 'n/a'}`);
             }
@@ -4115,7 +4115,7 @@ test('TEST 022 — Standard+plugin: context/xmlTag wrapping + condition filter t
 test('TEST 023 — Auto-sync settle/commit lag: swipes on active turn never extract', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 023 [SettleLag]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { getCommitBoundary, getAutoSyncWindowSize } = await import(base + 'core/eventbase-workflow.js');
         const { markWindowExtracted, isLastWindowExtracted, clearWindowCacheForChat } = await import(base + 'core/eventbase-store.js');
         const { extension_settings } = await import('/scripts/extensions.js');
@@ -4185,7 +4185,7 @@ test('TEST 023 — Auto-sync settle/commit lag: swipes on active turn never extr
         } finally {
             try {
                 clearWindowCacheForChat(testUUID);
-                const after = extension_settings?.vectfox?.eventbase_extracted_windows?.[testUUID];
+                const after = extension_settings?.vecttauri?.eventbase_extracted_windows?.[testUUID];
                 if (after !== undefined) console.warn(`${TEST} [WARN] clearWindowCacheForChat left a stale entry: ${JSON.stringify(after)}`);
                 else console.log(`${TEST} Cleanup ✓ fingerprint cache cleared for ${testUUID}`);
             } catch (cleanupErr) { console.warn(`${TEST} [WARN] Cleanup failed: ${cleanupErr.message}`); }
@@ -4216,12 +4216,12 @@ test('TEST 023 — Auto-sync settle/commit lag: swipes on active turn never extr
 test('TEST 024 — EventBase LLM extraction: real provider round-trip (postChatCompletion)', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 024 [LLMExtract]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { extractEvents } = await import(base + 'core/eventbase-extractor.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         // Real extraction needs a summarization model. Soft-skip (not fail) when
         // absent so the serial suite continues on boxes with no chat model set.
@@ -4266,12 +4266,12 @@ test('TEST 024 — EventBase LLM extraction: real provider round-trip (postChatC
 test('TEST 025 — Auto-Reformat: real provider splits multi-entity section', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 025 [Reformat]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { reformatDocument } = await import(base + 'core/reformat-extractor.js');
         const { extension_settings } = await import('/scripts/extensions.js');
 
-        const vf = extension_settings?.vectfox;
-        if (!vf) { console.error(`${TEST} [FAIL] VectFox settings not found`); return; }
+        const vf = extension_settings?.vecttauri;
+        if (!vf) { console.error(`${TEST} [FAIL] VectTauri settings not found`); return; }
 
         // Same inherit chain as extraction: reformat_* → chat_* (Core → LLM Summarization).
         const provider = (vf.reformat_provider || vf.chat_provider || 'openrouter').toLowerCase();
@@ -4327,7 +4327,7 @@ test('TEST 025 — Auto-Reformat: real provider splits multi-entity section', as
 test('TEST 026 — Acronym glossary: deployed-module grounding smoke (no LLM)', async () => {
     const logs = await runTestInPage(async () => {
         const TEST = 'TEST 026 [Glossary]';
-        const base = '/scripts/extensions/third-party/VectFox/';
+        const base = '/scripts/extensions/third-party/VectTauri/';
         const { extractGlossary, injectGlossary } = await import(base + 'core/glossary-extractor.js');
 
         // A document that defines an acronym once, then uses it bare elsewhere.

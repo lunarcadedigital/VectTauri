@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VectFox SEARCH DEBUG MODAL
+ * VectTauri SEARCH DEBUG MODAL
  * ============================================================================
  * Shows detailed breakdown of the last RAG query pipeline:
  * - Query text used
@@ -9,8 +9,8 @@
  * - Condition filtering
  * - Final injection results
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -144,7 +144,7 @@ export function setLastSearchDebug(data) {
         queryHistory.pop();
     }
 
-    console.log('VectFox Debug: Stored search debug data', {
+    console.log('VectTauri Debug: Stored search debug data', {
         query: data.query?.substring(0, 50) + '...',
         stages: {
             initial: data.stages.initial.length,
@@ -180,25 +180,25 @@ export function getLastSearchDebug() {
  */
 export function openSearchDebugModal() {
     if (!lastDebugData) {
-        toastr.info('No search has been performed yet. Send a message to trigger a RAG query.', 'VectFox');
+        toastr.info('No search has been performed yet. Send a message to trigger a RAG query.', 'VectTauri');
         return;
     }
 
     // Remove existing modal
-    $('#VectFox_search_debug_modal').remove();
+    $('#VectTauri_search_debug_modal').remove();
 
     const html = createModalHtml(lastDebugData);
     $('body').append(html);
 
     bindEvents();
-    $('#VectFox_search_debug_modal').fadeIn(200);
+    $('#VectTauri_search_debug_modal').fadeIn(200);
 }
 
 /**
  * Closes the search debug modal
  */
 export function closeSearchDebugModal() {
-    $('#VectFox_search_debug_modal').fadeOut(200, function() {
+    $('#VectTauri_search_debug_modal').fadeOut(200, function() {
         $(this).remove();
     });
 }
@@ -217,7 +217,7 @@ function createModalHtml(data, historyIndex = 0) {
 
     // Build history tabs
     const historyTabs = queryHistory.length > 1 ? `
-        <div class="vectfox-debug-history-tabs">
+        <div class="vecttauri-debug-history-tabs">
             ${queryHistory.map((q, idx) => {
                 const isActive = idx === historyIndex;
                 const tabTime = getTimeAgo(q.timestamp);
@@ -225,7 +225,7 @@ function createModalHtml(data, historyIndex = 0) {
                 const injectedCount = q.stages.injected?.length || 0;
                 const statusClass = injectedCount > 0 ? 'tab-success' : 'tab-empty';
                 return `
-                    <button class="vectfox-debug-history-tab ${isActive ? 'active' : ''} ${statusClass}"
+                    <button class="vecttauri-debug-history-tab ${isActive ? 'active' : ''} ${statusClass}"
                             data-history-index="${idx}"
                             title="${StringUtils.escapeHtml(q.query.substring(0, 100))}">
                         <span class="tab-num">#${idx + 1}</span>
@@ -237,105 +237,105 @@ function createModalHtml(data, historyIndex = 0) {
     ` : '';
 
     return `
-        <div id="VectFox_search_debug_modal" class="vectfox-modal" style="display: none;">
-            <div class="vectfox-modal-overlay"></div>
-            <div class="vectfox-modal-content vectfox-search-debug-content">
+        <div id="VectTauri_search_debug_modal" class="vecttauri-modal" style="display: none;">
+            <div class="vecttauri-modal-overlay"></div>
+            <div class="vecttauri-modal-content vecttauri-search-debug-content">
                 <!-- Header -->
-                <div class="vectfox-modal-header">
+                <div class="vecttauri-modal-header">
                     <h3><i class="fa-solid fa-bug"></i> Search Debug</h3>
-                    <button class="vectfox-debug-copy-btn" id="VectFox_copy_diagnostic" title="Copy diagnostic dump">
+                    <button class="vecttauri-debug-copy-btn" id="VectTauri_copy_diagnostic" title="Copy diagnostic dump">
                         <i class="fa-solid fa-copy"></i> Copy Debug
                     </button>
-                    <button class="vectfox-modal-close" id="VectFox_search_debug_close">✕</button>
+                    <button class="vecttauri-modal-close" id="VectTauri_search_debug_close">✕</button>
                 </div>
 
                 <!-- History Tabs -->
                 ${historyTabs}
 
                 <!-- Body -->
-                <div class="vectfox-modal-body vectfox-search-debug-body">
+                <div class="vecttauri-modal-body vecttauri-search-debug-body">
 
                     <!-- Query Info Card (Clickable to expand) -->
-                    <div class="vectfox-debug-card vectfox-debug-query-card" id="VectFox_query_card">
-                        <div class="vectfox-debug-card-header vectfox-debug-clickable" id="VectFox_query_header">
+                    <div class="vecttauri-debug-card vecttauri-debug-query-card" id="VectTauri_query_card">
+                        <div class="vecttauri-debug-card-header vecttauri-debug-clickable" id="VectTauri_query_header">
                             <i class="fa-solid fa-magnifying-glass"></i>
                             <span>Query</span>
-                            <span class="vectfox-debug-timestamp">${timeAgo}</span>
-                            <i class="fa-solid fa-chevron-down vectfox-debug-expand-icon"></i>
+                            <span class="vecttauri-debug-timestamp">${timeAgo}</span>
+                            <i class="fa-solid fa-chevron-down vecttauri-debug-expand-icon"></i>
                         </div>
-                        <div class="vectfox-debug-card-body">
-                            <div class="vectfox-debug-query-preview">${StringUtils.escapeHtml(queryPreview)}</div>
-                            <div class="vectfox-debug-query-full" style="display: none;">
+                        <div class="vecttauri-debug-card-body">
+                            <div class="vecttauri-debug-query-preview">${StringUtils.escapeHtml(queryPreview)}</div>
+                            <div class="vecttauri-debug-query-full" style="display: none;">
                                 <pre>${StringUtils.escapeHtml(data.query)}</pre>
                             </div>
                         </div>
                     </div>
 
                     <!-- Pipeline Overview -->
-                    <div class="vectfox-debug-pipeline">
-                        <div class="vectfox-debug-pipeline-title">
+                    <div class="vecttauri-debug-pipeline">
+                        <div class="vecttauri-debug-pipeline-title">
                             <i class="fa-solid fa-diagram-project"></i>
                             RAG Pipeline
                         </div>
-                        <div class="vectfox-debug-pipeline-stages">
+                        <div class="vecttauri-debug-pipeline-stages">
                             ${createPipelineStage('Vector Search', data.stages.initial.length, data.stages.initial.length, 'fa-database', 'primary', false)}
-                            <div class="vectfox-debug-pipeline-arrow">→</div>
+                            <div class="vecttauri-debug-pipeline-arrow">→</div>
                             ${createKeywordBoostStage(data)}
-                            <div class="vectfox-debug-pipeline-arrow">→</div>
+                            <div class="vecttauri-debug-pipeline-arrow">→</div>
                             ${createPipelineStage('Threshold', data.stages.afterThreshold?.length ?? data.stages.initial.filter(c => c.score >= (data.settings.threshold || 0)).length, data.stages.initial.length, 'fa-filter', 'info', false)}
-                            <div class="vectfox-debug-pipeline-arrow">→</div>
+                            <div class="vecttauri-debug-pipeline-arrow">→</div>
                             ${createPipelineStage('Conditions', data.stages.afterConditions.length, data.stages.afterThreshold?.length ?? 0, 'fa-code-branch', 'secondary', false)}
-                            <div class="vectfox-debug-pipeline-arrow">→</div>
+                            <div class="vecttauri-debug-pipeline-arrow">→</div>
                             ${createPipelineStage('Injected', data.stages.injected.length, data.stages.afterConditions.length, 'fa-syringe', 'success', false)}
                         </div>
                     </div>
 
                     <!-- Settings Used -->
-                    <div class="vectfox-debug-card vectfox-debug-settings">
-                        <div class="vectfox-debug-card-header">
+                    <div class="vecttauri-debug-card vecttauri-debug-settings">
+                        <div class="vecttauri-debug-card-header">
                             <i class="fa-solid fa-gear"></i>
                             <span>Settings Used</span>
                         </div>
-                        <div class="vectfox-debug-card-body">
-                            <div class="vectfox-debug-settings-grid">
-                                <div class="vectfox-debug-setting">
-                                    <span class="vectfox-debug-setting-label">Threshold</span>
-                                    <span class="vectfox-debug-setting-value">${data.settings.threshold || 'N/A'}</span>
+                        <div class="vecttauri-debug-card-body">
+                            <div class="vecttauri-debug-settings-grid">
+                                <div class="vecttauri-debug-setting">
+                                    <span class="vecttauri-debug-setting-label">Threshold</span>
+                                    <span class="vecttauri-debug-setting-value">${data.settings.threshold || 'N/A'}</span>
                                 </div>
-                                <div class="vectfox-debug-setting">
-                                    <span class="vectfox-debug-setting-label">Top K</span>
-                                    <span class="vectfox-debug-setting-value">${data.settings.topK || 'N/A'}</span>
+                                <div class="vecttauri-debug-setting">
+                                    <span class="vecttauri-debug-setting-label">Top K</span>
+                                    <span class="vecttauri-debug-setting-value">${data.settings.topK || 'N/A'}</span>
                                 </div>
-                                <div class="vectfox-debug-setting">
-                                    <span class="vectfox-debug-setting-label">Collection</span>
-                                    <span class="vectfox-debug-setting-value vectfox-debug-setting-mono">${data.collectionId || 'Unknown'}</span>
+                                <div class="vecttauri-debug-setting">
+                                    <span class="vecttauri-debug-setting-label">Collection</span>
+                                    <span class="vecttauri-debug-setting-value vecttauri-debug-setting-mono">${data.collectionId || 'Unknown'}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Chunks by Stage -->
-                    <div class="vectfox-debug-card">
-                        <div class="vectfox-debug-card-header">
+                    <div class="vecttauri-debug-card">
+                        <div class="vecttauri-debug-card-header">
                             <i class="fa-solid fa-layer-group"></i>
                             <span>Chunks by Stage</span>
                         </div>
-                        <div class="vectfox-debug-card-body">
+                        <div class="vecttauri-debug-card-body">
                             <!-- Stage Tabs -->
-                            <div class="vectfox-debug-stage-tabs">
-                                <button class="vectfox-debug-stage-tab active" data-stage="initial">
+                            <div class="vecttauri-debug-stage-tabs">
+                                <button class="vecttauri-debug-stage-tab active" data-stage="initial">
                                     Initial (${data.stages.initial.length})
                                 </button>
-                                <button class="vectfox-debug-stage-tab" data-stage="afterConditions">
+                                <button class="vecttauri-debug-stage-tab" data-stage="afterConditions">
                                     After Conditions (${data.stages.afterConditions.length})
                                 </button>
-                                <button class="vectfox-debug-stage-tab" data-stage="injected">
+                                <button class="vecttauri-debug-stage-tab" data-stage="injected">
                                     Injected (${data.stages.injected.length})
                                 </button>
                             </div>
 
                             <!-- Stage Content -->
-                            <div class="vectfox-debug-stage-content" id="VectFox_debug_stage_content">
+                            <div class="vecttauri-debug-stage-content" id="VectTauri_debug_stage_content">
                                 ${renderStageChunks(data.stages.initial, 'initial', data)}
                             </div>
                         </div>
@@ -374,16 +374,16 @@ function createModalHtml(data, historyIndex = 0) {
 function createPipelineStage(label, count, fromCount, icon, colorClass, disabled = false) {
     // Only show loss if this stage actually received chunks AND lost some
     const lost = (fromCount > 0 && count < fromCount) ? fromCount - count : 0;
-    const disabledClass = disabled ? 'vectfox-debug-stage-disabled' : '';
+    const disabledClass = disabled ? 'vecttauri-debug-stage-disabled' : '';
 
     return `
-        <div class="vectfox-debug-pipeline-stage vectfox-debug-stage-${colorClass} ${disabledClass}">
-            <div class="vectfox-debug-stage-icon">
+        <div class="vecttauri-debug-pipeline-stage vecttauri-debug-stage-${colorClass} ${disabledClass}">
+            <div class="vecttauri-debug-stage-icon">
                 <i class="fa-solid ${icon}"></i>
             </div>
-            <div class="vectfox-debug-stage-count">${count}</div>
-            <div class="vectfox-debug-stage-label">${label}${disabled ? ' (off)' : ''}</div>
-            ${lost > 0 ? `<div class="vectfox-debug-stage-lost">-${lost}</div>` : ''}
+            <div class="vecttauri-debug-stage-count">${count}</div>
+            <div class="vecttauri-debug-stage-label">${label}${disabled ? ' (off)' : ''}</div>
+            ${lost > 0 ? `<div class="vecttauri-debug-stage-lost">-${lost}</div>` : ''}
         </div>
     `;
 }
@@ -403,16 +403,16 @@ function createKeywordBoostStage(data) {
 
     // Show total matched keywords as the badge
     const badge = totalMatchedQueryKeywords > 0
-        ? `<div class="vectfox-debug-stage-boost">🔑${totalMatchedQueryKeywords}</div>`
+        ? `<div class="vecttauri-debug-stage-boost">🔑${totalMatchedQueryKeywords}</div>`
         : '';
 
     return `
-        <div class="vectfox-debug-pipeline-stage vectfox-debug-stage-keyword">
-            <div class="vectfox-debug-stage-icon">
+        <div class="vecttauri-debug-pipeline-stage vecttauri-debug-stage-keyword">
+            <div class="vecttauri-debug-stage-icon">
                 <i class="fa-solid fa-tags"></i>
             </div>
-            <div class="vectfox-debug-stage-count">${boostedCount}</div>
-            <div class="vectfox-debug-stage-label">Keywords</div>
+            <div class="vecttauri-debug-stage-count">${boostedCount}</div>
+            <div class="vecttauri-debug-stage-label">Keywords</div>
             ${badge}
         </div>
     `;
@@ -424,14 +424,14 @@ function createKeywordBoostStage(data) {
 function renderStageChunks(chunks, stageName, data) {
     if (!chunks || chunks.length === 0) {
         return `
-            <div class="vectfox-debug-empty">
+            <div class="vecttauri-debug-empty">
                 <i class="fa-solid fa-inbox"></i>
                 <p>No chunks at this stage</p>
             </div>
         `;
     }
 
-    let html = '<div class="vectfox-debug-chunks-list">';
+    let html = '<div class="vecttauri-debug-chunks-list">';
 
     chunks.forEach((chunk, idx) => {
         const textPreview = chunk.text
@@ -444,7 +444,7 @@ function renderStageChunks(chunks, stageName, data) {
 
         // Show matched query keywords badge
         const keywordMatchInfo = chunk.matchedQueryKeywords && chunk.matchedQueryKeywords.length > 0
-            ? `<span class="vectfox-debug-keyword-match-badge" title="Matched query keywords: ${chunk.matchedQueryKeywords.join(', ')}">
+            ? `<span class="vecttauri-debug-keyword-match-badge" title="Matched query keywords: ${chunk.matchedQueryKeywords.join(', ')}">
                    🔑 ${chunk.matchedQueryKeywords.length} keyword${chunk.matchedQueryKeywords.length > 1 ? 's' : ''}
                </span>`
             : '';
@@ -468,11 +468,11 @@ function renderStageChunks(chunks, stageName, data) {
                 const vectorPct = ((chunk.vectorScore || 0) * 100).toFixed(0);
                 const textPct = ((chunk.textScore || 0) * 100).toFixed(0);
                 scoreDisplay = `
-                    <span class="vectfox-debug-chunk-score-hybrid">
-                        <span class="vectfox-score-main ${scoreClass}">${finalScore}</span>
-                        <span class="vectfox-score-mini">
-                            <span class="vectfox-mini-vector" title="Semantic similarity (Qdrant cosine)">🔷${vectorPct}%</span>
-                            <span class="vectfox-mini-text" title="Keyword match score">📝${textPct}%</span>
+                    <span class="vecttauri-debug-chunk-score-hybrid">
+                        <span class="vecttauri-score-main ${scoreClass}">${finalScore}</span>
+                        <span class="vecttauri-score-mini">
+                            <span class="vecttauri-mini-vector" title="Semantic similarity (Qdrant cosine)">🔷${vectorPct}%</span>
+                            <span class="vecttauri-mini-text" title="Keyword match score">📝${textPct}%</span>
                         </span>
                     </span>`;
             } else {
@@ -481,16 +481,16 @@ function renderStageChunks(chunks, stageName, data) {
                 const vectorPct = ((chunk.vectorScore || 0) * 100).toFixed(0);
                 const textPct = ((chunk.textScore || 0) * 100).toFixed(0);
                 scoreDisplay = `
-                    <span class="vectfox-debug-chunk-score-hybrid">
-                        <span class="vectfox-score-main ${scoreClass}">${finalPct}%</span>
-                        <span class="vectfox-score-mini">
-                            <span class="vectfox-mini-vector" title="Semantic similarity">🔷${vectorPct}%</span>
-                            <span class="vectfox-mini-text" title="Keyword match">📝${textPct}%</span>
+                    <span class="vecttauri-debug-chunk-score-hybrid">
+                        <span class="vecttauri-score-main ${scoreClass}">${finalPct}%</span>
+                        <span class="vecttauri-score-mini">
+                            <span class="vecttauri-mini-vector" title="Semantic similarity">🔷${vectorPct}%</span>
+                            <span class="vecttauri-mini-text" title="Keyword match">📝${textPct}%</span>
                         </span>
                     </span>`;
             }
         } else {
-            scoreDisplay = `<span class="vectfox-debug-chunk-score ${scoreClass}">${chunk.score?.toFixed(3) || 'N/A'}</span>`;
+            scoreDisplay = `<span class="vecttauri-debug-chunk-score ${scoreClass}">${chunk.score?.toFixed(3) || 'N/A'}</span>`;
         }
 
         // Build full metadata for expanded view
@@ -506,66 +506,66 @@ function renderStageChunks(chunks, stageName, data) {
         };
 
         html += `
-            <div class="vectfox-debug-chunk vectfox-debug-chunk-expandable ${wasExcluded ? 'vectfox-debug-chunk-excluded' : ''}" data-chunk-idx="${idx}">
-                <div class="vectfox-debug-chunk-header">
-                    <span class="vectfox-debug-chunk-rank">#${idx + 1}</span>
+            <div class="vecttauri-debug-chunk vecttauri-debug-chunk-expandable ${wasExcluded ? 'vecttauri-debug-chunk-excluded' : ''}" data-chunk-idx="${idx}">
+                <div class="vecttauri-debug-chunk-header">
+                    <span class="vecttauri-debug-chunk-rank">#${idx + 1}</span>
                     ${scoreDisplay}
                     ${keywordMatchInfo}
-                    ${wasExcluded ? `<span class="vectfox-debug-excluded-badge">${wasExcluded}</span>` : ''}
-                    <i class="fa-solid fa-chevron-down vectfox-debug-chunk-expand-icon"></i>
+                    ${wasExcluded ? `<span class="vecttauri-debug-excluded-badge">${wasExcluded}</span>` : ''}
+                    <i class="fa-solid fa-chevron-down vecttauri-debug-chunk-expand-icon"></i>
                 </div>
                 ${scoreBreakdown}
-                <div class="vectfox-debug-chunk-text-preview">${StringUtils.escapeHtml(textPreview)}</div>
+                <div class="vecttauri-debug-chunk-text-preview">${StringUtils.escapeHtml(textPreview)}</div>
 
                 <!-- Expanded content (hidden by default) -->
-                <div class="vectfox-debug-chunk-expanded" style="display: none;">
-                    <div class="vectfox-debug-chunk-fulltext">
-                        <div class="vectfox-debug-chunk-fulltext-label">Full Text:</div>
+                <div class="vecttauri-debug-chunk-expanded" style="display: none;">
+                    <div class="vecttauri-debug-chunk-fulltext">
+                        <div class="vecttauri-debug-chunk-fulltext-label">Full Text:</div>
                         <pre>${StringUtils.escapeHtml(chunk.text || '(no text)')}</pre>
                     </div>
-                    <div class="vectfox-debug-chunk-meta-full">
-                        <div class="vectfox-debug-meta-grid">
-                            <div class="vectfox-debug-meta-item">
+                    <div class="vecttauri-debug-chunk-meta-full">
+                        <div class="vecttauri-debug-meta-grid">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Hash</span>
                                 <span class="meta-value">${chunk.hash}</span>
                             </div>
                             ${chunk.index !== undefined ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Message #</span>
                                 <span class="meta-value">${chunk.index}</span>
                             </div>` : ''}
                             ${chunk.collection || chunk.collectionId ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Collection</span>
                                 <span class="meta-value">${chunk.collection || chunk.collectionId}</span>
                             </div>` : ''}
                             ${chunk.metadata?.keywords?.length ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Keywords</span>
                                 <span class="meta-value">${chunk.metadata.keywords.map(k => typeof k === 'object' ? `${k.text}(${k.weight}x)` : k).join(', ')}</span>
                             </div>` : ''}
                             ${chunk.matchedQueryKeywords?.length ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Matched Query Keywords</span>
-                                <span class="meta-value vectfox-matched-keywords">${chunk.matchedQueryKeywords.join(', ')}</span>
+                                <span class="meta-value vecttauri-matched-keywords">${chunk.matchedQueryKeywords.join(', ')}</span>
                             </div>` : ''}
                             ${chunk.vectorRank !== undefined ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Vector Rank</span>
                                 <span class="meta-value">#${chunk.vectorRank}</span>
                             </div>` : ''}
                             ${chunk.keywordRank !== undefined && chunk.keywordRank !== Infinity ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Keyword Rank</span>
                                 <span class="meta-value">#${chunk.keywordRank}</span>
                             </div>` : ''}
                             ${chunk.matchedKeywords !== undefined ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Keywords Matched</span>
                                 <span class="meta-value">${chunk.matchedKeywords} keyword${chunk.matchedKeywords !== 1 ? 's' : ''}</span>
                             </div>` : ''}
                             ${chunk.fusionMethod ? `
-                            <div class="vectfox-debug-meta-item">
+                            <div class="vecttauri-debug-meta-item">
                                 <span class="meta-label">Fusion Method</span>
                                 <span class="meta-value">${chunk.fusionMethod.toUpperCase()}</span>
                             </div>` : ''}
@@ -574,10 +574,10 @@ function renderStageChunks(chunks, stageName, data) {
                 </div>
 
                 <!-- Collapsed meta (shown when collapsed) -->
-                <div class="vectfox-debug-chunk-meta">
+                <div class="vecttauri-debug-chunk-meta">
                     <span>Hash: ${String(chunk.hash).substring(0, 12)}...</span>
                     ${chunk.index !== undefined ? `<span>Msg #${chunk.index}</span>` : ''}
-                    ${hasMoreText ? `<span class="vectfox-debug-click-hint">Click to expand</span>` : ''}
+                    ${hasMoreText ? `<span class="vecttauri-debug-click-hint">Click to expand</span>` : ''}
                 </div>
             </div>
         `;
@@ -660,9 +660,9 @@ function buildScoreBreakdown(chunk) {
 
         let matchIndicator = '';
         if (!hasTextMatch) {
-            matchIndicator = '<span class="vectfox-score-warning" title="No keyword match - semantic only">⚠️</span>';
+            matchIndicator = '<span class="vecttauri-score-warning" title="No keyword match - semantic only">⚠️</span>';
         } else {
-            matchIndicator = '<span class="vectfox-score-good" title="Both semantic and keyword match">✓</span>';
+            matchIndicator = '<span class="vecttauri-score-good" title="Both semantic and keyword match">✓</span>';
         }
 
         // RRF final score is raw, but vector/text scores are still percentages (from Qdrant)
@@ -677,16 +677,16 @@ function buildScoreBreakdown(chunk) {
             finalDisplay = ((chunk.score || 0) * 100).toFixed(1) + '%';
         }
 
-        return `<div class="vectfox-debug-score-breakdown vectfox-hybrid-breakdown">
-            <div class="vectfox-hybrid-scores">
-                <span class="vectfox-score-vector-badge" title="Semantic similarity">🔷 Vector: ${vectorDisplay}</span>
-                <span class="vectfox-score-text-badge" title="Keyword/BM25 match">📝 Text: ${textDisplay}</span>
+        return `<div class="vecttauri-debug-score-breakdown vecttauri-hybrid-breakdown">
+            <div class="vecttauri-hybrid-scores">
+                <span class="vecttauri-score-vector-badge" title="Semantic similarity">🔷 Vector: ${vectorDisplay}</span>
+                <span class="vecttauri-score-text-badge" title="Keyword/BM25 match">📝 Text: ${textDisplay}</span>
                 ${matchIndicator}
             </div>
-            <div class="vectfox-score-math">
-                <span class="vectfox-score-fusion">${fusionMethod.toUpperCase()}</span>
-                <span class="vectfox-score-operator">→</span>
-                <span class="vectfox-score-final">${finalDisplay}</span>
+            <div class="vecttauri-score-math">
+                <span class="vecttauri-score-fusion">${fusionMethod.toUpperCase()}</span>
+                <span class="vecttauri-score-operator">→</span>
+                <span class="vecttauri-score-final">${finalDisplay}</span>
             </div>
         </div>`;
     }
@@ -699,13 +699,13 @@ function buildScoreBreakdown(chunk) {
     const hasKeywordBoost = keywordBoost && keywordBoost !== 1.0;
 
     if (!hasKeywordBoost && vectorScore === finalScore) {
-        return `<div class="vectfox-debug-score-breakdown">
-            <span class="vectfox-score-math">Vector: ${vectorScore?.toFixed(3) || 'N/A'}</span>
+        return `<div class="vecttauri-debug-score-breakdown">
+            <span class="vecttauri-score-math">Vector: ${vectorScore?.toFixed(3) || 'N/A'}</span>
         </div>`;
     }
 
     let mathParts = [];
-    mathParts.push(`<span class="vectfox-score-vector">${vectorScore?.toFixed(3) || '?'}</span>`);
+    mathParts.push(`<span class="vecttauri-score-vector">${vectorScore?.toFixed(3) || '?'}</span>`);
 
     if (hasKeywordBoost) {
         let boostTitle = 'Keyword boost';
@@ -717,12 +717,12 @@ function buildScoreBreakdown(chunk) {
         } else if (chunk.matchedKeywords?.length > 0) {
             boostTitle = `Matched: ${chunk.matchedKeywords.join(', ')}`;
         }
-        mathParts.push(`<span class="vectfox-score-operator">×</span>`);
-        mathParts.push(`<span class="vectfox-score-boost" title="${boostTitle}">${keywordBoost.toFixed(2)}x</span>`);
+        mathParts.push(`<span class="vecttauri-score-operator">×</span>`);
+        mathParts.push(`<span class="vecttauri-score-boost" title="${boostTitle}">${keywordBoost.toFixed(2)}x</span>`);
     }
 
-    mathParts.push(`<span class="vectfox-score-operator">=</span>`);
-    mathParts.push(`<span class="vectfox-score-final">${finalScore?.toFixed(3) || '?'}</span>`);
+    mathParts.push(`<span class="vecttauri-score-operator">=</span>`);
+    mathParts.push(`<span class="vecttauri-score-final">${finalScore?.toFixed(3) || '?'}</span>`);
 
     // Add keyword matches with weights if present
     let keywordInfo = '';
@@ -730,13 +730,13 @@ function buildScoreBreakdown(chunk) {
         const kwStr = chunk.matchedKeywordsWithWeights.map(k =>
             k.weight !== 1.5 ? `${k.text} (${k.weight}x)` : k.text
         ).join(', ');
-        keywordInfo = `<div class="vectfox-score-keywords">Keywords: ${kwStr}</div>`;
+        keywordInfo = `<div class="vecttauri-score-keywords">Keywords: ${kwStr}</div>`;
     } else if (chunk.matchedKeywords?.length > 0) {
-        keywordInfo = `<div class="vectfox-score-keywords">Keywords: ${chunk.matchedKeywords.join(', ')}</div>`;
+        keywordInfo = `<div class="vecttauri-score-keywords">Keywords: ${chunk.matchedKeywords.join(', ')}</div>`;
     }
 
-    return `<div class="vectfox-debug-score-breakdown">
-        <div class="vectfox-score-math">${mathParts.join(' ')}</div>
+    return `<div class="vecttauri-debug-score-breakdown">
+        <div class="vecttauri-score-math">${mathParts.join(' ')}</div>
         ${keywordInfo}
     </div>`;
 }
@@ -755,7 +755,7 @@ function renderInjectionVerification(data) {
     }
 
     const { verified, text, position, depth, charCount } = data.injection;
-    const statusClass = verified ? 'vectfox-verification-success' : 'vectfox-verification-failed';
+    const statusClass = verified ? 'vecttauri-verification-success' : 'vecttauri-verification-failed';
     const statusIcon = verified ? 'fa-circle-check' : 'fa-circle-xmark';
     const statusText = verified ? 'VERIFIED' : 'VERIFICATION FAILED';
 
@@ -772,31 +772,31 @@ function renderInjectionVerification(data) {
     const positionLabel = positionLabels[position] || `Position ${position}`;
 
     return `
-        <div class="vectfox-debug-card vectfox-debug-verification ${statusClass}">
-            <div class="vectfox-debug-card-header vectfox-debug-clickable" id="VectFox_verification_header">
+        <div class="vecttauri-debug-card vecttauri-debug-verification ${statusClass}">
+            <div class="vecttauri-debug-card-header vecttauri-debug-clickable" id="VectTauri_verification_header">
                 <i class="fa-solid ${statusIcon}"></i>
                 <span>Injection Verification</span>
-                <span class="vectfox-verification-badge ${statusClass}">${statusText}</span>
-                <i class="fa-solid fa-chevron-down vectfox-debug-expand-icon"></i>
+                <span class="vecttauri-verification-badge ${statusClass}">${statusText}</span>
+                <i class="fa-solid fa-chevron-down vecttauri-debug-expand-icon"></i>
             </div>
-            <div class="vectfox-debug-card-body">
-                <div class="vectfox-verification-summary">
-                    <div class="vectfox-verification-stat">
+            <div class="vecttauri-debug-card-body">
+                <div class="vecttauri-verification-summary">
+                    <div class="vecttauri-verification-stat">
                         <span class="stat-label">Position</span>
                         <span class="stat-value">${positionLabel}</span>
                     </div>
-                    <div class="vectfox-verification-stat">
+                    <div class="vecttauri-verification-stat">
                         <span class="stat-label">Depth</span>
                         <span class="stat-value">${depth}</span>
                     </div>
-                    <div class="vectfox-verification-stat">
+                    <div class="vecttauri-verification-stat">
                         <span class="stat-label">Characters</span>
                         <span class="stat-value">${charCount.toLocaleString()}</span>
                     </div>
                 </div>
-                <div class="vectfox-verification-text-wrapper" style="display: none;">
-                    <div class="vectfox-verification-text-label">Actual Injected Text:</div>
-                    <pre class="vectfox-verification-text">${StringUtils.escapeHtml(text)}</pre>
+                <div class="vecttauri-verification-text-wrapper" style="display: none;">
+                    <div class="vecttauri-verification-text-label">Actual Injected Text:</div>
+                    <pre class="vecttauri-verification-text">${StringUtils.escapeHtml(text)}</pre>
                 </div>
             </div>
         </div>
@@ -819,14 +819,14 @@ function renderCriticalFailure(data) {
         : 'Unknown failure point';
 
     return `
-        <div class="vectfox-debug-critical-failure">
-            <div class="vectfox-debug-critical-header">
-                <div class="vectfox-debug-critical-icon">
+        <div class="vecttauri-debug-critical-failure">
+            <div class="vecttauri-debug-critical-header">
+                <div class="vecttauri-debug-critical-icon">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
                 <div>
-                    <div class="vectfox-debug-critical-title">No Chunks Injected — ${failureSummary}</div>
-                    <div class="vectfox-debug-critical-subtitle">
+                    <div class="vecttauri-debug-critical-title">No Chunks Injected — ${failureSummary}</div>
+                    <div class="vecttauri-debug-critical-subtitle">
                         ${data.stages.initial.length === 0
                             ? 'Vector search returned no results'
                             : `${data.stages.initial.length} chunks retrieved, but all were filtered out before injection`}
@@ -834,25 +834,25 @@ function renderCriticalFailure(data) {
                 </div>
             </div>
 
-            <div class="vectfox-debug-diagnosis">
-                <div class="vectfox-debug-diagnosis-title">
+            <div class="vecttauri-debug-diagnosis">
+                <div class="vecttauri-debug-diagnosis-title">
                     <i class="fa-solid fa-stethoscope"></i>
                     Pipeline Diagnosis
                 </div>
 
                 ${diagnosis.map((item, idx) => `
-                    <div class="vectfox-debug-diagnosis-item ${item.isCause ? 'is-cause' : ''} ${item.isOk ? 'is-ok' : ''}">
-                        <div class="vectfox-debug-diagnosis-number">${idx + 1}</div>
-                        <div class="vectfox-debug-diagnosis-content">
-                            <div class="vectfox-debug-diagnosis-label">
+                    <div class="vecttauri-debug-diagnosis-item ${item.isCause ? 'is-cause' : ''} ${item.isOk ? 'is-ok' : ''}">
+                        <div class="vecttauri-debug-diagnosis-number">${idx + 1}</div>
+                        <div class="vecttauri-debug-diagnosis-content">
+                            <div class="vecttauri-debug-diagnosis-label">
                                 ${item.label}
-                                <span class="vectfox-debug-diagnosis-status ${item.isOk ? 'status-ok' : 'status-fail'}">
+                                <span class="vecttauri-debug-diagnosis-status ${item.isOk ? 'status-ok' : 'status-fail'}">
                                     ${item.isOk ? '✓ OK' : '✗ FAILED'}
                                 </span>
                             </div>
-                            <div class="vectfox-debug-diagnosis-detail">${item.detail}</div>
+                            <div class="vecttauri-debug-diagnosis-detail">${item.detail}</div>
                             ${item.fix ? `
-                                <div class="vectfox-debug-diagnosis-fix">
+                                <div class="vecttauri-debug-diagnosis-fix">
                                     <strong>Fix:</strong> ${item.fix}
                                 </div>
                             ` : ''}
@@ -1033,7 +1033,7 @@ function diagnosePipeline(data) {
             diagnosis.push({
                 label: 'Injection',
                 detail: `${afterConditionsCount} chunks passed all filters but none were injected. No specific reason was recorded.`,
-                fix: `This may be a bug. Open DevTools (F12) → Console tab, look for "VectFox" errors, and report the issue with console output.`,
+                fix: `This may be a bug. Open DevTools (F12) → Console tab, look for "VectTauri" errors, and report the issue with console output.`,
                 isCause: true,
                 isOk: false
             });
@@ -1066,7 +1066,7 @@ function diagnosePipeline(data) {
         diagnosis.push({
             label: 'Unknown',
             detail: 'Pipeline completed but no chunks were injected. No specific cause identified.',
-            fix: `This may be a bug. Open DevTools (F12) → Console tab, look for "VectFox" errors, and report the issue with console output.`,
+            fix: `This may be a bug. Open DevTools (F12) → Console tab, look for "VectTauri" errors, and report the issue with console output.`,
             isCause: true,
             isOk: false
         });
@@ -1110,42 +1110,42 @@ function renderExcludedAnalysis(data) {
     });
 
     return `
-        <div class="vectfox-debug-card vectfox-debug-exclusions">
-            <div class="vectfox-debug-card-header">
+        <div class="vecttauri-debug-card vecttauri-debug-exclusions">
+            <div class="vecttauri-debug-card-header">
                 <i class="fa-solid fa-filter-circle-xmark"></i>
                 <span>Exclusion Analysis</span>
-                <span class="vectfox-debug-exclusion-count">${excluded.length} chunks excluded</span>
+                <span class="vecttauri-debug-exclusion-count">${excluded.length} chunks excluded</span>
             </div>
-            <div class="vectfox-debug-card-body">
-                <div class="vectfox-debug-exclusion-categories">
+            <div class="vecttauri-debug-card-body">
+                <div class="vecttauri-debug-exclusion-categories">
                     ${belowThreshold.length > 0 ? `
-                        <div class="vectfox-debug-exclusion-category">
-                            <div class="vectfox-debug-exclusion-icon vectfox-debug-exclusion-threshold">
+                        <div class="vecttauri-debug-exclusion-category">
+                            <div class="vecttauri-debug-exclusion-icon vecttauri-debug-exclusion-threshold">
                                 <i class="fa-solid fa-less-than"></i>
                             </div>
-                            <div class="vectfox-debug-exclusion-info">
+                            <div class="vecttauri-debug-exclusion-info">
                                 <strong>${belowThreshold.length}</strong> below threshold
                                 <small>Score < ${data.settings.threshold}</small>
                             </div>
                         </div>
                     ` : ''}
                     ${failedConditions.length > 0 ? `
-                        <div class="vectfox-debug-exclusion-category">
-                            <div class="vectfox-debug-exclusion-icon vectfox-debug-exclusion-conditions">
+                        <div class="vecttauri-debug-exclusion-category">
+                            <div class="vecttauri-debug-exclusion-icon vecttauri-debug-exclusion-conditions">
                                 <i class="fa-solid fa-code-branch"></i>
                             </div>
-                            <div class="vectfox-debug-exclusion-info">
+                            <div class="vecttauri-debug-exclusion-info">
                                 <strong>${failedConditions.length}</strong> failed conditions
                                 <small>Chunk conditions not met</small>
                             </div>
                         </div>
                     ` : ''}
                     ${limitExceeded.length > 0 ? `
-                        <div class="vectfox-debug-exclusion-category">
-                            <div class="vectfox-debug-exclusion-icon vectfox-debug-exclusion-limit">
+                        <div class="vecttauri-debug-exclusion-category">
+                            <div class="vecttauri-debug-exclusion-icon vecttauri-debug-exclusion-limit">
                                 <i class="fa-solid fa-ban"></i>
                             </div>
-                            <div class="vectfox-debug-exclusion-info">
+                            <div class="vecttauri-debug-exclusion-info">
                                 <strong>${limitExceeded.length}</strong> hit injection limit
                                 <small>Top K limit reached</small>
                             </div>
@@ -1161,9 +1161,9 @@ function renderExcludedAnalysis(data) {
  * Gets CSS class for score value
  */
 function getScoreClass(score) {
-    if (score >= 0.7) return 'vectfox-debug-score-high';
-    if (score >= 0.4) return 'vectfox-debug-score-medium';
-    return 'vectfox-debug-score-low';
+    if (score >= 0.7) return 'vecttauri-debug-score-high';
+    if (score >= 0.4) return 'vecttauri-debug-score-medium';
+    return 'vecttauri-debug-score-low';
 }
 
 /**
@@ -1193,16 +1193,16 @@ function renderTraceLog(data) {
     const startTime = data.trace[0]?.time || data.timestamp;
 
     return `
-        <div class="vectfox-debug-card vectfox-debug-trace">
-            <div class="vectfox-debug-card-header">
+        <div class="vecttauri-debug-card vecttauri-debug-trace">
+            <div class="vecttauri-debug-card-header">
                 <i class="fa-solid fa-terminal"></i>
                 <span>Pipeline Trace Log</span>
-                <button class="vectfox-debug-toggle-btn" id="VectFox_toggle_trace">
+                <button class="vecttauri-debug-toggle-btn" id="VectTauri_toggle_trace">
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
             </div>
-            <div class="vectfox-debug-card-body vectfox-debug-trace-body" id="VectFox_trace_body" style="display: none;">
-                <div class="vectfox-debug-trace-list">
+            <div class="vecttauri-debug-card-body vecttauri-debug-trace-body" id="VectTauri_trace_body" style="display: none;">
+                <div class="vecttauri-debug-trace-list">
                     ${data.trace.map((entry, idx) => {
                         const relTime = entry.time - startTime;
                         const stageClass = getStageClass(entry.stage);
@@ -1214,12 +1214,12 @@ function renderTraceLog(data) {
                         );
 
                         return `
-                            <div class="vectfox-debug-trace-entry ${stageClass}">
-                                <div class="vectfox-debug-trace-time">+${relTime}ms</div>
-                                <div class="vectfox-debug-trace-stage">${entry.stage}</div>
-                                <div class="vectfox-debug-trace-action">${StringUtils.escapeHtml(entry.action)}</div>
+                            <div class="vecttauri-debug-trace-entry ${stageClass}">
+                                <div class="vecttauri-debug-trace-time">+${relTime}ms</div>
+                                <div class="vecttauri-debug-trace-stage">${entry.stage}</div>
+                                <div class="vecttauri-debug-trace-action">${StringUtils.escapeHtml(entry.action)}</div>
                                 ${detailsJson !== '{}' ? `
-                                    <pre class="vectfox-debug-trace-details">${StringUtils.escapeHtml(detailsJson)}</pre>
+                                    <pre class="vecttauri-debug-trace-details">${StringUtils.escapeHtml(detailsJson)}</pre>
                                 ` : ''}
                             </div>
                         `;
@@ -1243,41 +1243,41 @@ function renderChunkFates(data) {
     const injected = fates.filter(f => f.finalFate === 'injected');
 
     return `
-        <div class="vectfox-debug-card vectfox-debug-fates">
-            <div class="vectfox-debug-card-header">
+        <div class="vecttauri-debug-card vecttauri-debug-fates">
+            <div class="vecttauri-debug-card-header">
                 <i class="fa-solid fa-route"></i>
                 <span>Chunk Fate Tracker</span>
-                <span class="vectfox-debug-fate-summary">
-                    <span class="vectfox-fate-injected">${injected.length} injected</span>
-                    <span class="vectfox-fate-dropped">${dropped.length} dropped</span>
+                <span class="vecttauri-debug-fate-summary">
+                    <span class="vecttauri-fate-injected">${injected.length} injected</span>
+                    <span class="vecttauri-fate-dropped">${dropped.length} dropped</span>
                 </span>
-                <button class="vectfox-debug-toggle-btn" id="VectFox_toggle_fates">
+                <button class="vecttauri-debug-toggle-btn" id="VectTauri_toggle_fates">
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
             </div>
-            <div class="vectfox-debug-card-body vectfox-debug-fates-body" id="VectFox_fates_body" style="display: none;">
-                <div class="vectfox-debug-fates-list">
+            <div class="vecttauri-debug-card-body vecttauri-debug-fates-body" id="VectTauri_fates_body" style="display: none;">
+                <div class="vecttauri-debug-fates-list">
                     ${fates.map(fate => {
                         const isDropped = fate.finalFate === 'dropped';
                         const hashShort = String(fate.hash).substring(0, 12);
 
                         return `
-                            <div class="vectfox-debug-fate-entry ${isDropped ? 'fate-dropped' : 'fate-injected'}">
-                                <div class="vectfox-debug-fate-header">
-                                    <span class="vectfox-debug-fate-hash" title="${fate.hash}">${hashShort}...</span>
-                                    <span class="vectfox-debug-fate-result ${isDropped ? 'result-dropped' : 'result-injected'}">
+                            <div class="vecttauri-debug-fate-entry ${isDropped ? 'fate-dropped' : 'fate-injected'}">
+                                <div class="vecttauri-debug-fate-header">
+                                    <span class="vecttauri-debug-fate-hash" title="${fate.hash}">${hashShort}...</span>
+                                    <span class="vecttauri-debug-fate-result ${isDropped ? 'result-dropped' : 'result-injected'}">
                                         ${isDropped ? `✗ Dropped at ${fate.droppedAt}` : '✓ Injected'}
                                     </span>
                                 </div>
                                 ${isDropped && fate.finalReason ? `
-                                    <div class="vectfox-debug-fate-reason">${StringUtils.escapeHtml(fate.finalReason)}</div>
+                                    <div class="vecttauri-debug-fate-reason">${StringUtils.escapeHtml(fate.finalReason)}</div>
                                 ` : ''}
-                                <div class="vectfox-debug-fate-journey">
+                                <div class="vecttauri-debug-fate-journey">
                                     ${fate.stages.map(s => `
-                                        <span class="vectfox-fate-stage ${s.fate === 'dropped' ? 'stage-dropped' : s.fate === 'injected' ? 'stage-injected' : 'stage-passed'}">
+                                        <span class="vecttauri-fate-stage ${s.fate === 'dropped' ? 'stage-dropped' : s.fate === 'injected' ? 'stage-injected' : 'stage-passed'}">
                                             ${s.stage}${s.fate === 'dropped' ? ' ✗' : s.fate === 'injected' ? ' ✓' : ''}
                                         </span>
-                                    `).join('<span class="vectfox-fate-arrow">→</span>')}
+                                    `).join('<span class="vecttauri-fate-arrow">→</span>')}
                                 </div>
                             </div>
                         `;
@@ -1343,7 +1343,7 @@ function generateDiagnosticDump(data) {
         : '  No chunks skipped';
 
     // Build human-readable dump
-    const dump = `VectFox DEBUG DUMP
+    const dump = `VectTauri DEBUG DUMP
 ${'='.repeat(50)}
 Time: ${new Date(d.timestamp).toLocaleString()}
 Collection: ${d.collectionId}
@@ -1427,43 +1427,43 @@ let currentHistoryIndex = 0;
 
 function bindEvents() {
     // Close button
-    $('#VectFox_search_debug_close').on('click', closeSearchDebugModal);
+    $('#VectTauri_search_debug_close').on('click', closeSearchDebugModal);
 
     // Copy diagnostic dump
-    $('#VectFox_copy_diagnostic').on('click', copyDiagnosticDump);
+    $('#VectTauri_copy_diagnostic').on('click', copyDiagnosticDump);
 
     // Stop mousedown propagation (ST closes drawers on mousedown/touchstart)
-    $('#VectFox_search_debug_modal').on('mousedown touchstart', function(e) {
+    $('#VectTauri_search_debug_modal').on('mousedown touchstart', function(e) {
         e.stopPropagation();
     });
 
     // Close on background click
-    $('#VectFox_search_debug_modal').on('click', function(e) {
+    $('#VectTauri_search_debug_modal').on('click', function(e) {
         if (e.target === this) {
             closeSearchDebugModal();
         }
     });
 
     // History tabs - switch between past queries
-    $('.vectfox-debug-history-tab').on('click', function() {
+    $('.vecttauri-debug-history-tab').on('click', function() {
         const historyIndex = parseInt($(this).data('history-index'));
         if (queryHistory[historyIndex]) {
             currentHistoryIndex = historyIndex;
             lastDebugData = queryHistory[historyIndex];
             // Refresh the modal content
             const newHtml = createModalHtml(lastDebugData, historyIndex);
-            $('#VectFox_search_debug_modal').replaceWith(newHtml);
-            $('#VectFox_search_debug_modal').show();
+            $('#VectTauri_search_debug_modal').replaceWith(newHtml);
+            $('#VectTauri_search_debug_modal').show();
             bindEvents();
         }
     });
 
     // Query card expand/collapse
-    $('#VectFox_query_header').on('click', function() {
-        const $card = $(this).closest('.vectfox-debug-query-card');
-        const $preview = $card.find('.vectfox-debug-query-preview');
-        const $full = $card.find('.vectfox-debug-query-full');
-        const $icon = $(this).find('.vectfox-debug-expand-icon');
+    $('#VectTauri_query_header').on('click', function() {
+        const $card = $(this).closest('.vecttauri-debug-query-card');
+        const $preview = $card.find('.vecttauri-debug-query-preview');
+        const $full = $card.find('.vecttauri-debug-query-full');
+        const $icon = $(this).find('.vecttauri-debug-expand-icon');
 
         $preview.slideToggle(200);
         $full.slideToggle(200);
@@ -1471,25 +1471,25 @@ function bindEvents() {
     });
 
     // Verification card expand/collapse (shows actual injected text)
-    $('#VectFox_verification_header').on('click', function() {
-        const $card = $(this).closest('.vectfox-debug-verification');
-        const $textWrapper = $card.find('.vectfox-verification-text-wrapper');
-        const $icon = $(this).find('.vectfox-debug-expand-icon');
+    $('#VectTauri_verification_header').on('click', function() {
+        const $card = $(this).closest('.vecttauri-debug-verification');
+        const $textWrapper = $card.find('.vecttauri-verification-text-wrapper');
+        const $icon = $(this).find('.vecttauri-debug-expand-icon');
 
         $textWrapper.slideToggle(200);
         $icon.toggleClass('fa-chevron-down fa-chevron-up');
     });
 
     // Expandable chunks
-    $(document).off('click.chunkExpand').on('click.chunkExpand', '.vectfox-debug-chunk-expandable', function(e) {
+    $(document).off('click.chunkExpand').on('click.chunkExpand', '.vecttauri-debug-chunk-expandable', function(e) {
         // Don't trigger if clicking on a link or button inside
         if ($(e.target).is('a, button')) return;
 
         const $chunk = $(this);
-        const $expanded = $chunk.find('.vectfox-debug-chunk-expanded');
-        const $preview = $chunk.find('.vectfox-debug-chunk-text-preview');
-        const $meta = $chunk.find('.vectfox-debug-chunk-meta');
-        const $icon = $chunk.find('.vectfox-debug-chunk-expand-icon');
+        const $expanded = $chunk.find('.vecttauri-debug-chunk-expanded');
+        const $preview = $chunk.find('.vecttauri-debug-chunk-text-preview');
+        const $meta = $chunk.find('.vecttauri-debug-chunk-meta');
+        const $icon = $chunk.find('.vecttauri-debug-chunk-expand-icon');
 
         $expanded.slideToggle(200);
         $preview.slideToggle(200);
@@ -1499,28 +1499,28 @@ function bindEvents() {
     });
 
     // Stage tabs
-    $('.vectfox-debug-stage-tab').on('click', function() {
+    $('.vecttauri-debug-stage-tab').on('click', function() {
         const stage = $(this).data('stage');
-        $('.vectfox-debug-stage-tab').removeClass('active');
+        $('.vecttauri-debug-stage-tab').removeClass('active');
         $(this).addClass('active');
 
         const data = lastDebugData;
         if (data && data.stages[stage]) {
-            $('#VectFox_debug_stage_content').html(
+            $('#VectTauri_debug_stage_content').html(
                 renderStageChunks(data.stages[stage], stage, data)
             );
         }
     });
 
     // Toggle trace log
-    $('#VectFox_toggle_trace').on('click', function() {
-        $('#VectFox_trace_body').slideToggle();
+    $('#VectTauri_toggle_trace').on('click', function() {
+        $('#VectTauri_trace_body').slideToggle();
         $(this).find('i').toggleClass('fa-chevron-down fa-chevron-up');
     });
 
     // Toggle chunk fates
-    $('#VectFox_toggle_fates').on('click', function() {
-        $('#VectFox_fates_body').slideToggle();
+    $('#VectTauri_toggle_fates').on('click', function() {
+        $('#VectTauri_fates_body').slideToggle();
         $(this).find('i').toggleClass('fa-chevron-down fa-chevron-up');
     });
 }
@@ -1532,52 +1532,52 @@ function bindEvents() {
 /**
  * Opens the EventBase Query Tester modal.
  * The user types a test message, clicks Run, and sees the exact
- * <VectFoxMemory> block that would be injected for that message —
+ * <VectTauriMemory> block that would be injected for that message —
  * using all current settings (agentic mode, filters, locked collections).
  */
 export function openQueryTestModal() {
-    $('#VectFox_query_tester_modal').remove();
+    $('#VectTauri_query_tester_modal').remove();
 
     const sectionStyle = 'display:flex; flex-direction:column; gap:4px; border-left:3px solid; padding-left:8px;';
 
     const html = `
-        <div id="VectFox_query_tester_modal" class="vectfox-modal" style="display:none;">
-            <div class="vectfox-modal-overlay"></div>
-            <div class="vectfox-modal-content" style="max-width:700px; max-height:92vh; display:flex; flex-direction:column;">
-                <div class="vectfox-modal-header">
-                    <h3><i class="fa-solid fa-flask"></i> VectFox Query Tester</h3>
-                    <button class="vectfox-modal-close" id="VectFox_qtester_close">✕</button>
+        <div id="VectTauri_query_tester_modal" class="vecttauri-modal" style="display:none;">
+            <div class="vecttauri-modal-overlay"></div>
+            <div class="vecttauri-modal-content" style="max-width:700px; max-height:92vh; display:flex; flex-direction:column;">
+                <div class="vecttauri-modal-header">
+                    <h3><i class="fa-solid fa-flask"></i> VectTauri Query Tester</h3>
+                    <button class="vecttauri-modal-close" id="VectTauri_qtester_close">✕</button>
                 </div>
-                <div class="vectfox-modal-body" style="padding:16px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1 1 auto;">
+                <div class="vecttauri-modal-body" style="padding:16px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1 1 auto;">
                     <small style="color:var(--SmartThemeQuoteColor,#999);">
                         Dry-run all three pipelines (EventBase, ChunkBase, Lorebook WI) against a test message.
                         Uses your current settings and locked collections. Prompt injection is <b>not</b> affected.
                     </small>
-                    <textarea id="VectFox_qtester_input"
+                    <textarea id="VectTauri_qtester_input"
                         class="text_pole"
                         placeholder="e.g. Do you remember how I rescued you?"
                         rows="3"
                         style="resize:vertical; width:100%; box-sizing:border-box;"></textarea>
-                    <button id="VectFox_qtester_run" class="menu_button" style="align-self:flex-start;">
+                    <button id="VectTauri_qtester_run" class="menu_button" style="align-self:flex-start;">
                         <i class="fa-solid fa-play"></i>&nbsp;Run All Pipelines
                     </button>
-                    <div id="VectFox_qtester_status" style="display:none; color:var(--SmartThemeQuoteColor,#999); font-size:0.85em;">
+                    <div id="VectTauri_qtester_status" style="display:none; color:var(--SmartThemeQuoteColor,#999); font-size:0.85em;">
                         <i class="fa-solid fa-spinner fa-spin"></i>&nbsp;Running retrieval…
                     </div>
-                    <div id="VectFox_qtester_result" style="display:none; flex-direction:column; gap:14px;">
+                    <div id="VectTauri_qtester_result" style="display:none; flex-direction:column; gap:14px;">
                         <div style="${sectionStyle} border-color:#4a9eff;">
-                            <small style="font-weight:bold; color:#4a9eff;">EventBase <span id="VectFox_qtester_meta_eb" style="font-weight:normal; color:var(--SmartThemeQuoteColor,#999);"></span></small>
-                            <textarea id="VectFox_qtester_output_eb" readonly rows="8"
+                            <small style="font-weight:bold; color:#4a9eff;">EventBase <span id="VectTauri_qtester_meta_eb" style="font-weight:normal; color:var(--SmartThemeQuoteColor,#999);"></span></small>
+                            <textarea id="VectTauri_qtester_output_eb" readonly rows="8"
                                 style="width:100%; box-sizing:border-box; font-family:monospace; font-size:0.78em; resize:vertical; white-space:pre-wrap; overflow-wrap:break-word;"></textarea>
                         </div>
                         <div style="${sectionStyle} border-color:#4dbb6e;">
-                            <small style="font-weight:bold; color:#4dbb6e;">ChunkBase <span id="VectFox_qtester_meta_cb" style="font-weight:normal; color:var(--SmartThemeQuoteColor,#999);"></span></small>
-                            <textarea id="VectFox_qtester_output_cb" readonly rows="8"
+                            <small style="font-weight:bold; color:#4dbb6e;">ChunkBase <span id="VectTauri_qtester_meta_cb" style="font-weight:normal; color:var(--SmartThemeQuoteColor,#999);"></span></small>
+                            <textarea id="VectTauri_qtester_output_cb" readonly rows="8"
                                 style="width:100%; box-sizing:border-box; font-family:monospace; font-size:0.78em; resize:vertical; white-space:pre-wrap; overflow-wrap:break-word;"></textarea>
                         </div>
                         <div style="${sectionStyle} border-color:#b06fff;">
-                            <small style="font-weight:bold; color:#b06fff;">Lorebook WI <span id="VectFox_qtester_meta_lb" style="font-weight:normal; color:var(--SmartThemeQuoteColor,#999);"></span></small>
-                            <textarea id="VectFox_qtester_output_lb" readonly rows="8"
+                            <small style="font-weight:bold; color:#b06fff;">Lorebook WI <span id="VectTauri_qtester_meta_lb" style="font-weight:normal; color:var(--SmartThemeQuoteColor,#999);"></span></small>
+                            <textarea id="VectTauri_qtester_output_lb" readonly rows="8"
                                 style="width:100%; box-sizing:border-box; font-family:monospace; font-size:0.78em; resize:vertical; white-space:pre-wrap; overflow-wrap:break-word;"></textarea>
                         </div>
                     </div>
@@ -1588,22 +1588,22 @@ export function openQueryTestModal() {
 
     $('body').append(html);
 
-    $('#VectFox_query_tester_modal').on('mousedown touchstart', e => e.stopPropagation());
-    $('#VectFox_qtester_close').on('click', _closeQueryTester);
-    $('#VectFox_query_tester_modal').on('click', function (e) {
+    $('#VectTauri_query_tester_modal').on('mousedown touchstart', e => e.stopPropagation());
+    $('#VectTauri_qtester_close').on('click', _closeQueryTester);
+    $('#VectTauri_query_tester_modal').on('click', function (e) {
         if (e.target === this) _closeQueryTester();
     });
 
-    $('#VectFox_qtester_run').on('click', async function () {
-        const testMessage = $('#VectFox_qtester_input').val().trim();
+    $('#VectTauri_qtester_run').on('click', async function () {
+        const testMessage = $('#VectTauri_qtester_input').val().trim();
         if (!testMessage) {
-            toastr.warning('Enter a test message first.', 'VectFox');
+            toastr.warning('Enter a test message first.', 'VectTauri');
             return;
         }
 
-        $('#VectFox_qtester_run').prop('disabled', true);
-        $('#VectFox_qtester_status').show();
-        $('#VectFox_qtester_result').hide().css('display', 'none');
+        $('#VectTauri_qtester_run').prop('disabled', true);
+        $('#VectTauri_qtester_status').show();
+        $('#VectTauri_qtester_result').hide().css('display', 'none');
 
         try {
             const [
@@ -1618,7 +1618,7 @@ export function openQueryTestModal() {
                 import('../core/world-info-integration.js'),
             ]);
 
-            const settings = extension_settings.vectfox;
+            const settings = extension_settings.vecttauri;
             const { chat } = getContext();
 
             const [ebResult, cbResult, lbResult] = await Promise.all([
@@ -1627,16 +1627,16 @@ export function openQueryTestModal() {
                 runLorebookWIDryRun({ chat, testMessage, settings }),
             ]);
 
-            $('#VectFox_qtester_status').hide();
+            $('#VectTauri_qtester_status').hide();
 
             // --- EventBase ---
             if (ebResult?.injectionText) {
-                $('#VectFox_qtester_meta_eb').text(`— ${ebResult.eventCount ?? '?'} event(s) retrieved`);
-                $('#VectFox_qtester_output_eb').val(ebResult.injectionText);
+                $('#VectTauri_qtester_meta_eb').text(`— ${ebResult.eventCount ?? '?'} event(s) retrieved`);
+                $('#VectTauri_qtester_output_eb').val(ebResult.injectionText);
             } else {
                 const locked = (ebResult?.lockedCollectionsCount ?? 0) + (ebResult?.archiveCollectionsCount ?? 0);
-                $('#VectFox_qtester_meta_eb').text('— no results');
-                $('#VectFox_qtester_output_eb').val(
+                $('#VectTauri_qtester_meta_eb').text('— no results');
+                $('#VectTauri_qtester_output_eb').val(
                     locked === 0
                         ? '(no EventBase collections are locked to this chat)'
                         : `(searched ${locked} collection(s) — 0 events matched. Try a more specific query or lower the score threshold.)`
@@ -1645,43 +1645,43 @@ export function openQueryTestModal() {
 
             // --- ChunkBase ---
             if (cbResult?.injectionText) {
-                $('#VectFox_qtester_meta_cb').text(`— ${cbResult.chunkCount ?? '?'} chunk(s) retrieved`);
-                $('#VectFox_qtester_output_cb').val(cbResult.injectionText);
+                $('#VectTauri_qtester_meta_cb').text(`— ${cbResult.chunkCount ?? '?'} chunk(s) retrieved`);
+                $('#VectTauri_qtester_output_cb').val(cbResult.injectionText);
             } else {
                 const reason = cbResult?.noCollections ? 'no ChunkBase collections are enabled'
                     : cbResult?.noActive ? 'no collections passed activation filters'
                     : cbResult?.allDuplicates ? 'all chunks already in context (dedup)'
                     : '0 chunks matched the query';
-                $('#VectFox_qtester_meta_cb').text('— no results');
-                $('#VectFox_qtester_output_cb').val(`(${reason})`);
+                $('#VectTauri_qtester_meta_cb').text('— no results');
+                $('#VectTauri_qtester_output_cb').val(`(${reason})`);
             }
 
             // --- Lorebook WI ---
             if (lbResult?.injectionText) {
-                $('#VectFox_qtester_meta_lb').text(`— ${lbResult.entryCount ?? '?'} entry/entries retrieved`);
-                $('#VectFox_qtester_output_lb').val(lbResult.injectionText);
+                $('#VectTauri_qtester_meta_lb').text(`— ${lbResult.entryCount ?? '?'} entry/entries retrieved`);
+                $('#VectTauri_qtester_output_lb').val(lbResult.injectionText);
             } else {
                 const reason = lbResult?.disabled ? 'Lorebook WI is disabled in settings'
                     : lbResult?.noCollections ? 'no vectorized lorebook collections found'
                     : '0 entries matched the query';
-                $('#VectFox_qtester_meta_lb').text('— no results');
-                $('#VectFox_qtester_output_lb').val(`(${reason})`);
+                $('#VectTauri_qtester_meta_lb').text('— no results');
+                $('#VectTauri_qtester_output_lb').val(`(${reason})`);
             }
 
-            $('#VectFox_qtester_result').css('display', 'flex').show();
+            $('#VectTauri_qtester_result').css('display', 'flex').show();
         } catch (err) {
-            $('#VectFox_qtester_status').hide();
-            console.error('[VectFox Query Tester]', err);
-            toastr.error(`Retrieval failed: ${err.message}`, 'VectFox');
+            $('#VectTauri_qtester_status').hide();
+            console.error('[VectTauri Query Tester]', err);
+            toastr.error(`Retrieval failed: ${err.message}`, 'VectTauri');
         } finally {
-            $('#VectFox_qtester_run').prop('disabled', false);
+            $('#VectTauri_qtester_run').prop('disabled', false);
         }
     });
 
-    $('#VectFox_query_tester_modal').fadeIn(200);
-    setTimeout(() => $('#VectFox_qtester_input').focus(), 250);
+    $('#VectTauri_query_tester_modal').fadeIn(200);
+    setTimeout(() => $('#VectTauri_qtester_input').focus(), 250);
 }
 
 function _closeQueryTester() {
-    $('#VectFox_query_tester_modal').fadeOut(200, function () { $(this).remove(); });
+    $('#VectTauri_query_tester_modal').fadeOut(200, function () { $(this).remove(); });
 }

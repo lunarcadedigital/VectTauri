@@ -20,8 +20,8 @@
  *
  * !! DO NOT add any unconditional plugin calls here !!
  *
- * @author VectFox
- * @version 3.1.0
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -41,7 +41,7 @@ import { getPluginUrl } from '../utils/similharity-url.js';
 
 /**
  * Build provider-specific parameters for API requests.
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {boolean} isQuery - Whether this is a query operation
  * @returns {object} Provider-specific parameters
  */
@@ -66,7 +66,7 @@ function getProviderSpecificParams(settings, isQuery = false) {
 
         case 'llamacpp':
             params.apiUrl = resolveProviderApiUrl(settings, 'llamacpp');
-            log.verbose(`VectFox DEBUG llamacpp: final apiUrl="${params.apiUrl}"`);
+            log.verbose(`VectTauri DEBUG llamacpp: final apiUrl="${params.apiUrl}"`);
             break;
 
         case 'vllm':
@@ -108,7 +108,7 @@ function getProviderSpecificParams(settings, isQuery = false) {
 // position X` where X varies because it depends on file size at corruption time)
 // and a corrupted Vectra index on disk.
 //
-// VectFox's parallel-split insert (default since 2026-05-30) fires N concurrent
+// VectTauri's parallel-split insert (default since 2026-05-30) fires N concurrent
 // single-item POSTs per batch — great for failure containment on Qdrant, fatal
 // for Vectra.
 //
@@ -159,23 +159,23 @@ export class StandardBackend extends VectorBackend {
         // uses. Routing through the shared cache means a no-plugin install
         // issues exactly ONE /health request total (and thus at most one 404 in
         // the browser console) instead of one per backend/UI consumer.
-        log.lifecycle('VectFox DEBUG: Checking plugin availability...');
+        log.lifecycle('VectTauri DEBUG: Checking plugin availability...');
         try {
             const { checkPluginAvailable } = await import('../core/collection-loader.js');
             this.pluginAvailable = await checkPluginAvailable();
-            log.lifecycle('VectFox DEBUG: Plugin available:', this.pluginAvailable);
+            log.lifecycle('VectTauri DEBUG: Plugin available:', this.pluginAvailable);
 
             if (this.pluginAvailable) {
                 await fetch(getPluginUrl('/api/plugins/similharity/backend/init/vectra'), {
                     method: 'POST',
                     headers: getRequestHeaders(),
                 });
-                log.lifecycle('VectFox: Standard backend initialized (plugin available)');
+                log.lifecycle('VectTauri: Standard backend initialized (plugin available)');
             } else {
-                log.lifecycle('VectFox: Standard backend initialized (native ST API only - health check failed)');
+                log.lifecycle('VectTauri: Standard backend initialized (native ST API only - health check failed)');
             }
         } catch (e) {
-            log.lifecycle('VectFox: Standard backend initialized (native ST API only - error:', e.message, ')');
+            log.lifecycle('VectTauri: Standard backend initialized (native ST API only - error:', e.message, ')');
             this.pluginAvailable = false;
         }
         
@@ -361,32 +361,32 @@ export class StandardBackend extends VectorBackend {
         // Count how many chunks have keywords
         const chunksWithKeywords = items.filter(item => item.keywords && item.keywords.length > 0).length;
 
-        log.verbose(`VectFox: Embedding ${items.length} chunks (avg: ${avgLen} chars, max: ${maxLen} chars at index ${longestChunkIndex}) - ${chunksWithKeywords} chunks have keywords`);
+        log.verbose(`VectTauri: Embedding ${items.length} chunks (avg: ${avgLen} chars, max: ${maxLen} chars at index ${longestChunkIndex}) - ${chunksWithKeywords} chunks have keywords`);
 
         // Debug: Log first chunk's keywords if any
         if (chunksWithKeywords > 0) {
             const firstChunkWithKeywords = items.find(item => item.keywords && item.keywords.length > 0);
-            log.verbose(`VectFox DEBUG: First chunk keywords:`, firstChunkWithKeywords.keywords);
+            log.verbose(`VectTauri DEBUG: First chunk keywords:`, firstChunkWithKeywords.keywords);
         }
 
         // Warn if chunks are unusually large (potential OOM risk)
         if (maxLen > 2000) {
-            log.warn(`VectFox: Large chunk detected (${maxLen} chars). If you see OOM errors, try reducing chunk size.`);
-            log.warn(`VectFox: Problematic chunk preview: "${(items[longestChunkIndex]?.text || '').substring(0, 100)}..."`);
+            log.warn(`VectTauri: Large chunk detected (${maxLen} chars). If you see OOM errors, try reducing chunk size.`);
+            log.warn(`VectTauri: Problematic chunk preview: "${(items[longestChunkIndex]?.text || '').substring(0, 100)}..."`);
         }
 
         try {
             // Try plugin API first (supports metadata) - fallback to native API if unavailable
-            log.verbose('VectFox DEBUG: this.pluginAvailable =', this.pluginAvailable);
+            log.verbose('VectTauri DEBUG: this.pluginAvailable =', this.pluginAvailable);
             let usePluginApi = this.pluginAvailable;
             let endpoint = usePluginApi ? '/api/plugins/similharity/chunks/insert' : '/api/vector/insert';
 
-            log.verbose(`VectFox DEBUG: Using ${usePluginApi ? 'PLUGIN' : 'NATIVE'} API for insertion (${endpoint})`);
+            log.verbose(`VectTauri DEBUG: Using ${usePluginApi ? 'PLUGIN' : 'NATIVE'} API for insertion (${endpoint})`);
             
             // Warn if keywords will be lost
             if (!usePluginApi && chunksWithKeywords > 0) {
-                log.warn(`⚠️ VectFox: ${chunksWithKeywords} chunks have keywords, but native ST API doesn't support metadata!`);
-                log.warn(`⚠️ VectFox: Install the Similharity plugin to save keywords: https://github.com/SillyTavern/SillyTavern-Extras-Similharity-plugin`);
+                log.warn(`⚠️ VectTauri: ${chunksWithKeywords} chunks have keywords, but native ST API doesn't support metadata!`);
+                log.warn(`⚠️ VectTauri: Install the Similharity plugin to save keywords: https://github.com/SillyTavern/SillyTavern-Extras-Similharity-plugin`);
             }
 
             const payload = usePluginApi ? {
@@ -409,7 +409,7 @@ export class StandardBackend extends VectorBackend {
                     };
                     // Debug: Log first item's metadata
                     if (item === items[0] && item.keywords?.length > 0) {
-                        log.verbose(`VectFox DEBUG: First item metadata being sent:`, mappedItem.metadata);
+                        log.verbose(`VectTauri DEBUG: First item metadata being sent:`, mappedItem.metadata);
                     }
                     return mappedItem;
                 }),
@@ -456,7 +456,7 @@ export class StandardBackend extends VectorBackend {
                 )
                 : {};
             log.verbose(
-                `VectFox DEBUG: insert body = ${sizeKB} KB (${sizeMB} MB), ` +
+                `VectTauri DEBUG: insert body = ${sizeKB} KB (${sizeMB} MB), ` +
                 `source="${payload.source}", model="${payload.model}", ` +
                 `backend="${payload.backend}", ` +
                 `items=${payload.items?.length || 0}, ` +
@@ -464,7 +464,7 @@ export class StandardBackend extends VectorBackend {
                 `metadata field sizes:`, metadataFieldSizes
             );
             if (bodyJson.length > 500 * 1024) {
-                log.warn(`VectFox DEBUG: ⚠️ insert body exceeds 500 KB — dumping first 1000 chars: ${bodyJson.slice(0, 1000)}`);
+                log.warn(`VectTauri DEBUG: ⚠️ insert body exceeds 500 KB — dumping first 1000 chars: ${bodyJson.slice(0, 1000)}`);
             }
 
             const response = await fetch(endpoint, {
@@ -492,12 +492,12 @@ export class StandardBackend extends VectorBackend {
                 throw new Error(`Failed to insert vectors: ${response.status} - ${errorBody} (sent body size: ${sizeKB} KB)`);
             }
 
-            log.verbose(`VectFox Standard: Inserted ${items.length} vectors into ${collectionId}`);
+            log.verbose(`VectTauri Standard: Inserted ${items.length} vectors into ${collectionId}`);
         } catch (error) {
             // Enhanced error logging for OOM debugging
             const isOOM = error.message?.includes('OrtRun') || error.message?.includes('error code = 6');
             if (isOOM) {
-                log.error(`VectFox: ONNX OOM Error while embedding. Diagnostics:`);
+                log.error(`VectTauri: ONNX OOM Error while embedding. Diagnostics:`);
                 log.error(`  - Provider: ${settings.embedding_provider}`);
                 log.error(`  - Model: ${model || '(default)'}`);
                 log.error(`  - Batch size: ${items.length} chunks`);
@@ -577,7 +577,7 @@ export class StandardBackend extends VectorBackend {
      * Similharity plugin: ST's native /api/vector/query then embeds the text
      * itself, per request.
      * @param {string} searchText
-     * @param {object} settings - VectFox settings
+     * @param {object} settings - VectTauri settings
      * @returns {Promise<number[]|null>}
      */
     async embedQuery(searchText, settings) {
@@ -631,7 +631,7 @@ export class StandardBackend extends VectorBackend {
                 pluginBody.searchText = searchText;
             }
 
-            log.verbose(`[VectFox] queryCollection via plugin: collectionId=${bareCollectionId}, source=${source}, model=${model}, topK=${topK}, threshold=${threshold}, hasQueryVector=${!!queryVector}`);
+            log.verbose(`[VectTauri] queryCollection via plugin: collectionId=${bareCollectionId}, source=${source}, model=${model}, topK=${topK}, threshold=${threshold}, hasQueryVector=${!!queryVector}`);
 
             const response = await fetch(getPluginUrl('/api/plugins/similharity/chunks/query'), {
                 method: 'POST',
@@ -639,11 +639,11 @@ export class StandardBackend extends VectorBackend {
                 body: JSON.stringify(pluginBody),
             });
 
-            log.verbose(`[VectFox] plugin query response: status=${response.status} ok=${response.ok}`);
+            log.verbose(`[VectTauri] plugin query response: status=${response.status} ok=${response.ok}`);
 
             if (!response.ok) {
                 const errorBody = await response.text().catch(() => 'No response body');
-                log.error(`[VectFox] plugin query failed: ${errorBody}`);
+                log.error(`[VectTauri] plugin query failed: ${errorBody}`);
                 throwIfModelConfigError({
                     contextLabel: 'Embedding',
                     provider: settings.embedding_provider,
@@ -656,7 +656,7 @@ export class StandardBackend extends VectorBackend {
             }
 
             const data = await response.json();
-            log.verbose(`[VectFox] plugin query result: count=${data.count}, results.length=${data.results?.length}, embed=${data.timings?.embedMs ?? 'n/a'}ms, query=${data.timings?.queryMs ?? 'n/a'}ms, error=${data.error || 'none'}`);
+            log.verbose(`[VectTauri] plugin query result: count=${data.count}, results.length=${data.results?.length}, embed=${data.timings?.embedMs ?? 'n/a'}ms, query=${data.timings?.queryMs ?? 'n/a'}ms, error=${data.error || 'none'}`);
             warnIfEmbeddingSlow(data.timings?.embedMs, settings, 'query');
 
             // Plugin returns { success, results: [{ hash, score, text, metadata }] }
@@ -753,20 +753,20 @@ export class StandardBackend extends VectorBackend {
 
         if (!response.ok) {
             // Fallback: query each collection individually
-            log.warn('VectFox: query-multi failed, falling back to individual queries');
+            log.warn('VectTauri: query-multi failed, falling back to individual queries');
             const results = {};
             const errors = [];
             for (const collectionId of collectionIds) {
                 try {
                     results[collectionId] = await this.queryCollection(collectionId, searchText, topK, settings, queryVector);
                 } catch (e) {
-                    log.error(`VectFox: Query failed for collection ${collectionId}:`, e.message);
+                    log.error(`VectTauri: Query failed for collection ${collectionId}:`, e.message);
                     errors.push(`${collectionId}: ${e.message}`);
                     results[collectionId] = { hashes: [], metadata: [], error: e.message };
                 }
             }
             if (errors.length > 0) {
-                log.error(`VectFox: ${errors.length} collection(s) failed to query:`, errors);
+                log.error(`VectTauri: ${errors.length} collection(s) failed to query:`, errors);
             }
             return results;
         }
@@ -809,7 +809,7 @@ export class StandardBackend extends VectorBackend {
      * unambiguous in any code review.
      *
      * @param {string} collectionId - bare collection ID (no `backend:` prefix)
-     * @param {object} settings - VectFox settings (source + model)
+     * @param {object} settings - VectTauri settings (source + model)
      * @returns {Promise<{pluginOk: boolean, nativeOk: boolean}>}
      */
     async _purgeCollectionFolderForTestCleanup(collectionId, settings) {
@@ -887,7 +887,7 @@ export class StandardBackend extends VectorBackend {
                 throw new Error(`Failed to purge collection via plugin: ${errors.join('; ')}`);
             }
             if (errors.length > 0) {
-                log.warn(`VectFox Standard: partial purge of ${collectionId}:`, errors);
+                log.warn(`VectTauri Standard: partial purge of ${collectionId}:`, errors);
             }
             return;
         }
@@ -969,16 +969,16 @@ export class StandardBackend extends VectorBackend {
                     // even if the throw is caught silently upstream. This branch
                     // hasn't been triggered in regression testing yet — keep the
                     // log loud so a real 4xx in the wild is unmissable.
-                    log.error(`VectFox: Plugin listChunks ${response.status} ${response.statusText} for ${collectionId} — failing loud (misconfiguration / version skew suspected). Body: ${errBody.slice(0, 500)}`);
+                    log.error(`VectTauri: Plugin listChunks ${response.status} ${response.statusText} for ${collectionId} — failing loud (misconfiguration / version skew suspected). Body: ${errBody.slice(0, 500)}`);
                     throw new Error(`Plugin listChunks ${response.status} ${response.statusText} for ${collectionId}: ${errBody.slice(0, 200)}`);
                 }
-                log.warn(`VectFox: Plugin listChunks returned ${response.status} ${response.statusText} — falling back to native (hashes only). Body: ${errBody.slice(0, 200)}`);
+                log.warn(`VectTauri: Plugin listChunks returned ${response.status} ${response.statusText} — falling back to native (hashes only). Body: ${errBody.slice(0, 200)}`);
             } catch (e) {
                 // Re-throw the 4xx error we raised above; only swallow real
                 // network/transport failures (fetch reject, timeout, etc.)
                 // which match the "transient outage" graceful-degrade case.
                 if (e?.message?.startsWith('Plugin listChunks 4')) throw e;
-                log.warn('VectFox: Plugin listChunks threw, using native fallback:', e.message);
+                log.warn('VectTauri: Plugin listChunks threw, using native fallback:', e.message);
             }
         }
 
@@ -1012,7 +1012,7 @@ export class StandardBackend extends VectorBackend {
                 return data.chunk;
             }
         } catch (e) {
-            log.warn('VectFox: Plugin getChunk failed');
+            log.warn('VectTauri: Plugin getChunk failed');
         }
 
         return null;
@@ -1097,7 +1097,7 @@ export class StandardBackend extends VectorBackend {
                     return data.stats;
                 }
             } catch (e) {
-                log.warn('VectFox: Plugin getStats failed, using native fallback');
+                log.warn('VectTauri: Plugin getStats failed, using native fallback');
             }
         }
 

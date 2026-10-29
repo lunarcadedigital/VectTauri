@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox CONDITIONAL ACTIVATION SYSTEM
+ * VectTauri CONDITIONAL ACTIVATION SYSTEM
  * ============================================================================
  * Evaluates conditions to determine if chunks should be activated
- * Ported from legacy VectFox with enhanced structure
+ * Ported from legacy VectTauri with enhanced structure
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -74,7 +74,7 @@ function evaluatePatternCondition(rule, context) {
                 const regex = new RegExp(regexPattern, flags);
                 return regex.test(searchText);
             } catch (e) {
-                log.warn(`VectFox: Invalid pattern regex: ${pattern}`, e);
+                log.warn(`VectTauri: Invalid pattern regex: ${pattern}`, e);
                 return false;
             }
         }
@@ -234,7 +234,7 @@ function evaluateScoreThresholdCondition(rule, context) {
     const passes = chunkScore >= threshold;
 
     if (!passes) {
-        log.trace(`VectFox: Chunk ${context.currentChunkHash} score ${chunkScore.toFixed(3)} below threshold ${threshold}`);
+        log.trace(`VectTauri: Chunk ${context.currentChunkHash} score ${chunkScore.toFixed(3)} below threshold ${threshold}`);
     }
 
     return passes;
@@ -303,7 +303,7 @@ function evaluateFrequencyCondition(rule, context) {
 
     // Check max activations
     if (chunkHistory.count >= maxActivations) {
-        log.trace(`VectFox Conditions: Chunk ${chunkHash} reached max activations (${maxActivations})`);
+        log.trace(`VectTauri Conditions: Chunk ${chunkHash} reached max activations (${maxActivations})`);
         return false;
     }
 
@@ -311,7 +311,7 @@ function evaluateFrequencyCondition(rule, context) {
     if (cooldownMessages > 0 && chunkHistory.lastActivation !== null) {
         const messagesSinceLastActivation = context.messageCount - chunkHistory.lastActivation;
         if (messagesSinceLastActivation < cooldownMessages) {
-            log.trace(`VectFox Conditions: Chunk ${chunkHash} on cooldown (${messagesSinceLastActivation}/${cooldownMessages} messages)`);
+            log.trace(`VectTauri Conditions: Chunk ${chunkHash} on cooldown (${messagesSinceLastActivation}/${cooldownMessages} messages)`);
             return false;
         }
     }
@@ -346,7 +346,7 @@ function evaluateTimeOfDayCondition(rule, context) {
             return currentTime >= start || currentTime <= end;
         }
     } catch (error) {
-        log.warn('VectFox Conditions: Invalid timeOfDay format');
+        log.warn('VectTauri Conditions: Invalid timeOfDay format');
         return false;
     }
 }
@@ -564,7 +564,7 @@ export function evaluateConditionRule(rule, context) {
 
 
         default:
-            log.warn(`VectFox Conditions: Unknown condition type: ${rule.type}`);
+            log.warn(`VectTauri Conditions: Unknown condition type: ${rule.type}`);
             result = false;
     }
 
@@ -621,7 +621,7 @@ export function filterChunksByConditions(chunks, baseContext) {
         return evaluateConditions(chunk, chunkContext);
     });
 
-    log.verbose(`VectFox Conditions: Filtered ${chunks.length} chunks to ${filtered.length} based on conditions`);
+    log.verbose(`VectTauri Conditions: Filtered ${chunks.length} chunks to ${filtered.length} based on conditions`);
 
     return filtered;
 }

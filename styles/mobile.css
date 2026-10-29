@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VECTFOX MOBILE STYLES
+ * VECTTAURI MOBILE STYLES
  * ============================================================================
  * Full-screen mobile modal handling following CarrotKernel's approach
  * Using aggressive !important overrides with 100vw/100vh
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -17,15 +17,15 @@
 /* Mobile first - all modals go full screen */
 @media (max-width: 768px) {
     /* BASE MODAL OVERLAY */
-    .vectfox-modal {
+    .vecttauri-modal {
         padding: 0 !important;
         margin: 0 !important;
     }
 
     /* BASE MODAL CONTENT - NUCLEAR OPTION */
-    .vectfox-modal-content,
-    div.vectfox-modal-content,
-    .vectfox-modal .vectfox-modal-content {
+    .vecttauri-modal-content,
+    div.vecttauri-modal-content,
+    .vecttauri-modal .vecttauri-modal-content {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -45,13 +45,13 @@
     }
 
     /* DATABASE BROWSER - NUCLEAR FULL SCREEN */
-    .vectfox-database-browser-content,
-    div.vectfox-database-browser-content,
-    .vectfox-modal .vectfox-database-browser-content,
-    .vectfox-modal-content.vectfox-database-browser-content,
-    .vectfox-database-browser-content.popup,
-    .vectfox-modal-content.vectfox-database-browser-content.popup,
-    #vectfox_database_browser_modal .vectfox-database-browser-content {
+    .vecttauri-database-browser-content,
+    div.vecttauri-database-browser-content,
+    .vecttauri-modal .vecttauri-database-browser-content,
+    .vecttauri-modal-content.vecttauri-database-browser-content,
+    .vecttauri-database-browser-content.popup,
+    .vecttauri-modal-content.vecttauri-database-browser-content.popup,
+    #vecttauri_database_browser_modal .vecttauri-database-browser-content {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -73,10 +73,10 @@
     }
 
     /* CONTENT VECTORIZER - NUCLEAR FULL SCREEN */
-    .vectfox-content-vectorizer,
-    div.vectfox-content-vectorizer,
-    .vectfox-modal .vectfox-content-vectorizer,
-    .vectfox-modal-content.vectfox-content-vectorizer {
+    .vecttauri-content-vectorizer,
+    div.vecttauri-content-vectorizer,
+    .vecttauri-modal .vecttauri-content-vectorizer,
+    .vecttauri-modal-content.vecttauri-content-vectorizer {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -97,9 +97,9 @@
     }
 
     /* CHUNK VISUALIZER - NUCLEAR FULL SCREEN */
-    .vectfox-visualizer-container,
-    div.vectfox-visualizer-container,
-    #vectfox_visualizer_modal .vectfox-visualizer-container {
+    .vecttauri-visualizer-container,
+    div.vecttauri-visualizer-container,
+    #vecttauri_visualizer_modal .vecttauri-visualizer-container {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -120,9 +120,9 @@
     }
 
     /* DIAGNOSTICS - NUCLEAR FULL SCREEN */
-    .vectfox-diagnostics-content,
-    div.vectfox-diagnostics-content,
-    .vectfox-modal .vectfox-diagnostics-content {
+    .vecttauri-diagnostics-content,
+    div.vecttauri-diagnostics-content,
+    .vecttauri-modal .vecttauri-diagnostics-content {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -141,9 +141,9 @@
     }
 
     /* ACTIVATION EDITOR - NUCLEAR FULL SCREEN */
-    .vectfox-activation-editor,
-    div.vectfox-activation-editor,
-    .vectfox-modal .vectfox-activation-editor {
+    .vecttauri-activation-editor,
+    div.vecttauri-activation-editor,
+    .vecttauri-modal .vecttauri-activation-editor {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -162,8 +162,8 @@
     }
 
     /* MODEL SWITCHER - NUCLEAR FULL SCREEN */
-    .vectfox-model-switcher-content,
-    div.vectfox-model-switcher-content {
+    .vecttauri-model-switcher-content,
+    div.vecttauri-model-switcher-content {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -180,8 +180,8 @@
     }
 
     /* RENAME DIALOG - NUCLEAR FULL SCREEN */
-    .vectfox-rename-dialog,
-    div.vectfox-rename-dialog {
+    .vecttauri-rename-dialog,
+    div.vecttauri-rename-dialog {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -201,9 +201,9 @@
      * MODAL HEADER - Always visible and touchable
      * ======================================================================== */
 
-    .vectfox-modal-header,
-    .vectfox-visualizer-header,
-    .vectfox-cv-header {
+    .vecttauri-modal-header,
+    .vecttauri-visualizer-header,
+    .vecttauri-cv-header {
         position: sticky !important;
         top: 0 !important;
         z-index: 100 !important;
@@ -217,8 +217,8 @@
         row-gap: 8px !important;
     }
 
-    .vectfox-modal-header h3,
-    .vectfox-visualizer-title {
+    .vecttauri-modal-header h3,
+    .vecttauri-visualizer-title {
         font-size: 0.66em !important;
         max-width: 60%;
         order: 1 !important;
@@ -227,18 +227,18 @@
 
     /* The close button is now the only other item on the title row, so the
        title may use everything left of it instead of a fixed 60%. */
-    .vectfox-modal-header h3 {
+    .vecttauri-modal-header h3 {
         max-width: none !important;
         flex: 1 1 auto !important;
     }
 
     /* Close buttons - LARGE touch targets.
-       .vectfox-btn-icon is only a close button when it sits directly in a modal
+       .vecttauri-btn-icon is only a close button when it sits directly in a modal
        header; elsewhere it is a small inline row action that must stay small. */
-    .vectfox-modal-close,
-    .vectfox-visualizer-close,
-    .vectfox-modal-header > .vectfox-btn-icon,
-    #vectfox_visualizer_close {
+    .vecttauri-modal-close,
+    .vecttauri-visualizer-close,
+    .vecttauri-modal-header > .vecttauri-btn-icon,
+    #vecttauri_visualizer_close {
         width: 48px !important;
         height: 48px !important;
         min-width: 48px !important;
@@ -251,8 +251,8 @@
     }
 
     /* Close button keeps the top-right corner of the first row… */
-    .vectfox-modal-header > .vectfox-modal-close,
-    .vectfox-modal-header > .vectfox-btn-icon {
+    .vecttauri-modal-header > .vecttauri-modal-close,
+    .vecttauri-modal-header > .vecttauri-btn-icon {
         order: 2 !important;
         margin-left: auto !important;
         flex-shrink: 0 !important;
@@ -260,7 +260,7 @@
 
     /* …and the action buttons drop to a full-width second row that scrolls
        sideways rather than stretching each button to 100%. */
-    .vectfox-modal-header-actions {
+    .vecttauri-modal-header-actions {
         order: 3 !important;
         width: 100% !important;
         margin-left: 0 !important;
@@ -270,7 +270,7 @@
         -webkit-overflow-scrolling: touch !important;
     }
 
-    .vectfox-modal-header-actions .vectfox-btn-sm {
+    .vecttauri-modal-header-actions .vecttauri-btn-sm {
         width: auto !important;
         flex: 0 0 auto !important;
         white-space: nowrap !important;
@@ -280,8 +280,8 @@
      * MODAL BODY - Scrollable content area
      * ======================================================================== */
 
-    .vectfox-modal-body,
-    .vectfox-cv-body {
+    .vecttauri-modal-body,
+    .vecttauri-cv-body {
         flex: 1 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -293,24 +293,24 @@
      * DATABASE BROWSER INTERNALS
      * ======================================================================== */
 
-    .vectfox-browser-tabs {
+    .vecttauri-browser-tabs {
         padding: 8px 12px 0 12px !important;
         overflow-x: auto !important;
         flex-shrink: 0 !important;
     }
 
-    .vectfox-tab-btn::before {
+    .vecttauri-tab-btn::before {
         display: none !important;
     }
 
-    .vectfox-tab-btn {
+    .vecttauri-tab-btn {
         padding: 10px 14px !important;
         min-height: 44px !important;
         font-size: 0.85em !important;
         white-space: nowrap !important;
     }
 
-    .vectfox-browser-content {
+    .vecttauri-browser-content {
         flex: 1 !important;
         overflow: hidden !important;
         display: flex !important;
@@ -318,7 +318,7 @@
         min-height: 0 !important;
     }
 
-    .vectfox-tab-content {
+    .vecttauri-tab-content {
         flex: 1 !important;
         overflow-x: hidden !important;
         overflow-y: scroll !important;
@@ -327,11 +327,11 @@
         min-height: 0 !important;
     }
 
-    .vectfox-tab-content.active {
+    .vecttauri-tab-content.active {
         display: flex !important;
     }
 
-    .vectfox-scope-filters {
+    .vecttauri-scope-filters {
         display: grid !important;
         grid-template-columns: 1fr 1fr 1fr !important;
         gap: 8px !important;
@@ -339,13 +339,13 @@
         flex-shrink: 0 !important;
     }
 
-    .vectfox-scope-filter {
+    .vecttauri-scope-filter {
         padding: 10px 6px !important;
         min-height: 44px !important;
         font-size: 0.85em !important;
     }
 
-    .vectfox-type-filters {
+    .vecttauri-type-filters {
         padding: 8px 12px !important;
         flex-shrink: 0 !important;
         overflow-x: auto !important;
@@ -354,96 +354,96 @@
         -webkit-overflow-scrolling: touch !important;
     }
 
-    .vectfox-type-filters label {
+    .vecttauri-type-filters label {
         gap: 4px !important;
         padding: 6px 10px !important;
         white-space: nowrap !important;
         font-size: 0.82em !important;
     }
 
-    .vectfox-search-results {
+    .vecttauri-search-results {
         overflow-y: scroll !important;
         min-height: max-content !important;
     }
 
-    .vectfox-search-box {
+    .vecttauri-search-box {
         padding: 12px !important;
         flex-shrink: 0 !important;
     }
 
-    .vectfox-search-box input[type="text"] {
+    .vecttauri-search-box input[type="text"] {
         min-height: 44px !important;
     }
 
-    .vectfox-search-collection {
+    .vecttauri-search-collection {
         min-height: auto;
         display: flex;
         flex-direction: column;
     }
 
-    .vectfox-collections-list {
+    .vecttauri-collections-list {
         flex: none !important;
         overflow-y: visible !important;
         padding: 0 12px 12px 12px !important;
     }
 
-    .vectfox-collection-card {
+    .vecttauri-collection-card {
         padding: 14px 12px !important;
         margin-bottom: 10px !important;
         overflow-x: hidden;
         min-height: max-content;
     }
 
-    .vectfox-collection-header {
+    .vecttauri-collection-header {
         flex-direction: column !important;
         gap: 10px !important;
     }
 
-    .vectfox-collection-title {
+    .vecttauri-collection-title {
         flex: none !important;
         width: 100% !important;
     }
 
-    .vectfox-collection-badges {
+    .vecttauri-collection-badges {
         gap: 5px !important;
         flex-wrap: wrap !important;
     }
 
-    .vectfox-collection-badges .vectfox-badge {
+    .vecttauri-collection-badges .vecttauri-badge {
         font-size: 0.7em !important;
         padding: 3px 8px !important;
         letter-spacing: 0.5px !important;
     }
 
-    .vectfox-collection-actions {
+    .vecttauri-collection-actions {
         flex-direction: column !important;
         gap: 6px !important;
     }
 
-    .vectfox-collection-title {
+    .vecttauri-collection-title {
         font-size: 0.9em !important;
         gap: 8px !important;
         font-weight: 700 !important;
     }
 
-    .vectfox-collection-meta {
+    .vecttauri-collection-meta {
         font-size: 0.8em !important;
         gap: 12px !important;
         padding-left: 0 !important;
         flex-wrap: wrap !important;
     }
 
-    .vectfox-collection-meta::before {
+    .vecttauri-collection-meta::before {
         display: none !important;
     }
 
-    .vectfox-btn-sm {
+    .vecttauri-btn-sm {
         width: 100% !important;
         min-height: 44px !important;
         justify-content: center !important;
     }
 
-    .vectfox-browser-stats {
+    .vecttauri-browser-stats {
         padding: 10px 12px !important;
         flex-shrink: 0 !important;
         position: sticky !important;
@@ -456,7 +456,7 @@
      * CHUNK VISUALIZER INTERNALS
      * ======================================================================== */
 
-    .vectfox-visualizer-body {
+    .vecttauri-visualizer-body {
         flex: 1 !important;
         display: flex !important;
         flex-direction: column !important;
@@ -465,7 +465,7 @@
     }
 
     /* Chunk list - collapsible top section */
-    .vectfox-chunk-list-panel {
+    .vecttauri-chunk-list-panel {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 100% !important;
@@ -478,28 +478,28 @@
         flex-direction: column !important;
     }
 
-    .vectfox-list-toolbar {
+    .vecttauri-list-toolbar {
         padding: 8px !important;
         flex-shrink: 0 !important;
     }
 
-    .vectfox-list-toolbar .vectfox-list-search {
+    .vecttauri-list-toolbar .vecttauri-list-search {
         min-height: 32px !important;
         font-size: 0.88em !important;
         padding: 4px 10px;
     }
 
-    .vectfox-list-controls {
+    .vecttauri-list-controls {
         flex-wrap: wrap !important;
         gap: 6px !important;
     }
 
-    .vectfox-list-controls select {
+    .vecttauri-list-controls select {
         min-height: 36px !important;
         font-size: 0.85em !important;
     }
 
-    .vectfox-chunk-list {
+    .vecttauri-chunk-list {
         flex-grow: 3 !important;
         flex-basis: 100px !important;
         flex-shrink: 0 !important;
@@ -510,18 +510,18 @@
         display: flex;
         flex-direction: column;
     }
-    .vectfox-chunk-list .vectfox-load-more {
+    .vecttauri-chunk-list .vecttauri-load-more {
         padding: 6px;
         font-size: 0.6em;
     }
 
-    .vectfox-chunk-item {
+    .vecttauri-chunk-item {
         padding: 10px !important;
         min-height: 44px !important;
     }
 
     /* Detail panel - takes remaining space */
-    .vectfox-chunk-detail-panel {
+    .vecttauri-chunk-detail-panel {
         flex: 1 !important;
         min-height: 0 !important;
         overflow: hidden !important;
@@ -529,20 +529,20 @@
         flex-direction: column !important;
     }
 
-    .vectfox-detail-header {
+    .vecttauri-detail-header {
         padding: 4px 10px !important;
         flex-shrink: 0 !important;
         max-height: 48px;
     }
-    .vectfox-detail-header
-        .vectfox-detail-name-section
-        .vectfox-chunk-name-input {
+    .vecttauri-detail-header
+        .vecttauri-detail-name-section
+        .vecttauri-chunk-name-input {
         padding: 8px 10px;
         font-size: 0.88em;
         max-height: 32px !important;
     }
 
-    .vectfox-detail-content {
+    .vecttauri-detail-content {
         flex: 1 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -550,12 +550,12 @@
         min-height: 0 !important;
     }
 
-    .vectfox-bulk-actions {
+    .vecttauri-bulk-actions {
         padding: 8px 12px !important;
         flex-shrink: 0 !important;
     }
 
-    .vectfox-list-status {
+    .vecttauri-list-status {
         padding: 6px 12px !important;
         flex-shrink: 0 !important;
     }
@@ -564,7 +564,7 @@
      * CONTENT VECTORIZER INTERNALS
      * ======================================================================== */
 
-    .vectfox-cv-body {
+    .vecttauri-cv-body {
         flex: 1 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -572,19 +572,19 @@
         min-height: 0 !important;
     }
 
-    .vectfox-cv-type-dropdown {
+    .vecttauri-cv-type-dropdown {
         min-height: 44px !important;
     }
 
-    .vectfox-cv-scope-options {
+    .vecttauri-cv-scope-options {
         grid-template-columns: 1fr !important;
     }
 
-    .vectfox-cv-scope-card {
+    .vecttauri-cv-scope-card {
         min-height: 44px !important;
     }
 
-    .vectfox-cv-footer {
+    .vecttauri-cv-footer {
         position: sticky !important;
         bottom: 0 !important;
         padding: 12px !important;
@@ -593,7 +593,7 @@
         flex-wrap: wrap !important;
     }
 
-    .vectfox-cv-footer button {
+    .vecttauri-cv-footer button {
         flex: 1 1 auto !important;
         min-height: 44px !important;
         min-width: 100px !important;
@@ -604,11 +604,11 @@
      * ======================================================================== */
 
     /* All buttons need good touch targets */
-    .vectfox-btn,
-    .vectfox-btn-primary,
-    .vectfox-btn-secondary,
-    .vectfox-btn-danger,
-    button[class*="vectfox"] {
+    .vecttauri-btn,
+    .vecttauri-btn-primary,
+    .vecttauri-btn-secondary,
+    .vecttauri-btn-danger,
+    button[class*="vecttauri"] {
         min-height: 44px !important;
         touch-action: manipulation !important;
     }
@@ -632,25 +632,25 @@
     /* ========================================================================
      * PROGRESS PANEL → full-screen modal on mobile.
      * The floating bottom-sheet would not reliably surface above SillyTavern's
-     * UI on touch devices, so progress-tracker.js renders a .vectfox-modal here
+     * UI on touch devices, so progress-tracker.js renders a .vecttauri-modal here
      * instead — the same proven full-screen pattern as the Text Cleaning modal.
-     * (The generic .vectfox-modal-content rule above already pins it to the full
+     * (The generic .vecttauri-modal-content rule above already pins it to the full
      * viewport; these rules give it a header/scroll-body flex layout.)
      * ======================================================================== */
 
-    .vectfox-progress-modal-content {
+    .vecttauri-progress-modal-content {
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
         padding: 0 !important;
     }
 
-    .vectfox-progress-modal-content .vectfox-progress-header {
+    .vecttauri-progress-modal-content .vecttauri-progress-header {
         flex-shrink: 0 !important;
         border-radius: 0 !important;
     }
 
-    .vectfox-progress-modal-content .vectfox-progress-body {
+    .vecttauri-progress-modal-content .vecttauri-progress-body {
         flex: 1 !important;
         max-height: none !important;   /* override the bottom-sheet's 35vh cap */
         overflow-y: auto !important;
@@ -659,15 +659,15 @@
     }
 
     /* Roomy, tappable header buttons */
-    .vectfox-progress-modal-content .vectfox-progress-close,
-    .vectfox-progress-modal-content .vectfox-progress-stop {
+    .vecttauri-progress-modal-content .vecttauri-progress-close,
+    .vecttauri-progress-modal-content .vecttauri-progress-stop {
         min-height: 44px !important;
         min-width: 44px !important;
         touch-action: manipulation !important;
     }
 
     /* Two-up stats grid reads better on a full screen */
-    .vectfox-progress-modal-content .vectfox-progress-stats {
+    .vecttauri-progress-modal-content .vecttauri-progress-stats {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 12px !important;
     }
@@ -676,7 +676,7 @@
      * QUERY TESTER MODAL
      * ======================================================================== */
 
-    #VectFox_query_tester_modal .vectfox-modal-body {
+    #VectTauri_query_tester_modal .vecttauri-modal-body {
         flex: 1 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -686,14 +686,14 @@
     }
 
     /* Shrink the result textareas so all 3 fit on screen */
-    #VectFox_qtester_result textarea {
+    #VectTauri_qtester_result textarea {
         height: 110px !important;
         min-height: 80px !important;
         font-size: 0.72em !important;
     }
 
     /* Make the result container itself scroll if needed */
-    #VectFox_qtester_result {
+    #VectTauri_qtester_result {
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
         min-height: 0 !important;
@@ -701,7 +701,7 @@
     }
 
     /* Shrink the input textarea */
-    #VectFox_qtester_input {
+    #VectTauri_qtester_input {
         height: 56px !important;
         min-height: 44px !important;
     }
@@ -713,48 +713,48 @@
 
 @media (max-width: 480px) {
     /* Even more aggressive stacking */
-    .vectfox-scope-filters {
+    .vecttauri-scope-filters {
         grid-template-columns: 1fr 1fr 1fr !important;
         gap: 6px !important;
         padding: 8px !important;
     }
 
-    .vectfox-scope-filter {
+    .vecttauri-scope-filter {
         padding: 8px 4px !important;
         font-size: 0.78em !important;
     }
 
-    .vectfox-type-filters label {
+    .vecttauri-type-filters label {
         font-size: 0.75em !important;
         padding: 5px 8px !important;
     }
 
     /* Stack search box and "Active here only" vertically */
-    .vectfox-search-box[style*="display:flex"] {
+    .vecttauri-search-box[style*="display:flex"] {
         flex-direction: column !important;
         gap: 8px !important;
     }
 
-    .vectfox-cv-footer {
+    .vecttauri-cv-footer {
         flex-direction: column !important;
     }
 
-    .vectfox-cv-footer button {
+    .vecttauri-cv-footer button {
         width: 100% !important;
     }
 
     /* Smaller chunk list area */
-    .vectfox-chunk-list-panel {
+    .vecttauri-chunk-list-panel {
         max-height: 40vh !important;
     }
 
     /* Compact headers */
-    .vectfox-modal-header,
-    .vectfox-visualizer-header {
+    .vecttauri-modal-header,
+    .vecttauri-visualizer-header {
         padding: 10px 12px !important;
     }
 
-    .vectfox-visualizer-header .vectfox-visualizer-title:nth-child(1) {
+    .vecttauri-visualizer-header .vecttauri-visualizer-title:nth-child(1) {
         font-size: 0.66em !important;
         width: 80%;
         word-wrap: break-word;
@@ -767,11 +767,11 @@
 
 @media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
     /* Side-by-side for visualizer in landscape */
-    .vectfox-visualizer-body {
+    .vecttauri-visualizer-body {
         flex-direction: row !important;
     }
 
-    .vectfox-chunk-list-panel {
+    .vecttauri-chunk-list-panel {
         width: 40% !important;
         max-width: 300px !important;
         min-width: 200px !important;
@@ -780,7 +780,7 @@
         border-bottom: none !important;
     }
 
-    .vectfox-chunk-detail-panel {
+    .vecttauri-chunk-detail-panel {
         flex: 1 !important;
     }
 }
@@ -791,7 +791,7 @@
 
 @media (min-width: 769px) {
     /* Database Browser - restore desktop sizing */
-    .vectfox-database-browser-content {
+    .vecttauri-database-browser-content {
         max-width: 1200px !important;
         width: 95% !important;
         max-height: 90vh !important;
@@ -802,13 +802,13 @@
         border: 1px solid
             color-mix(
                 in srgb,
-                var(--vectfox-primary) 20%,
+                var(--vecttauri-primary) 20%,
                 var(--SmartThemeBorderColor)
             ) !important;
     }
 
     /* Content Vectorizer - restore desktop sizing */
-    .vectfox-content-vectorizer {
+    .vecttauri-content-vectorizer {
         max-width: 900px !important;
         width: 95% !important;
         max-height: 90vh !important;
@@ -819,7 +819,7 @@
     }
 
     /* Visualizer - restore desktop sizing */
-    .vectfox-visualizer-container {
+    .vecttauri-visualizer-container {
         max-width: 1400px !important;
         width: 95% !important;
         max-height: 90vh !important;
@@ -830,11 +830,11 @@
     }
 
     /* Side-by-side in visualizer on desktop */
-    .vectfox-visualizer-body {
+    .vecttauri-visualizer-body {
         flex-direction: row !important;
     }
 
-    .vectfox-chunk-list-panel {
+    .vecttauri-chunk-list-panel {
         width: 350px !important;
         max-width: 350px !important;
         min-width: 280px !important;
@@ -851,8 +851,8 @@
  * ============================================================================ */
 
 @media (pointer: coarse) {
-    .vectfox-progress-panel,
-    .vectfox-progress-modal {
+    .vecttauri-progress-panel,
+    .vecttauri-progress-modal {
         z-index: 2147483647 !important;
     }
 }

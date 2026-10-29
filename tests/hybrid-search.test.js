@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // → core/collection-ids.js → ../../../../extensions.js, etc. Without these
 // mocks vite's import-analysis fails and the whole file refuses to load.
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     getContext: vi.fn(() => ({ chat: [], characterId: null })),
 }));
 vi.mock('../../../../../script.js', () => ({

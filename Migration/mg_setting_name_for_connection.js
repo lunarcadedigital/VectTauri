@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VECTFOX MIGRATION — connection setting names
+ * VECTTAURI MIGRATION — connection setting names
  * ============================================================================
  * MIGRATION FOLDER CONVENTION (read before adding files here):
  *   - Every one-time, on-load settings migration lives under `Migration/`.
@@ -68,7 +68,7 @@ export const CONNECTION_SETTING_RENAMES = Object.freeze({
  * old key to its new name (only if the new name isn't already set), then removes the
  * old key. Running again after completion is a no-op.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @returns {{ migrated: number, keys: string[] }} count + which old keys were moved this run
  */
 export function migration_setting_name_for_connection(settings) {

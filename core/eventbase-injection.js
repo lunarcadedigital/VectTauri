@@ -220,7 +220,7 @@ function _orderEventsForPresentation(events) {
  * Events are re-ordered chronologically for presentation before formatting.
  *
  * @param {object[]} events   - Re-ranked EventRecord objects (highest score first)
- * @param {object}   settings - VectFox settings
+ * @param {object}   settings - VectTauri settings
  * @returns {string}          - Formatted string ready for injection (empty string if nothing fits)
  */
 export function formatEventsForInjectionDetailed(events, _settings) {

@@ -336,12 +336,12 @@ function _logRerankComparison(colId, queryText, native, js, nativeMs, jsMs, sett
  *                                         a second parallel vector query (dual-query mode).
  *                                         Falls back to searchText when absent or identical.
  * @param {number} params.chatLength    - Current total chat message count (for recency)
- * @param {object} params.settings      - VectFox settings
+ * @param {object} params.settings      - VectTauri settings
  * @param {string[]} [params.liveCollectionIds] - EventBase collection IDs to query for live
  *        events. Resolved by the workflow from collections locked to the current chat.
  *        Empty/missing → no live query.
  * @param {object[]} [params.additionalCandidates] - Pre-queried events from archive event
- *        collections (VectFox_archiveevent_*). Already event-shaped; merged before re-ranking.
+ *        collections (VectTauri_archiveevent_*). Already event-shaped; merged before re-ranking.
  * @param {boolean}  [params.skipLiveQuery]    - When true, skip live EventBase collection query.
  *        Used when the live collection is paused or not locked to the current chat.
  * @param {boolean}  [params.skipContextDedup] - When true, skip the dedup-depth step.
@@ -499,7 +499,7 @@ export async function retrieveEvents({ searchText, keywordQuery, chatLength, set
         log.verbose(`[EventBase] Live query: ${liveCollectionIds.length} collection(s) × ${queryTexts.length} query/queries → ${rawCandidates.length} unique events`);
     }
 
-    // Merge in caller-supplied candidates: archive events (VectFox_archiveevent_*)
+    // Merge in caller-supplied candidates: archive events (VectTauri_archiveevent_*)
     // and the agentic planner's per-query fanout. The fanout can surface the SAME
     // event from multiple queries, so dedupe the combined set by identity (keeping
     // the highest score) — otherwise identical events reach similarity-dedup as

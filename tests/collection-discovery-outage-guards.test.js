@@ -20,7 +20,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: { collections: {} } },
+    extension_settings: { vecttauri: { collections: {} } },
     getContext: vi.fn(() => ({ characterId: '0', name1: 'TestPersona', chatId: 'chat-1' })),
 }));
 
@@ -56,7 +56,7 @@ const SETTINGS = { vector_backend: 'qdrant' };
 const VECTRA_LIVE = { id: 'vf_chat_testpersona_alpha_1760000000000', backend: 'standard', source: 'transformers', chunkCount: 12, model: '' };
 
 function seedRegistry(keys) {
-    extension_settings.vectfox.vectfox_collection_registry = [...keys];
+    extension_settings.vecttauri.vecttauri_collection_registry = [...keys];
 }
 
 /** fetch stub: /health ok, /collections returns the given payload (or rejects). */
@@ -74,7 +74,7 @@ function mockPluginFetch(collectionsPayload) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    extension_settings.vectfox = { collections: {}, vectfox_collection_registry: [] };
+    extension_settings.vecttauri = { collections: {}, vecttauri_collection_registry: [] };
     resetPluginAvailableCache();
     delete global.fetch;
 });
@@ -120,7 +120,7 @@ describe('discoverViaPlugin × qdrantScanned', () => {
 // ---------------------------------------------------------------------------
 describe('cleanupOrphanedMeta outage refusal', () => {
     it('refuses to delete anything when discovery returned zero collections', () => {
-        extension_settings.vectfox.collections = {
+        extension_settings.vecttauri.collections = {
             [QDRANT_KEY]: { lockedToChatIds: ['chat-1'], triggers: ['dragon'] },
             [VECTRA_KEY]: { lockedToCharacterIds: ['2'] },
         };
@@ -130,14 +130,14 @@ describe('cleanupOrphanedMeta outage refusal', () => {
         expect(result.refused).toBe(true);
         expect(result.removed).toBe(0);
         // The locks — the irreplaceable part — are untouched.
-        expect(extension_settings.vectfox.collections[QDRANT_KEY].lockedToChatIds).toEqual(['chat-1']);
-        expect(extension_settings.vectfox.collections[VECTRA_KEY].lockedToCharacterIds).toEqual(['2']);
+        expect(extension_settings.vecttauri.collections[QDRANT_KEY].lockedToChatIds).toEqual(['chat-1']);
+        expect(extension_settings.vecttauri.collections[VECTRA_KEY].lockedToCharacterIds).toEqual(['2']);
         expect(saveSettingsDebounced).not.toHaveBeenCalled();
         expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('refused'));
     });
 
     it('still prunes a real orphan when survivors exist, and names it in the log', () => {
-        extension_settings.vectfox.collections = {
+        extension_settings.vecttauri.collections = {
             [QDRANT_KEY]: { lockedToChatIds: ['chat-1'] },
             'standard:vf_document_gone_123': { name: 'deleted doc' },
         };
@@ -147,13 +147,13 @@ describe('cleanupOrphanedMeta outage refusal', () => {
         expect(result.refused).toBe(false);
         expect(result.removed).toBe(1);
         expect(result.orphanedIds).toEqual(['standard:vf_document_gone_123']);
-        expect(extension_settings.vectfox.collections[QDRANT_KEY]).toBeDefined();
-        expect(extension_settings.vectfox.collections['standard:vf_document_gone_123']).toBeUndefined();
+        expect(extension_settings.vecttauri.collections[QDRANT_KEY]).toBeDefined();
+        expect(extension_settings.vecttauri.collections['standard:vf_document_gone_123']).toBeUndefined();
         expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('standard:vf_document_gone_123'));
     });
 
     it('no-ops cleanly when nothing is orphaned', () => {
-        extension_settings.vectfox.collections = { [QDRANT_KEY]: { lockedToChatIds: ['chat-1'] } };
+        extension_settings.vecttauri.collections = { [QDRANT_KEY]: { lockedToChatIds: ['chat-1'] } };
 
         const result = cleanupOrphanedMeta([QDRANT_KEY]);
 

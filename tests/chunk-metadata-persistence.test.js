@@ -19,7 +19,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Mock ST globals needed by collection-metadata.js
 // vi.hoisted lifts the variable to the same scope as vi.mock (both are hoisted)
 // ---------------------------------------------------------------------------
-const mockSettings = vi.hoisted(() => ({ vectfox: {} }));
+const mockSettings = vi.hoisted(() => ({ vecttauri: {} }));
 
 vi.mock('../../../../extensions.js', () => ({
     extension_settings: mockSettings,
@@ -56,7 +56,7 @@ function resolveChunkKeywords(chunk) {
 describe('saveChunkMetadata / getChunkMetadata — keyword round-trip', () => {
     beforeEach(() => {
         // Reset settings store between tests
-        mockSettings.vectfox = {};
+        mockSettings.vecttauri = {};
     });
 
     it('stores keywords and retrieves them by hash', () => {
@@ -103,7 +103,7 @@ describe('saveChunkMetadata / getChunkMetadata — keyword round-trip', () => {
 
 describe('resolveChunkKeywords — no-plugin fallback', () => {
     beforeEach(() => {
-        mockSettings.vectfox = {};
+        mockSettings.vecttauri = {};
     });
 
     it('returns keywords from chunk.metadata when present (plugin path)', () => {

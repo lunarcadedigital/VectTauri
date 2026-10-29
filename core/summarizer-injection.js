@@ -5,7 +5,7 @@
  * Injects the most recent N EventBase events into the prompt every turn,
  * independent of the semantic-retrieval injection. Sorted by source_window_end
  * descending, sliced to N, rendered chronologically, and wrapped in
- * <VectFoxSummarizer> tags. Provides "word-for-word-ish" memory of the last few
+ * <VectTauriSummarizer> tags. Provides "word-for-word-ish" memory of the last few
  * turns to complement (not replace) semantic retrieval.
  *
  * Only meaningful when auto-sync is active (otherwise the EventBase collection
@@ -24,7 +24,7 @@ import { getBackend } from '../backends/backend-manager.js';
 import { getChatUUID } from './collection-ids.js';
 import { resolveActiveEventBaseCollection, getVectorizationTip } from './eventbase-store.js';
 import { SUMMARIZER_PROMPT_TAG } from './constants.js';
-import { isVectFoxEnabled } from './feature-gate.js';
+import { isVectTauriEnabled } from './feature-gate.js';
 import { log } from './log.js';
 
 /**
@@ -32,7 +32,7 @@ import { log } from './log.js';
  * Self-clears when disabled / no chat / no collection / no events, so calling it
  * unconditionally every turn is safe and keeps stale injections from lingering.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @returns {Promise<{ injected: number, error?: string }>}
  */
 export async function runSummarizerInjection(settings) {
@@ -55,15 +55,15 @@ let _maxEntryScanDepth = 0;
 /**
  * Recompute _maxEntryScanDepth from the active world books. Async (loads lore) — wire it to
  * CHAT_CHANGED / WORLDINFO_UPDATED / WORLDINFO_SETTINGS_UPDATED, NOT to per-generation code.
- * Does nothing while VectFox is disabled (ghosting is off, so nothing reads the value); the
- * master switch calls it again when VectFox is turned back on.
+ * Does nothing while VectTauri is disabled (ghosting is off, so nothing reads the value); the
+ * master switch calls it again when VectTauri is turned back on.
  * On failure it logs a warning and keeps the previous cached value. Disabled entries are
  * ignored (ST skips them during the scan), matching ST's own behavior.
  *
- * @param {object} [settings] - extension_settings.vectfox (defaults to the live store)
+ * @param {object} [settings] - extension_settings.vecttauri (defaults to the live store)
  */
 export async function refreshWorldInfoEntryDepthCache(settings) {
-    if (!isVectFoxEnabled(settings)) return;
+    if (!isVectTauriEnabled(settings)) return;
     try {
         const entries = await getSortedEntries();
         let max = 0;
@@ -172,7 +172,7 @@ function blankPromptClone(m) {
  * at any slider value, and ghosting auto-pauses if WI could scan the whole chat.
  *
  * @param {Array} chat - ST interceptor chat array (coreChat; mutated by slot replacement)
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @returns {{ wiped: number, charsRemoved: number }}
  */
 export function applyGhosting(chat, settings) {
@@ -245,7 +245,7 @@ export function applyGhosting(chat, settings) {
     // readout reflects "0 saved this turn" (e.g. tip hasn't advanced yet) instead of a
     // stale value from an earlier generation.
     const approxTokens = Math.round(charsRemoved / 4); // rough 4-chars/token heuristic
-    window.VectFox_LastGhost = { wiped, charsRemoved, approxTokens, at: Date.now() };
+    window.VectTauri_LastGhost = { wiped, charsRemoved, approxTokens, at: Date.now() };
     if (wiped > 0) {
         log.domain('injection', 'lifecycle', `[Ghost] Wiped ${wiped} vectorized message(s) from prompt — ~${charsRemoved} chars (~${approxTokens} tokens) saved`);
     }
@@ -258,7 +258,7 @@ export function applyGhosting(chat, settings) {
  * → slice → format) minus the `setExtensionPrompt` and the `enabled` gate, so the
  * "Debug Summarizer" preview shows the real result even while the feature is off.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @returns {Promise<{ text: string, count: number, reason?: string, collectionId?: string, requested?: number, error?: string }>}
  *   `reason` is set on a 0-count outcome (disabled handled by the caller).
  */
@@ -317,7 +317,7 @@ export async function buildSummarizerInjection(settings) {
 }
 
 /**
- * Render events oldest→newest inside <VectFoxSummarizer> tags, one summary per
+ * Render events oldest→newest inside <VectTauriSummarizer> tags, one summary per
  * line, each tagged with its recency so the model knows how far back it is:
  * the most recent extracted turn is "(latest turn)", older ones "(N turns ago)".
  * When `fullDetail` is on, each event's structured fields are listed (indented)
@@ -361,7 +361,7 @@ function _format(events, fullDetail = false, maxChars = 0) {
     }
 
     const body = blocksNewestFirst.slice().reverse().join('\n'); // render oldest→newest
-    return { text: `<VectFoxSummarizer>\n${body}\n</VectFoxSummarizer>`, count: blocksNewestFirst.length };
+    return { text: `<VectTauriSummarizer>\n${body}\n</VectTauriSummarizer>`, count: blocksNewestFirst.length };
 }
 
 /**

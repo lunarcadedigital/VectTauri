@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VectFox DEAD CODE DELETION — REGRESSION CONTRACT TEST
+ * VectTauri DEAD CODE DELETION — REGRESSION CONTRACT TEST
  * ============================================================================
  *
  * This test asserts the *post-deletion* state for the cleanup described in
@@ -27,7 +27,7 @@
  *   somewhere; the syntactic contract is checked, not runtime behavior.
  *   For runtime verification, see the Definition of Done checklist in the plan.
  *
- * @author Kritblade
+ * @author Lunarcade Digital
  * ============================================================================
  */
 
@@ -302,13 +302,13 @@ describe('Dead code is removed (cleanup contract)', () => {
             expect(offenders).toEqual([]);
         });
 
-        it('VECTFOX_CHAT prefix is removed from COLLECTION_PREFIXES', () => {
+        it('VECTTAURI_CHAT prefix is removed from COLLECTION_PREFIXES', () => {
             const src = readRel('core/collection-ids.js');
-            expect(src).not.toMatch(/VECTFOX_CHAT:\s*['"]vf_chat_['"]/);
+            expect(src).not.toMatch(/VECTTAURI_CHAT:\s*['"]vf_chat_['"]/);
         });
 
-        it('No code references VECTFOX_CHAT prefix anymore', () => {
-            const offenders = grepSourcesWithLines(/COLLECTION_PREFIXES\.VECTFOX_CHAT/);
+        it('No code references VECTTAURI_CHAT prefix anymore', () => {
+            const offenders = grepSourcesWithLines(/COLLECTION_PREFIXES\.VECTTAURI_CHAT/);
             expect(offenders).toEqual([]);
         });
 
@@ -404,13 +404,13 @@ describe('Dead code is removed (cleanup contract)', () => {
             const src = readRel('ui/ui-manager.js');
             // Allow incidental string mentions but no live `settings.temporal_decay.X = ...`
             expect(src).not.toMatch(/settings\.temporal_decay\./);
-            expect(src).not.toMatch(/\$\(['"]#VectFox_temporal_decay/);
+            expect(src).not.toMatch(/\$\(['"]#VectTauri_temporal_decay/);
         });
 
         it('Decay Immune toggle is removed from chunk visualizer', () => {
             const src = readRel('ui/chunk-visualizer.js');
             expect(src).not.toContain('Decay Immune');
-            expect(src).not.toMatch(/VectFox_detail_blind/);
+            expect(src).not.toMatch(/VectTauri_detail_blind/);
         });
 
         it('"blind" filter option is removed from chunk visualizer', () => {

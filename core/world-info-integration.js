@@ -1,11 +1,11 @@
 /**
  * ============================================================================
- * VectFox WORLD INFO INTEGRATION
+ * VectTauri WORLD INFO INTEGRATION
  * ============================================================================
  * Enhanced integration between vectorized lorebooks and ST's world info system
  * Provides semantic activation of WI entries based on vector similarity
  *
- * @author VectFox Team
+ * @author Lunarcade Digital
  * @version 1.0.0
  * ============================================================================
  */
@@ -32,7 +32,7 @@ import { detectLorebookRenames, showLorebookRenameModal, openDatabaseBrowserForR
 // exact ID (backend + handle + timestamp segments are not known at lookup time).
 import { eventSource, event_types, setExtensionPrompt, substituteParams, getCurrentChatId } from '../../../../../script.js';
 import { log } from './log.js';
-import { isVectFoxEnabled } from './feature-gate.js';
+import { isVectTauriEnabled } from './feature-gate.js';
 
 // ============================================================================
 // WORLD INFO ACTIVATION HOOKS
@@ -41,7 +41,7 @@ import { isVectFoxEnabled } from './feature-gate.js';
 /**
  * Resolve a display title for a semantic-activated lorebook entry.
  * Prefers stored entryName; falls back to entry.key. `key` may carry either
- * lorebook trigger strings (legacy ST shape) or VectFox keyword objects
+ * lorebook trigger strings (legacy ST shape) or VectTauri keyword objects
  * (`{text, weight}` from the extractor) — handle both rather than letting
  * `[object Object], [object Object]` leak into the injected prompt.
  */
@@ -61,7 +61,7 @@ function _resolveEntryTitle(entry) {
  *
  * @param {string[]} recentMessages - Recent chat messages to use as query
  * @param {object[]} activeEntries - Currently active WI entries (from keyword matching)
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<object[]>} Array of WI entries to activate { uid, key, content, score }
  */
 export async function getSemanticWorldInfoEntries(recentMessages, activeEntries, settings, keywordQuery = null, preloadedCollections = null) {
@@ -83,7 +83,7 @@ export async function getSemanticWorldInfoEntries(recentMessages, activeEntries,
     const dualQuery = kq && kq !== query;
     const queryTexts = dualQuery ? [kq, query] : [query];
 
-    log.verbose(`VectFox: Querying vectorized lorebooks for semantic WI activation${dualQuery ? ' (dual query)' : ''}...`);
+    log.verbose(`VectTauri: Querying vectorized lorebooks for semantic WI activation${dualQuery ? ' (dual query)' : ''}...`);
 
     const semanticEntries = [];
     // Scores are 0-1 similarities on EVERY path: Vectra returns cosine, the
@@ -143,7 +143,7 @@ export async function getSemanticWorldInfoEntries(recentMessages, activeEntries,
                 // lorebook is active.
                 const error = failures[0].error;
                 log.error(
-                    `VectFox WI: retrieval FAILED for lorebook "${collection.name}" (${lookupKey}) — `
+                    `VectTauri WI: retrieval FAILED for lorebook "${collection.name}" (${lookupKey}) — `
                     + `no entries from this book will be injected this turn:`,
                     error?.message || error,
                 );
@@ -154,7 +154,7 @@ export async function getSemanticWorldInfoEntries(recentMessages, activeEntries,
                 // Partial: one query text of the dual-query pair failed. Recall is
                 // reduced but the book still contributes, so warn rather than toast.
                 log.warn(
-                    `VectFox WI: ${failures.length}/${queryOutcomes.length} queries failed for lorebook `
+                    `VectTauri WI: ${failures.length}/${queryOutcomes.length} queries failed for lorebook `
                     + `"${collection.name}" — reduced recall this turn:`,
                     failures[0].error?.message || failures[0].error,
                 );
@@ -191,11 +191,11 @@ export async function getSemanticWorldInfoEntries(recentMessages, activeEntries,
                     const keyDisplay = Array.isArray(entry.key)
                         ? entry.key.map(k => typeof k === 'object' ? (k.text || k.keyword || JSON.stringify(k)) : k).join(', ')
                         : (entry.key || 'unknown');
-                    log.trace(`VectFox: Semantic WI activation: "${keyDisplay}" (score: ${score.toFixed(3)})`);
+                    log.trace(`VectTauri: Semantic WI activation: "${keyDisplay}" (score: ${score.toFixed(3)})`);
                 }
             }
         } catch (error) {
-            log.warn(`VectFox: Failed to query lorebook collection ${collection.id}:`, error);
+            log.warn(`VectTauri: Failed to query lorebook collection ${collection.id}:`, error);
         }
     }
 
@@ -215,10 +215,10 @@ export async function getSemanticWorldInfoEntries(recentMessages, activeEntries,
     // Deduplicate with already active entries (avoid duplicates from keyword matching)
     const deduplicatedEntries = deduplicateWithActiveEntries(uniqueEntries, activeEntries);
 
-    log.verbose(`VectFox: Found ${deduplicatedEntries.length} semantic WI entries to activate`);
+    log.verbose(`VectTauri: Found ${deduplicatedEntries.length} semantic WI entries to activate`);
 
     if (settings.world_info_retrieval_popup && deduplicatedEntries.length > 0) {
-        try { toastr.info(`Semantic WI: retrieved ${deduplicatedEntries.length} lorebook entry/entries`, 'VectFox'); } catch (_) {}
+        try { toastr.info(`Semantic WI: retrieved ${deduplicatedEntries.length} lorebook entry/entries`, 'VectTauri'); } catch (_) {}
     }
 
     return deduplicatedEntries;
@@ -268,7 +268,7 @@ function _classifyInactiveLorebook(registryKey, context) {
  * and no indication anything was meant to happen. The per-collection reason is a
  * log.trace inside shouldCollectionActivate that nobody has switched on.
  *
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<{active: Array<{id: string, name: string, sourceName: string|null}>,
  *                    candidateCount: number,
  *                    skipped: {disabled: number, foreignPersona: number,
@@ -344,7 +344,7 @@ async function selectActiveLorebookCollections(settings, recentMessages = []) {
     // Verbosity 2 gets the full accounting, not just a count — "0 available" on
     // its own tells the user nothing about which knob to turn.
     log.verbose(
-        `VectFox WI: ${collections.length}/${candidateCount} lorebook collection(s) eligible for semantic search`
+        `VectTauri WI: ${collections.length}/${candidateCount} lorebook collection(s) eligible for semantic search`
         + (candidateCount ? ` — skipped: ${_describeSkipped(skipped) || 'none'}` : ''),
     );
 
@@ -385,7 +385,7 @@ function _describeSkipped(skipped) {
  * semantic hits cluster in 1–3 books, so latency stays negligible.
  *
  * @param {object[]} semanticEntries - Hits from getSemanticWorldInfoEntries
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<object[]>}
  */
 export async function resolveLiveEntries(semanticEntries, settings) {
@@ -434,12 +434,12 @@ export async function resolveLiveEntries(semanticEntries, settings) {
 
         const live = liveEntries[entryUid];
         if (!live) {
-            log.trace(`VectFox WI: dropping semantic hit for deleted entry ${sourceName}::${entryUid}`);
+            log.trace(`VectTauri WI: dropping semantic hit for deleted entry ${sourceName}::${entryUid}`);
             continue;
         }
 
         if (respectDisable && live.disable === true) {
-            log.trace(`VectFox WI: dropping semantic hit for disabled entry ${sourceName}::${entryUid}`);
+            log.trace(`VectTauri WI: dropping semantic hit for disabled entry ${sourceName}::${entryUid}`);
             continue;
         }
 
@@ -498,7 +498,7 @@ function _findLorebookRegistryEntry(lorebookName, settings) {
 
     // Honor caller-supplied registry (used by tests / synthetic snapshots);
     // otherwise read the module-global via getCollectionRegistry() like production.
-    const registry = settings?.vectfox_collection_registry || getCollectionRegistry();
+    const registry = settings?.vecttauri_collection_registry || getCollectionRegistry();
     for (const key of registry) {
         // Registry keys can be "backend:collectionId" or bare "collectionId".
         const id = String(key).includes(':') ? String(key).split(':').slice(1).join(':') : String(key);
@@ -513,7 +513,7 @@ function _findLorebookRegistryEntry(lorebookName, settings) {
 /**
  * Check if a lorebook is already vectorized
  * @param {string} lorebookName - Name of the lorebook
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {boolean}
  */
 export function isLorebookVectorized(lorebookName, settings) {
@@ -523,7 +523,7 @@ export function isLorebookVectorized(lorebookName, settings) {
 /**
  * Get vectorization status for all lorebooks
  * @param {string[]} lorebookNames - Array of lorebook names
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Map<string, boolean>} Map of lorebook name -> is vectorized
  */
 export function getLorebooksVectorizationStatus(lorebookNames, settings) {
@@ -539,7 +539,7 @@ export function getLorebooksVectorizationStatus(lorebookNames, settings) {
 /**
  * Get statistics for vectorized lorebook
  * @param {string} lorebookName - Name of the lorebook
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<object|null>} Stats object or null if not vectorized
  */
 export async function getLorebookVectorStats(lorebookName, settings) {
@@ -574,7 +574,7 @@ export async function getLorebookVectorStats(lorebookName, settings) {
  *
  * @param {string} lorebookName - Name of the current lorebook
  * @param {object[]} entries - World info entries
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {object[]} Enhanced entries with vector status
  */
 export function enhanceWorldInfoEntriesUI(lorebookName, entries, settings) {
@@ -605,7 +605,7 @@ export function enhanceWorldInfoEntriesUI(lorebookName, entries, settings) {
  * overwritten, so a block that is not cleared keeps reaching the model on every
  * later generation.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  */
 export function clearLorebookPrompt(settings) {
     setExtensionPrompt(LOREBOOK_PROMPT_TAG, '', settings.position, settings.depth, false);
@@ -613,8 +613,8 @@ export function clearLorebookPrompt(settings) {
 
 /**
  * GENERATION_STARTED handler — runs the semantic lorebook query and injects the matching
- * entries as one <VectFoxLorebook> block (tag from `lorebook_xml_tag`) through
- * setExtensionPrompt, at the shared VectFox injection position/depth. The entries do NOT
+ * entries as one <VectTauriLorebook> block (tag from `lorebook_xml_tag`) through
+ * setExtensionPrompt, at the shared VectTauri injection position/depth. The entries do NOT
  * pass through ST's WI pipeline, so per-entry position, budget and recursion do not apply.
  *
  * Hits are identified by { world: sourceName, uid: entryUid } stored at vectorization
@@ -626,14 +626,14 @@ export function clearLorebookPrompt(settings) {
  */
 async function handleGenerationStarted(type, options, dryRun) {
     if (dryRun) return;
-    const settings = extension_settings.vectfox;
+    const settings = extension_settings.vecttauri;
     if (!settings) return;
 
     // Clear the previous lorebook injection before any other exit, so turning off
     // Semantic WI or the master switch never leaves last turn's block in the prompt.
     clearLorebookPrompt(settings);
 
-    if (!settings.enabled_world_info || !isVectFoxEnabled(settings)) return;
+    if (!settings.enabled_world_info || !isVectTauriEnabled(settings)) return;
 
     try {
         const context = getContext();
@@ -674,7 +674,7 @@ async function handleGenerationStarted(type, options, dryRun) {
                 const reason = _describeSkipped(skipped);
                 const named = inactiveNames.slice(0, 3).map(n => `"${n}"`).join(', ');
                 log.warn(
-                    `VectFox WI: Semantic WI is enabled and ${candidateCount} vectorized lorebook(s) exist, `
+                    `VectTauri WI: Semantic WI is enabled and ${candidateCount} vectorized lorebook(s) exist, `
                     + `but NONE are active this turn — ${reason || 'no reason recorded'}`,
                 );
                 notifyNoActiveCollections(
@@ -690,7 +690,7 @@ async function handleGenerationStarted(type, options, dryRun) {
         // sourceName won't match any entry in world_names. Show a blocking popup.
         const mismatches = await detectLorebookRenames(lorebookCollections);
         if (mismatches.length) {
-            log.warn(`VectFox: Lorebook rename detected — ${mismatches.map(m => m.sourceName).join(', ')}`);
+            log.warn(`VectTauri: Lorebook rename detected — ${mismatches.map(m => m.sourceName).join(', ')}`);
             const choice = await showLorebookRenameModal(mismatches);
             if (choice === 'open_browser') {
                 try {
@@ -727,7 +727,7 @@ async function handleGenerationStarted(type, options, dryRun) {
         const liveEntries = await resolveLiveEntries(semanticEntries, settings);
         if (!liveEntries.length) return;
 
-        // Format entries into direct prompt injection under <VectFoxLorebook>
+        // Format entries into direct prompt injection under <VectTauriLorebook>
         const entryTexts = liveEntries
             .filter(e => e.content?.trim())
             .map(e => {
@@ -738,14 +738,14 @@ async function handleGenerationStarted(type, options, dryRun) {
 
         if (!entryTexts.length) return;
 
-        const xmlTag = settings.lorebook_xml_tag || 'VectFoxLorebook';
+        const xmlTag = settings.lorebook_xml_tag || 'VectTauriLorebook';
         const injectionContent = entryTexts.join('\n\n');
         const injectionText = `<${xmlTag}>\n${injectionContent}\n</${xmlTag}>`;
 
         setExtensionPrompt(LOREBOOK_PROMPT_TAG, injectionText, settings.position, settings.depth, false);
-        log.verbose(`VectFox: Injected ${entryTexts.length} lorebook entries to <${xmlTag}>`);
+        log.verbose(`VectTauri: Injected ${entryTexts.length} lorebook entries to <${xmlTag}>`);
     } catch (err) {
-        log.warn('VectFox: Lorebook WI injection failed', err.message || err);
+        log.warn('VectTauri: Lorebook WI injection failed', err.message || err);
     }
 }
 
@@ -796,7 +796,7 @@ export async function runLorebookWIDryRun({ chat, testMessage, settings }) {
     });
     if (!entryTexts.length) return { injectionText: null, entryCount: 0 };
 
-    const xmlTag = settings.lorebook_xml_tag || 'VectFoxLorebook';
+    const xmlTag = settings.lorebook_xml_tag || 'VectTauriLorebook';
     return {
         injectionText: `<${xmlTag}>\n${entryTexts.join('\n\n')}\n</${xmlTag}>`,
         entryCount: entryTexts.length,
@@ -805,11 +805,11 @@ export async function runLorebookWIDryRun({ chat, testMessage, settings }) {
 
 /**
  * Initialize world info integration hooks
- * This should be called when VectFox loads
+ * This should be called when VectTauri loads
  */
 export function initializeWorldInfoIntegration() {
     // Make functions available globally for ST to call
-    window.VectFox_WorldInfo = {
+    window.VectTauri_WorldInfo = {
         getSemanticEntries: getSemanticWorldInfoEntries,
         isLorebookVectorized: isLorebookVectorized,
         getVectorizationStatus: getLorebooksVectorizationStatus,
@@ -818,5 +818,5 @@ export function initializeWorldInfoIntegration() {
     };
 
     eventSource.on(event_types.GENERATION_STARTED, handleGenerationStarted);
-    log.lifecycle('VectFox: World Info integration hooks initialized');
+    log.lifecycle('VectTauri: World Info integration hooks initialized');
 }

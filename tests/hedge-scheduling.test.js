@@ -20,7 +20,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('../../../../../script.js', () => ({ getRequestHeaders: () => ({}) }));
-vi.mock('../../../../extensions.js', () => ({ extension_settings: { vectfox: {} }, modules: [] }));
+vi.mock('../../../../extensions.js', () => ({ extension_settings: { vecttauri: {} }, modules: [] }));
 vi.mock('../../../../secrets.js', () => ({ secret_state: {}, SECRET_KEYS: {}, findSecret: vi.fn(), writeSecret: vi.fn() }));
 vi.mock('../../../../textgen-settings.js', () => ({ textgen_types: {}, textgenerationwebui_settings: {} }));
 vi.mock('../../../../openai.js', () => ({ oai_settings: {} }));

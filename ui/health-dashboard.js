@@ -11,14 +11,14 @@
  * - Error tracking and display
  * - Auto-refresh with configurable interval
  *
- * @author VectFox
- * @version 2.2.0-alpha
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
 import { getBackendMetrics, probeBackendHealth } from '../backends/backend-manager.js';
 import { extension_settings } from '../../../../extensions.js';
-import { isVectFoxEnabled } from '../core/feature-gate.js';
+import { isVectTauriEnabled } from '../core/feature-gate.js';
 
 let refreshInterval = null;
 let isModalOpen = false;
@@ -28,7 +28,7 @@ let isModalOpen = false;
  * @returns {string} Current backend name
  */
 function getCurrentBackend() {
-    return extension_settings.vectfox?.vector_backend || 'standard';
+    return extension_settings.vecttauri?.vector_backend || 'standard';
 }
 
 /**
@@ -53,9 +53,9 @@ function formatRelativeTime(timestamp) {
  * @returns {string} CSS class name
  */
 function getHealthClass(healthy, errors = 0) {
-    if (!healthy) return 'vectfox-health-error';
-    if (errors > 0) return 'vectfox-health-warning';
-    return 'vectfox-health-ok';
+    if (!healthy) return 'vecttauri-health-error';
+    if (errors > 0) return 'vecttauri-health-warning';
+    return 'vecttauri-health-ok';
 }
 
 /**
@@ -95,115 +95,115 @@ function renderDashboard() {
     const healthIcon = getHealthIcon(currentMetrics.healthy, currentMetrics.errors);
 
     return `
-        <div class="vectfox-health-dashboard">
+        <div class="vecttauri-health-dashboard">
             <!-- Summary Section -->
-            <div class="vectfox-health-summary">
-                <div class="vectfox-health-status ${healthClass}">
-                    <span class="vectfox-health-icon">${healthIcon}</span>
-                    <span class="vectfox-health-label">${currentMetrics.healthy ? 'Healthy' : 'Unhealthy'}</span>
+            <div class="vecttauri-health-summary">
+                <div class="vecttauri-health-status ${healthClass}">
+                    <span class="vecttauri-health-icon">${healthIcon}</span>
+                    <span class="vecttauri-health-label">${currentMetrics.healthy ? 'Healthy' : 'Unhealthy'}</span>
                 </div>
-                <div class="vectfox-health-uptime">
+                <div class="vecttauri-health-uptime">
                     <small>Uptime: ${metrics.uptimeFormatted}</small>
                 </div>
             </div>
 
             <!-- Current Backend Section -->
-            <div class="vectfox-health-section">
+            <div class="vecttauri-health-section">
                 <h4>Current Backend: ${currentBackend}</h4>
-                <div class="vectfox-health-grid">
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${currentMetrics.queries}</span>
-                        <span class="vectfox-stat-label">Queries</span>
+                <div class="vecttauri-health-grid">
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${currentMetrics.queries}</span>
+                        <span class="vecttauri-stat-label">Queries</span>
                     </div>
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${currentMetrics.inserts}</span>
-                        <span class="vectfox-stat-label">Inserts</span>
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${currentMetrics.inserts}</span>
+                        <span class="vecttauri-stat-label">Inserts</span>
                     </div>
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${currentMetrics.deletes}</span>
-                        <span class="vectfox-stat-label">Deletes</span>
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${currentMetrics.deletes}</span>
+                        <span class="vecttauri-stat-label">Deletes</span>
                     </div>
-                    <div class="vectfox-health-stat ${currentMetrics.errors > 0 ? 'vectfox-stat-error' : ''}">
-                        <span class="vectfox-stat-value">${currentMetrics.errors}</span>
-                        <span class="vectfox-stat-label">Errors</span>
+                    <div class="vecttauri-health-stat ${currentMetrics.errors > 0 ? 'vecttauri-stat-error' : ''}">
+                        <span class="vecttauri-stat-value">${currentMetrics.errors}</span>
+                        <span class="vecttauri-stat-label">Errors</span>
                     </div>
                 </div>
             </div>
 
             <!-- Latency Section -->
-            <div class="vectfox-health-section">
+            <div class="vecttauri-health-section">
                 <h4>Query Latency</h4>
-                <div class="vectfox-health-grid">
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${currentMetrics.avgLatency || 0}ms</span>
-                        <span class="vectfox-stat-label">Average</span>
+                <div class="vecttauri-health-grid">
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${currentMetrics.avgLatency || 0}ms</span>
+                        <span class="vecttauri-stat-label">Average</span>
                     </div>
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${currentMetrics.minLatency !== null ? currentMetrics.minLatency + 'ms' : '-'}</span>
-                        <span class="vectfox-stat-label">Min</span>
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${currentMetrics.minLatency !== null ? currentMetrics.minLatency + 'ms' : '-'}</span>
+                        <span class="vecttauri-stat-label">Min</span>
                     </div>
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${currentMetrics.maxLatency !== null ? currentMetrics.maxLatency + 'ms' : '-'}</span>
-                        <span class="vectfox-stat-label">Max</span>
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${currentMetrics.maxLatency !== null ? currentMetrics.maxLatency + 'ms' : '-'}</span>
+                        <span class="vecttauri-stat-label">Max</span>
                     </div>
                 </div>
             </div>
 
             <!-- Health Checks Section -->
-            <div class="vectfox-health-section">
+            <div class="vecttauri-health-section">
                 <h4>Health Checks</h4>
-                <div class="vectfox-health-grid">
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${currentMetrics.healthChecksPassed || 0}</span>
-                        <span class="vectfox-stat-label">Passed</span>
+                <div class="vecttauri-health-grid">
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${currentMetrics.healthChecksPassed || 0}</span>
+                        <span class="vecttauri-stat-label">Passed</span>
                     </div>
-                    <div class="vectfox-health-stat ${currentMetrics.healthChecksFailed > 0 ? 'vectfox-stat-error' : ''}">
-                        <span class="vectfox-stat-value">${currentMetrics.healthChecksFailed || 0}</span>
-                        <span class="vectfox-stat-label">Failed</span>
+                    <div class="vecttauri-health-stat ${currentMetrics.healthChecksFailed > 0 ? 'vecttauri-stat-error' : ''}">
+                        <span class="vecttauri-stat-value">${currentMetrics.healthChecksFailed || 0}</span>
+                        <span class="vecttauri-stat-label">Failed</span>
                     </div>
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${formatRelativeTime(currentMetrics.lastHealthCheck)}</span>
-                        <span class="vectfox-stat-label">Last Check</span>
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${formatRelativeTime(currentMetrics.lastHealthCheck)}</span>
+                        <span class="vecttauri-stat-label">Last Check</span>
                     </div>
                 </div>
             </div>
 
             <!-- Last Error Section -->
             ${currentMetrics.lastError ? `
-            <div class="vectfox-health-section vectfox-health-error-section">
+            <div class="vecttauri-health-section vecttauri-health-error-section">
                 <h4>Last Error</h4>
-                <div class="vectfox-health-error-box">
-                    <span class="vectfox-error-time">${formatRelativeTime(currentMetrics.lastError.timestamp)}</span>
-                    <span class="vectfox-error-message">${currentMetrics.lastError.message}</span>
+                <div class="vecttauri-health-error-box">
+                    <span class="vecttauri-error-time">${formatRelativeTime(currentMetrics.lastError.timestamp)}</span>
+                    <span class="vecttauri-error-message">${currentMetrics.lastError.message}</span>
                 </div>
             </div>
             ` : ''}
 
             <!-- Global Stats Section -->
-            <div class="vectfox-health-section">
+            <div class="vecttauri-health-section">
                 <h4>Global Statistics</h4>
-                <div class="vectfox-health-grid">
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${metrics.totalQueries}</span>
-                        <span class="vectfox-stat-label">Total Queries</span>
+                <div class="vecttauri-health-grid">
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${metrics.totalQueries}</span>
+                        <span class="vecttauri-stat-label">Total Queries</span>
                     </div>
-                    <div class="vectfox-health-stat">
-                        <span class="vectfox-stat-value">${metrics.totalInserts}</span>
-                        <span class="vectfox-stat-label">Total Inserts</span>
+                    <div class="vecttauri-health-stat">
+                        <span class="vecttauri-stat-value">${metrics.totalInserts}</span>
+                        <span class="vecttauri-stat-label">Total Inserts</span>
                     </div>
-                    <div class="vectfox-health-stat ${metrics.totalErrors > 0 ? 'vectfox-stat-error' : ''}">
-                        <span class="vectfox-stat-value">${metrics.totalErrors}</span>
-                        <span class="vectfox-stat-label">Total Errors</span>
+                    <div class="vecttauri-health-stat ${metrics.totalErrors > 0 ? 'vecttauri-stat-error' : ''}">
+                        <span class="vecttauri-stat-value">${metrics.totalErrors}</span>
+                        <span class="vecttauri-stat-label">Total Errors</span>
                     </div>
                 </div>
             </div>
 
             <!-- Active Backends -->
             ${metrics.activeBackends.length > 0 ? `
-            <div class="vectfox-health-section">
+            <div class="vecttauri-health-section">
                 <h4>Active Backends</h4>
-                <div class="vectfox-active-backends">
-                    ${metrics.activeBackends.map(name => `<span class="vectfox-backend-badge">${name}</span>`).join('')}
+                <div class="vecttauri-active-backends">
+                    ${metrics.activeBackends.map(name => `<span class="vecttauri-backend-badge">${name}</span>`).join('')}
                 </div>
             </div>
             ` : ''}
@@ -216,9 +216,9 @@ function renderDashboard() {
  */
 async function updateDashboard() {
     const currentBackend = getCurrentBackend();
-    const settings = extension_settings.vectfox;
+    const settings = extension_settings.vecttauri;
     await probeBackendHealth(currentBackend, settings);
-    const content = document.getElementById('VectFox_health_content');
+    const content = document.getElementById('VectTauri_health_content');
     if (content && isModalOpen) {
         content.innerHTML = renderDashboard();
     }
@@ -248,7 +248,7 @@ function stopAutoRefresh() {
  */
 export function openHealthDashboard() {
     isModalOpen = true;
-    const modal = document.getElementById('VectFox_health_modal');
+    const modal = document.getElementById('VectTauri_health_modal');
     if (modal) {
         modal.style.display = 'flex';
         updateDashboard();
@@ -262,7 +262,7 @@ export function openHealthDashboard() {
 export function closeHealthDashboard() {
     isModalOpen = false;
     stopAutoRefresh();
-    const modal = document.getElementById('VectFox_health_modal');
+    const modal = document.getElementById('VectTauri_health_modal');
     if (modal) {
         modal.style.display = 'none';
     }
@@ -282,8 +282,8 @@ export function getHealthIndicatorHtml() {
     const healthClass = getHealthClass(healthy, errors);
 
     return `
-        <button id="VectFox_health_indicator" class="vectfox-health-indicator ${healthClass}" title="Backend Health">
-            <span class="vectfox-health-dot"></span>
+        <button id="VectTauri_health_indicator" class="vecttauri-health-indicator ${healthClass}" title="Backend Health">
+            <span class="vecttauri-health-dot"></span>
         </button>
     `;
 }
@@ -294,23 +294,23 @@ export function getHealthIndicatorHtml() {
  */
 export function getHealthModalHtml() {
     return `
-        <div id="VectFox_health_modal" class="vectfox-modal" style="display: none;">
-            <div class="vectfox-modal-overlay"></div>
-            <div class="vectfox-modal-content vectfox-health-modal">
-                <div class="vectfox-modal-header">
+        <div id="VectTauri_health_modal" class="vecttauri-modal" style="display: none;">
+            <div class="vecttauri-modal-overlay"></div>
+            <div class="vecttauri-modal-content vecttauri-health-modal">
+                <div class="vecttauri-modal-header">
                     <h3>Backend Health Dashboard</h3>
-                    <button class="vectfox-modal-close" id="VectFox_health_close">
+                    <button class="vecttauri-modal-close" id="VectTauri_health_close">
                         <span>&times;</span>
                     </button>
                 </div>
-                <div class="vectfox-modal-body">
-                    <div id="VectFox_health_content">
+                <div class="vecttauri-modal-body">
+                    <div id="VectTauri_health_content">
                         ${renderDashboard()}
                     </div>
                 </div>
-                <div class="vectfox-modal-footer">
+                <div class="vecttauri-modal-footer">
                     <small>Auto-refreshes every 5 seconds</small>
-                    <button id="VectFox_health_refresh" class="vectfox-btn-secondary">Refresh Now</button>
+                    <button id="VectTauri_health_refresh" class="vecttauri-btn-secondary">Refresh Now</button>
                 </div>
             </div>
         </div>
@@ -321,15 +321,15 @@ export function getHealthModalHtml() {
  * Run a health probe and refresh the indicator dot.
  */
 export async function refreshIndicator() {
-    const indicator = document.getElementById('VectFox_health_indicator');
+    const indicator = document.getElementById('VectTauri_health_indicator');
     if (!indicator) return;
     const currentBackend = getCurrentBackend();
-    await probeBackendHealth(currentBackend, extension_settings.vectfox);
+    await probeBackendHealth(currentBackend, extension_settings.vecttauri);
     const metrics = getBackendMetrics();
     const currentMetrics = metrics.backends.find(b => b.name === currentBackend);
     const healthy = currentMetrics?.healthy ?? false;
     const errors = currentMetrics?.errors ?? 0;
-    indicator.className = `vectfox-health-indicator ${getHealthClass(healthy, errors)}`;
+    indicator.className = `vecttauri-health-indicator ${getHealthClass(healthy, errors)}`;
 }
 
 /**
@@ -337,28 +337,28 @@ export async function refreshIndicator() {
  */
 export function initializeHealthDashboard() {
     // Health indicator click
-    $(document).on('click', '#VectFox_health_indicator', openHealthDashboard);
+    $(document).on('click', '#VectTauri_health_indicator', openHealthDashboard);
 
     // Close button
-    $(document).on('click', '#VectFox_health_close', closeHealthDashboard);
+    $(document).on('click', '#VectTauri_health_close', closeHealthDashboard);
 
     // Overlay click
-    $(document).on('click', '#VectFox_health_modal .vectfox-modal-overlay', closeHealthDashboard);
+    $(document).on('click', '#VectTauri_health_modal .vecttauri-modal-overlay', closeHealthDashboard);
 
     // Refresh button
-    $(document).on('click', '#VectFox_health_refresh', updateDashboard);
+    $(document).on('click', '#VectTauri_health_refresh', updateDashboard);
 
-    // Probe when the VectFox panel drawer is expanded
-    $(document).on('click', '#VectFox_settings .inline-drawer-toggle', function() {
+    // Probe when the VectTauri panel drawer is expanded
+    $(document).on('click', '#VectTauri_settings .inline-drawer-toggle', function() {
         const isOpening = $(this).closest('.inline-drawer').find('.inline-drawer-content').is(':hidden')
             || $(this).find('.inline-drawer-icon').hasClass('down');
         if (isOpening) refreshIndicator();
     });
 
     // Probe immediately on init (Action tab is the default tab on load). Skipped while
-    // VectFox is disabled: opening the panel probes on demand, and switching VectFox
+    // VectTauri is disabled: opening the panel probes on demand, and switching VectTauri
     // back on refreshes the indicator.
-    if (isVectFoxEnabled()) {
+    if (isVectTauriEnabled()) {
         refreshIndicator();
     }
 }
@@ -370,7 +370,7 @@ export function initializeHealthDashboard() {
 export function getHealthDashboardStyles() {
     return `
         /* Health Indicator */
-        .vectfox-health-indicator {
+        .vecttauri-health-indicator {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -383,40 +383,40 @@ export function getHealthDashboardStyles() {
             padding: 0;
         }
 
-        .vectfox-health-dot {
+        .vecttauri-health-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             transition: background-color 0.3s;
         }
 
-        .vectfox-health-ok .vectfox-health-dot {
+        .vecttauri-health-ok .vecttauri-health-dot {
             background-color: #4caf50;
             box-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
         }
 
-        .vectfox-health-warning .vectfox-health-dot {
+        .vecttauri-health-warning .vecttauri-health-dot {
             background-color: #ff9800;
             box-shadow: 0 0 6px rgba(255, 152, 0, 0.5);
         }
 
-        .vectfox-health-error .vectfox-health-dot {
+        .vecttauri-health-error .vecttauri-health-dot {
             background-color: #f44336;
             box-shadow: 0 0 6px rgba(244, 67, 54, 0.5);
         }
 
         /* Health Dashboard Modal */
-        .vectfox-health-modal {
+        .vecttauri-health-modal {
             max-width: 500px;
         }
 
-        .vectfox-health-dashboard {
+        .vecttauri-health-dashboard {
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
 
-        .vectfox-health-summary {
+        .vecttauri-health-summary {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -425,7 +425,7 @@ export function getHealthDashboardStyles() {
             border-radius: 8px;
         }
 
-        .vectfox-health-status {
+        .vecttauri-health-status {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -433,29 +433,29 @@ export function getHealthDashboardStyles() {
             font-weight: 600;
         }
 
-        .vectfox-health-status.vectfox-health-ok {
+        .vecttauri-health-status.vecttauri-health-ok {
             color: #4caf50;
         }
 
-        .vectfox-health-status.vectfox-health-warning {
+        .vecttauri-health-status.vecttauri-health-warning {
             color: #ff9800;
         }
 
-        .vectfox-health-status.vectfox-health-error {
+        .vecttauri-health-status.vecttauri-health-error {
             color: #f44336;
         }
 
-        .vectfox-health-icon {
+        .vecttauri-health-icon {
             font-size: 1.2em;
         }
 
-        .vectfox-health-section {
+        .vecttauri-health-section {
             padding: 12px;
             background: rgba(0,0,0,0.1);
             border-radius: 8px;
         }
 
-        .vectfox-health-section h4 {
+        .vecttauri-health-section h4 {
             margin: 0 0 12px 0;
             font-size: 0.9em;
             opacity: 0.8;
@@ -463,13 +463,13 @@ export function getHealthDashboardStyles() {
             letter-spacing: 0.5px;
         }
 
-        .vectfox-health-grid {
+        .vecttauri-health-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 12px;
         }
 
-        .vectfox-health-stat {
+        .vecttauri-health-stat {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -478,26 +478,26 @@ export function getHealthDashboardStyles() {
             border-radius: 6px;
         }
 
-        .vectfox-stat-value {
+        .vecttauri-stat-value {
             font-size: 1.4em;
             font-weight: 600;
         }
 
-        .vectfox-stat-label {
+        .vecttauri-stat-label {
             font-size: 0.75em;
             opacity: 0.7;
             text-transform: uppercase;
         }
 
-        .vectfox-stat-error .vectfox-stat-value {
+        .vecttauri-stat-error .vecttauri-stat-value {
             color: #f44336;
         }
 
-        .vectfox-health-error-section {
+        .vecttauri-health-error-section {
             border-left: 3px solid #f44336;
         }
 
-        .vectfox-health-error-box {
+        .vecttauri-health-error-box {
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -506,31 +506,31 @@ export function getHealthDashboardStyles() {
             border-radius: 4px;
         }
 
-        .vectfox-error-time {
+        .vecttauri-error-time {
             font-size: 0.8em;
             opacity: 0.7;
         }
 
-        .vectfox-error-message {
+        .vecttauri-error-message {
             font-size: 0.9em;
             color: #f44336;
             word-break: break-word;
         }
 
-        .vectfox-active-backends {
+        .vecttauri-active-backends {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
 
-        .vectfox-backend-badge {
+        .vecttauri-backend-badge {
             padding: 4px 10px;
             background: rgba(255,255,255,0.1);
             border-radius: 12px;
             font-size: 0.85em;
         }
 
-        .vectfox-modal-footer {
+        .vecttauri-modal-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -538,7 +538,7 @@ export function getHealthDashboardStyles() {
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-        .vectfox-modal-footer small {
+        .vecttauri-modal-footer small {
             opacity: 0.6;
         }
     `;

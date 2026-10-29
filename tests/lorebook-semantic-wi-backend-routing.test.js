@@ -30,7 +30,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // to the same module the core/ files import.
 
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     modules: [],
     getContext: vi.fn(() => ({
         chat: [],
@@ -298,7 +298,7 @@ beforeEach(async () => {
     installFetchRouter();
 
     global.toastr = { info: vi.fn(), warn: vi.fn(), warning: vi.fn(), error: vi.fn(), success: vi.fn() };
-    // initializeWorldInfoIntegration() publishes window.VectFox_WorldInfo; the
+    // initializeWorldInfoIntegration() publishes window.VectTauri_WorldInfo; the
     // vitest environment is 'node', so give it somewhere to land.
     global.window = global.window || {};
 
@@ -313,7 +313,7 @@ beforeEach(async () => {
     resetNoActiveCollectionsNotifications();
 
     const { extension_settings } = await import('../../../../extensions.js');
-    extension_settings.vectfox = baseSettings();
+    extension_settings.vecttauri = baseSettings();
 });
 
 afterEach(() => {
@@ -626,7 +626,7 @@ describe('Nothing-activated surfacing (GENERATION_STARTED path)', () => {
 
     beforeEach(async () => {
         const { getContext, extension_settings } = await import('../../../../extensions.js');
-        extension_settings.vectfox = baseSettings({ enabled: true });
+        extension_settings.vecttauri = baseSettings({ enabled: true });
         getContext.mockReturnValue({
             chat: [{ mes: 'Tell me about the dragon.', is_user: true, is_system: false }],
             characterId: 'char123',
@@ -750,7 +750,7 @@ describe('Nothing-activated surfacing (GENERATION_STARTED path)', () => {
         // "0 available" tells the user nothing about which knob to turn.
         const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
         const { extension_settings } = await import('../../../../extensions.js');
-        extension_settings.vectfox = baseSettings({ enabled: true, debug_verbosity: 'verbose' });
+        extension_settings.vecttauri = baseSettings({ enabled: true, debug_verbosity: 'verbose' });
         const { shouldCollectionActivate } = await import('../core/collection-metadata.js');
         await listOneLorebook();
         shouldCollectionActivate.mockResolvedValue(false);
@@ -915,7 +915,7 @@ describe('Backend failure behavior (issue #11 symptom)', () => {
 
         expect(global.toastr.info).toHaveBeenCalledWith(
             expect.stringContaining('Semantic WI: retrieved 1'),
-            'VectFox',
+            'VectTauri',
         );
     });
 });

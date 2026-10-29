@@ -6,7 +6,7 @@ import { log } from './log.js';
 
 /**
  * ============================================================================
- * VectFox KEYWORD SYSTEM
+ * VectTauri KEYWORD SYSTEM
  * ============================================================================
  * Keyword extraction and boosting for vector search.
  *
@@ -26,7 +26,7 @@ import { log } from './log.js';
  *   The boost above 1.0 is added together:
  *     - "magic" (1.5x) + "divine" (2.0x) = 1 + 0.5 + 1.0 = 2.5x total boost
  *
- * @version 4.0.0
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -203,7 +203,7 @@ function getEffectiveHeaderSize(config, level, settings) {
 /**
  * Get combined stopwords (default + custom from settings)
  * Processes ST macros like {{char}}, {{user}} in custom stopwords
- * @param {object} settings - VectFox settings (optional)
+ * @param {object} settings - VectTauri settings (optional)
  * @returns {Set<string>} Combined stopwords set
  */
 function getCombinedStopwords(settings = null) {
@@ -239,7 +239,7 @@ function getCombinedStopwords(settings = null) {
 /**
  * Extract keywords from a lorebook entry
  * @param {object} entry - Lorebook entry with key array
- * @param {object} settings - VectFox settings (optional)
+ * @param {object} settings - VectTauri settings (optional)
  * @returns {string[]} Array of keywords
  */
 export function extractLorebookKeywords(entry, settings = null) {
@@ -433,7 +433,7 @@ export function extractTextKeywords(text, options = {}) {
     }
 
     if (result.length > 0) {
-        log.trace(`[VectFox Keyword Extraction] Extracted text keywords (${level} level): [${result.map(k => `${k.text}(${k.weight.toFixed(2)}x, freq:${k.frequency})`).join(', ')}] from: "${text.substring(0, 80)}${text.length > 80 ? '...' : ''}"`);
+        log.trace(`[VectTauri Keyword Extraction] Extracted text keywords (${level} level): [${result.map(k => `${k.text}(${k.weight.toFixed(2)}x, freq:${k.frequency})`).join(', ')}] from: "${text.substring(0, 80)}${text.length > 80 ? '...' : ''}"`);
     }
 
     return result;
@@ -502,7 +502,7 @@ export function extractChatKeywords(text, options = {}) {
     }
 
     if (keywords.length > 0) {
-        log.trace(`[VectFox Keyword Extraction] Extracted chat keywords: [${keywords.map(k => `${k.text}(${k.weight.toFixed(2)}x)`).join(', ')}] from text: "${text.substring(0, 80)}${text.length > 80 ? '...' : ''}"`);
+        log.trace(`[VectTauri Keyword Extraction] Extracted chat keywords: [${keywords.map(k => `${k.text}(${k.weight.toFixed(2)}x)`).join(', ')}] from text: "${text.substring(0, 80)}${text.length > 80 ? '...' : ''}"`);
     }
 
     return keywords;
@@ -691,7 +691,7 @@ export function extractBM25Keywords(text, options = {}) {
     }));
 
     if (keywords.length > 0) {
-        log.trace(`[VectFox BM25 Keywords] Level=${level}, scanned ${scanText.length}/${text.length} chars, ${sentences.length} sentences → [${keywords.map(k => `${k.text}(${k.weight.toFixed(2)}x)`).join(', ')}]`);
+        log.trace(`[VectTauri BM25 Keywords] Level=${level}, scanned ${scanText.length}/${text.length} chars, ${sentences.length} sentences → [${keywords.map(k => `${k.text}(${k.weight.toFixed(2)}x)`).join(', ')}]`);
     }
 
     return keywords;
@@ -908,7 +908,7 @@ export function extractSmartKeywords(text, options = {}) {
 
     if (keywords.length > 0) {
         const entityCount = keywords.filter(k => k.isEntity).length;
-        log.trace(`[VectFox Smart Keywords] Level=${level}, ${keywords.length} keywords (${entityCount} entities) → [${keywords.map(k => `${k.text}(${k.type})`).join(', ')}]`);
+        log.trace(`[VectTauri Smart Keywords] Level=${level}, ${keywords.length} keywords (${entityCount} entities) → [${keywords.map(k => `${k.text}(${k.type})`).join(', ')}]`);
     }
 
     return keywords;
@@ -1017,7 +1017,7 @@ export function applyKeywordBoost(results, query, options = {}) {
 
     const queryLower = query.toLowerCase();
 
-    log.verbose(`[VectFox Keyword Boost] Starting keyword boost for query: "${query}" (diminishing=${diminishingReturns}, cap=${perKeywordCap})`);
+    log.verbose(`[VectTauri Keyword Boost] Starting keyword boost for query: "${query}" (diminishing=${diminishingReturns}, cap=${perKeywordCap})`);
 
     const boosted = results.map(result => {
         const rawKeywords = result.keywords || result.metadata?.keywords || [];
@@ -1060,7 +1060,7 @@ export function applyKeywordBoost(results, query, options = {}) {
             const scaleInfo = diminishingReturns
                 ? ` (raw=${rawBoost.toFixed(2)}x, scale=${(MATCH_SCALING_FACTORS[Math.min(matchedKeywords.length, 3)] * 100).toFixed(0)}%)`
                 : '';
-            log.trace(`[VectFox Keyword Boost] Result matched ${matchedKeywords.length} keyword(s): [${matchedKeywords.map(k => `${k.text}(${k.weight.toFixed(2)}x)`).join(', ')}] → boost: ${finalBoost.toFixed(2)}x${scaleInfo}, score: ${result.score.toFixed(4)} → ${(result.score * finalBoost).toFixed(4)}`);
+            log.trace(`[VectTauri Keyword Boost] Result matched ${matchedKeywords.length} keyword(s): [${matchedKeywords.map(k => `${k.text}(${k.weight.toFixed(2)}x)`).join(', ')}] → boost: ${finalBoost.toFixed(2)}x${scaleInfo}, score: ${result.score.toFixed(4)} → ${(result.score * finalBoost).toFixed(4)}`);
         }
 
         return {
@@ -1080,7 +1080,7 @@ export function applyKeywordBoost(results, query, options = {}) {
     boosted.sort((a, b) => b.score - a.score);
 
     const boostedCount = boosted.filter(r => r.keywordBoosted).length;
-    log.verbose(`[VectFox Keyword Boost] Applied keyword boosts to ${boostedCount}/${boosted.length} results (diminishing=${diminishingReturns})`);
+    log.verbose(`[VectTauri Keyword Boost] Applied keyword boosts to ${boostedCount}/${boosted.length} results (diminishing=${diminishingReturns})`);
 
     return boosted;
 }

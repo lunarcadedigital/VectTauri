@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VECTFOX CONSTANTS
+ * VECTTAURI CONSTANTS
  * ============================================================================
  * Centralized configuration values used across the extension.
  * Change these values here instead of hunting through the codebase.
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -15,10 +15,10 @@
 // =============================================================================
 
 /** Extension prompt tag for SillyTavern's prompt system */
-export const EXTENSION_PROMPT_TAG = '3_vectfox';
+export const EXTENSION_PROMPT_TAG = '3_vecttauri';
 
 /** Extension prompt tag for lorebook semantic WI injection */
-export const LOREBOOK_PROMPT_TAG = '3_vectfox_lorebook';
+export const LOREBOOK_PROMPT_TAG = '3_vecttauri_lorebook';
 
 /** Extension prompt tag for EventBase semantic-retrieval injection */
 export const EVENTBASE_PROMPT_TAG = `${EXTENSION_PROMPT_TAG}_eventbase`;
@@ -27,7 +27,7 @@ export const EVENTBASE_PROMPT_TAG = `${EXTENSION_PROMPT_TAG}_eventbase`;
 export const SUMMARIZER_PROMPT_TAG = `${EXTENSION_PROMPT_TAG}_summarizer`;
 
 /** Extension name for logging and UI */
-export const EXTENSION_NAME = 'VectFox';
+export const EXTENSION_NAME = 'VectTauri';
 
 // =============================================================================
 // PERFORMANCE & RATE LIMITING

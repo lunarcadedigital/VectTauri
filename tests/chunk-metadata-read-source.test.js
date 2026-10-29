@@ -16,7 +16,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-const mockSettings = vi.hoisted(() => ({ vectfox: {} }));
+const mockSettings = vi.hoisted(() => ({ vecttauri: {} }));
 vi.mock('../../../../extensions.js', () => ({ extension_settings: mockSettings }));
 vi.mock('../../../../../script.js', () => ({ saveSettingsDebounced: vi.fn() }));
 

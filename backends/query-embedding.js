@@ -18,7 +18,7 @@ import { getPluginUrl } from '../utils/similharity-url.js';
 
 /**
  * @param {string} searchText - Query text to embed
- * @param {object} settings - VectFox settings (embedding provider and model)
+ * @param {object} settings - VectTauri settings (embedding provider and model)
  * @param {object} providerParams - Provider-specific body params from the calling backend
  * @returns {Promise<number[]>} The query vector
  */
@@ -48,7 +48,7 @@ export async function fetchQueryEmbedding(searchText, settings, providerParams) 
         throw new Error(`Query embedding via '${source}' failed: plugin returned no embedding vector`);
     }
     const embedMs = performance.now() - tStart;
-    log.verbose(`[VectFox] Query embedding via '${source}': ${embedMs.toFixed(0)}ms, dim=${data.embedding.length}`);
+    log.verbose(`[VectTauri] Query embedding via '${source}': ${embedMs.toFixed(0)}ms, dim=${data.embedding.length}`);
     warnIfEmbeddingSlow(embedMs, settings, 'get-embedding');
     return data.embedding;
 }

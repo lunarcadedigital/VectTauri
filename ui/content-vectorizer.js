@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VECTFOX CONTENT VECTORIZER UI
+ * VECTTAURI CONTENT VECTORIZER UI
  * ============================================================================
  * Modal interface for vectorizing different content types with intelligent
  * settings that adapt based on selected content type.
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -50,9 +50,9 @@ let isVectorizing = false;
 let startFromMessage = 1;
 
 function syncStartFromMessageFromUI() {
-    const raw = parseInt($('#vectfox_cv_startfrom').val(), 10);
+    const raw = parseInt($('#vecttauri_cv_startfrom').val(), 10);
     startFromMessage = Number.isFinite(raw) && raw >= 1 ? raw : 1;
-    $('#vectfox_cv_startfrom').val(startFromMessage);
+    $('#vecttauri_cv_startfrom').val(startFromMessage);
 }
 
 /**
@@ -62,16 +62,16 @@ function syncStartFromMessageFromUI() {
  */
 async function _hasPriorExtractionState(chatUUID) {
     if (!chatUUID) return false;
-    const arr = extension_settings?.vectfox?.eventbase_extracted_windows?.[chatUUID];
+    const arr = extension_settings?.vecttauri?.eventbase_extracted_windows?.[chatUUID];
     if (Array.isArray(arr) && arr.length > 0) return true;
     const { getVectorizationTip } = await import('../core/eventbase-store.js');
     return typeof getVectorizationTip(chatUUID) === 'number';
 }
 
 function updateVectorizeButtonState(running) {
-    const btn = $('#vectfox_cv_vectorize');
-    const cancelBtn = $('#vectfox_cv_cancel');
-    const continueBtn = $('#vectfox_cv_continue');
+    const btn = $('#vecttauri_cv_vectorize');
+    const cancelBtn = $('#vecttauri_cv_cancel');
+    const continueBtn = $('#vecttauri_cv_continue');
 
     if (running) {
         btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Vectorizing...');
@@ -109,17 +109,17 @@ export function openContentVectorizer(initialType = null) {
     // Only show subsequent sections if type is pre-selected
     if (currentContentType) {
         updateUIForContentType();
-        $('.vectfox-cv-subsequent').show();
+        $('.vecttauri-cv-subsequent').show();
     } else {
-        $('.vectfox-cv-subsequent').hide();
+        $('.vecttauri-cv-subsequent').hide();
     }
 
     // Stop mousedown propagation (ST closes drawers on mousedown/touchstart)
-    $('#vectfox_content_vectorizer_modal').on('mousedown touchstart', function(e) {
+    $('#vecttauri_content_vectorizer_modal').on('mousedown touchstart', function(e) {
         e.stopPropagation();
     });
 
-    $('#vectfox_content_vectorizer_modal').fadeIn(200);
+    $('#vecttauri_content_vectorizer_modal').fadeIn(200);
 }
 
 /**
@@ -129,14 +129,14 @@ export function openContentVectorizer(initialType = null) {
  * "changed their mind". The auto-sync checkbox uses it that way: it redirects here
  * when a chat has no collection yet, and it must not resume enabling itself if the
  * user simply closed this panel. A successful run dispatches
- * `vectfox:eventbase-synced` BEFORE this, so the resume path wins on success and
+ * `vecttauri:eventbase-synced` BEFORE this, so the resume path wins on success and
  * this only clears an intent nobody acted on.
  */
 export function closeContentVectorizer() {
-    $('#vectfox_content_vectorizer_modal').fadeOut(200, function() {
+    $('#vecttauri_content_vectorizer_modal').fadeOut(200, function() {
         $(this).remove();
     });
-    document.dispatchEvent(new CustomEvent('vectfox:content-vectorizer-closed'));
+    document.dispatchEvent(new CustomEvent('vecttauri:content-vectorizer-closed'));
 }
 
 /**
@@ -145,7 +145,7 @@ export function closeContentVectorizer() {
  * On touch devices the vectorizer is a full-screen modal that would completely cover
  * the progress bottom-sheet, so we fade it out. We deliberately use .fadeOut() (NOT
  * closeContentVectorizer()) so the modal stays in the DOM — downstream code still reads
- * its inputs (e.g. #vectfox_cv_parallel_windows), and closeContentVectorizer() removes
+ * its inputs (e.g. #vecttauri_cv_parallel_windows), and closeContentVectorizer() removes
  * it for good once the run completes.
  *
  * Desktop leaves the modal open; the progress panel floats in the corner and doesn't
@@ -157,7 +157,7 @@ export function closeContentVectorizer() {
  */
 function hideVectorizerForProgress() {
     if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
-        $('#vectfox_content_vectorizer_modal').fadeOut(200);
+        $('#vecttauri_content_vectorizer_modal').fadeOut(200);
     }
 }
 
@@ -166,30 +166,30 @@ function hideVectorizerForProgress() {
  */
 function createModal() {
     // Remove existing
-    $('#vectfox_content_vectorizer_modal').remove();
+    $('#vecttauri_content_vectorizer_modal').remove();
 
     const contentTypes = getAllContentTypes(); // All types including chat
 
     const html = `
-        <div id="vectfox_content_vectorizer_modal" class="vectfox-modal">
-            <div class="vectfox-modal-overlay"></div>
-            <div class="vectfox-modal-content vectfox-content-vectorizer">
-                <div class="vectfox-modal-header">
+        <div id="vecttauri_content_vectorizer_modal" class="vecttauri-modal">
+            <div class="vecttauri-modal-overlay"></div>
+            <div class="vecttauri-modal-content vecttauri-content-vectorizer">
+                <div class="vecttauri-modal-header">
                     <h3>
                         <i class="fa-solid fa-database"></i>
                         Vectorize Content
                     </h3>
-                    <button class="vectfox-modal-close" id="vectfox_cv_close">
+                    <button class="vecttauri-modal-close" id="vecttauri_cv_close">
                         <i class="fa-solid fa-times"></i>
                     </button>
                 </div>
 
-                <div class="vectfox-cv-body">
+                <div class="vecttauri-cv-body">
                     <!-- Step 1: Content Type Selection - BIG DROPDOWN -->
-                    <div class="vectfox-cv-section vectfox-cv-type-section">
-                        <div class="vectfox-cv-type-dropdown-wrapper">
-                            <label class="vectfox-cv-main-label">What do you want to vectorize?</label>
-                            <select id="vectfox_cv_type_select" class="vectfox-cv-type-dropdown">
+                    <div class="vecttauri-cv-section vecttauri-cv-type-section">
+                        <div class="vecttauri-cv-type-dropdown-wrapper">
+                            <label class="vecttauri-cv-main-label">What do you want to vectorize?</label>
+                            <select id="vecttauri_cv_type_select" class="vecttauri-cv-type-dropdown">
                                 <option value="">-- Choose content type --</option>
                                 ${contentTypes.map(type => `
                                     <option value="${type.id}" ${type.id === currentContentType ? 'selected' : ''}>
@@ -197,102 +197,102 @@ function createModal() {
                                     </option>
                                 `).join('')}
                             </select>
-                            <span class="vectfox-cv-type-hint" id="vectfox_cv_type_hint">
+                            <span class="vecttauri-cv-type-hint" id="vecttauri_cv_type_hint">
                                 Select a content type to continue
                             </span>
                         </div>
                     </div>
 
                     <!-- Step 1: Backfill Range (chat only) -->
-                    <div class="vectfox-cv-section vectfox-cv-startfrom-section vectfox-cv-subsequent" id="vectfox_cv_startfrom_section" style="display:none;">
-                        <div class="vectfox-cv-section-header">
-                            <span class="vectfox-cv-step-number">1</span>
-                            <span class="vectfox-cv-section-title">Backfill Range</span>
+                    <div class="vecttauri-cv-section vecttauri-cv-startfrom-section vecttauri-cv-subsequent" id="vecttauri_cv_startfrom_section" style="display:none;">
+                        <div class="vecttauri-cv-section-header">
+                            <span class="vecttauri-cv-step-number">1</span>
+                            <span class="vecttauri-cv-section-title">Backfill Range</span>
                         </div>
-                        <div class="vectfox-cv-section-body">
-                            <div class="vectfox-cv-startfrom-row">
-                                <label for="vectfox_cv_startfrom">Start From Message</label>
-                                <input type="number" id="vectfox_cv_startfrom" class="vectfox-input" min="1" step="1" value="1" style="width:100px;">
+                        <div class="vecttauri-cv-section-body">
+                            <div class="vecttauri-cv-startfrom-row">
+                                <label for="vecttauri_cv_startfrom">Start From Message</label>
+                                <input type="number" id="vecttauri_cv_startfrom" class="vecttauri-input" min="1" step="1" value="1" style="width:100px;">
                             </div>
-                            <span class="vectfox-cv-type-hint">Default 1 = entire chat. Enter e.g. 2000 to start from message 2000 onward.</span>
+                            <span class="vecttauri-cv-type-hint">Default 1 = entire chat. Enter e.g. 2000 to start from message 2000 onward.</span>
                         </div>
                     </div>
 
                     <!-- Step 2: Source Selection (changes based on type) -->
-                    <div class="vectfox-cv-section vectfox-cv-source-section vectfox-cv-subsequent">
-                        <div class="vectfox-cv-section-header">
-                            <span class="vectfox-cv-step-number">2</span>
-                            <span class="vectfox-cv-section-title" id="vectfox_cv_source_title">Select Source</span>
+                    <div class="vecttauri-cv-section vecttauri-cv-source-section vecttauri-cv-subsequent">
+                        <div class="vecttauri-cv-section-header">
+                            <span class="vecttauri-cv-step-number">2</span>
+                            <span class="vecttauri-cv-section-title" id="vecttauri_cv_source_title">Select Source</span>
                         </div>
-                        <div id="vectfox_cv_source_content" class="vectfox-cv-section-body">
+                        <div id="vecttauri_cv_source_content" class="vecttauri-cv-section-body">
                             <!-- Dynamically populated based on content type -->
                         </div>
                     </div>
 
                     <!-- Step 2.5: Auto-Reformat (Optional, Document/URL/Wiki only) -->
-                    <div class="vectfox-cv-section vectfox-cv-reformat-section vectfox-cv-subsequent" id="vectfox_cv_reformat_section" style="display:none;">
-                        <div class="vectfox-cv-section-header">
-                            <span class="vectfox-cv-step-number"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
-                            <span class="vectfox-cv-section-title">Auto-Reformat (Optional)</span>
+                    <div class="vecttauri-cv-section vecttauri-cv-reformat-section vecttauri-cv-subsequent" id="vecttauri_cv_reformat_section" style="display:none;">
+                        <div class="vecttauri-cv-section-header">
+                            <span class="vecttauri-cv-step-number"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                            <span class="vecttauri-cv-section-title">Auto-Reformat (Optional)</span>
                         </div>
-                        <div id="vectfox_cv_reformat_content" class="vectfox-cv-section-body">
+                        <div id="vecttauri_cv_reformat_content" class="vecttauri-cv-section-body">
                             <!-- Dynamically populated -->
                         </div>
                     </div>
 
                     <!-- Step 3: Chunking Settings -->
-                    <div class="vectfox-cv-section vectfox-cv-chunking-section vectfox-cv-subsequent">
-                        <div class="vectfox-cv-section-header">
-                            <span class="vectfox-cv-step-number">3</span>
-                            <span class="vectfox-cv-section-title">Chunking Strategy</span>
-                            <button class="vectfox-cv-collapse-btn" data-target="chunking">
+                    <div class="vecttauri-cv-section vecttauri-cv-chunking-section vecttauri-cv-subsequent">
+                        <div class="vecttauri-cv-section-header">
+                            <span class="vecttauri-cv-step-number">3</span>
+                            <span class="vecttauri-cv-section-title">Chunking Strategy</span>
+                            <button class="vecttauri-cv-collapse-btn" data-target="chunking">
                                 <i class="fa-solid fa-chevron-down"></i>
                             </button>
                         </div>
-                        <div class="vectfox-cv-collapsible" id="vectfox_cv_chunking_content">
-                            <div class="vectfox-cv-strategy-select" id="vectfox_cv_strategy_select_wrapper">
+                        <div class="vecttauri-cv-collapsible" id="vecttauri_cv_chunking_content">
+                            <div class="vecttauri-cv-strategy-select" id="vecttauri_cv_strategy_select_wrapper">
                                 <label>Strategy</label>
-                                <select id="vectfox_cv_strategy" class="vectfox-select">
+                                <select id="vecttauri_cv_strategy" class="vecttauri-select">
                                     <!-- Populated dynamically -->
                                 </select>
-                                <span class="vectfox-cv-strategy-desc" id="vectfox_cv_strategy_desc"></span>
+                                <span class="vecttauri-cv-strategy-desc" id="vecttauri_cv_strategy_desc"></span>
                             </div>
 
                             <!-- Size/Overlap controls - only shown for text-based strategies -->
-                            <div class="vectfox-cv-size-controls" id="vectfox_cv_size_controls">
-                                <div class="vectfox-cv-slider-row" id="vectfox_cv_chunk_size_row">
+                            <div class="vecttauri-cv-size-controls" id="vecttauri_cv_size_controls">
+                                <div class="vecttauri-cv-slider-row" id="vecttauri_cv_chunk_size_row">
                                     <label>
                                         Chunk Size
-                                        <span class="vectfox-cv-value" id="vectfox_cv_chunk_size_val">400</span> chars
+                                        <span class="vecttauri-cv-value" id="vecttauri_cv_chunk_size_val">400</span> chars
                                     </label>
-                                    <input type="range" id="vectfox_cv_chunk_size"
+                                    <input type="range" id="vecttauri_cv_chunk_size"
                                            min="100" max="1000" step="50" value="400">
-                                    <div class="vectfox-cv-slider-hints">
+                                    <div class="vecttauri-cv-slider-hints">
                                         <span>Precise</span>
                                         <span>Contextual</span>
                                     </div>
                                 </div>
-                                <div class="vectfox-cv-slider-row" id="vectfox_cv_overlap_row">
+                                <div class="vecttauri-cv-slider-row" id="vecttauri_cv_overlap_row">
                                     <label>
                                         Chunk Overlap
-                                        <span class="vectfox-cv-value" id="vectfox_cv_overlap_val">50</span> chars
+                                        <span class="vecttauri-cv-value" id="vecttauri_cv_overlap_val">50</span> chars
                                     </label>
-                                    <input type="range" id="vectfox_cv_overlap"
+                                    <input type="range" id="vecttauri_cv_overlap"
                                            min="0" max="200" step="10" value="50">
-                                    <div class="vectfox-cv-slider-hints">
+                                    <div class="vecttauri-cv-slider-hints">
                                         <span>Off</span>
                                         <span>High</span>
                                     </div>
                                 </div>
                                 <!-- Batch size - only shown for message_batch strategy -->
-                                <div class="vectfox-cv-slider-row" id="vectfox_cv_batch_size_row" style="display:none;">
+                                <div class="vecttauri-cv-slider-row" id="vecttauri_cv_batch_size_row" style="display:none;">
                                     <label>
                                         Messages per Batch
-                                        <span class="vectfox-cv-value" id="vectfox_cv_batch_size_val">4</span>
+                                        <span class="vecttauri-cv-value" id="vecttauri_cv_batch_size_val">4</span>
                                     </label>
-                                    <input type="range" id="vectfox_cv_batch_size"
+                                    <input type="range" id="vecttauri_cv_batch_size"
                                            min="1" max="20" step="1" value="4">
-                                    <div class="vectfox-cv-slider-hints">
+                                    <div class="vecttauri-cv-slider-hints">
                                         <span>1 msg</span>
                                         <span>20 msgs</span>
                                     </div>
@@ -300,14 +300,14 @@ function createModal() {
                             </div>
 
                             <!-- Parallel Windows - EventBase/chat only -->
-                            <div class="vectfox-cv-slider-row" id="vectfox_cv_parallel_row" style="display:none;">
+                            <div class="vecttauri-cv-slider-row" id="vecttauri_cv_parallel_row" style="display:none;">
                                 <label>
                                     Parallel Windows
-                                    <span class="vectfox-cv-value" id="vectfox_cv_parallel_val">3</span>
+                                    <span class="vecttauri-cv-value" id="vecttauri_cv_parallel_val">3</span>
                                 </label>
-                                <input type="range" id="vectfox_cv_parallel_windows"
+                                <input type="range" id="vecttauri_cv_parallel_windows"
                                        min="1" max="8" step="1" value="3">
-                                <div class="vectfox-cv-slider-hints">
+                                <div class="vecttauri-cv-slider-hints">
                                     <span>1 (safe)</span>
                                     <span>8 (fast)</span>
                                 </div>
@@ -318,28 +318,28 @@ function createModal() {
                                  (today: chat history + chat-history file upload). Gated via
                                  _usesEventBaseWindowControls() so future chunk-based summarizer
                                  types can opt in from one place. -->
-                            <div class="vectfox-cv-slider-row" id="vectfox_cv_window_size_row" style="display:none;">
+                            <div class="vecttauri-cv-slider-row" id="vecttauri_cv_window_size_row" style="display:none;">
                                 <label>
                                     Window Size
-                                    <span class="vectfox-cv-value" id="vectfox_cv_window_size_val">2</span> messages
+                                    <span class="vecttauri-cv-value" id="vecttauri_cv_window_size_val">2</span> messages
                                 </label>
-                                <input type="range" id="vectfox_cv_window_size"
+                                <input type="range" id="vecttauri_cv_window_size"
                                        min="2" max="20" step="1" value="2">
-                                <div class="vectfox-cv-slider-hints">
+                                <div class="vecttauri-cv-slider-hints">
                                     <span>2 (granular)</span>
                                     <span>20 (coarse)</span>
                                 </div>
                             </div>
 
                             <!-- Window Overlap - moved from EventBase tab (Feature A re-home). -->
-                            <div class="vectfox-cv-slider-row" id="vectfox_cv_window_overlap_row" style="display:none;">
+                            <div class="vecttauri-cv-slider-row" id="vecttauri_cv_window_overlap_row" style="display:none;">
                                 <label>
                                     Window Overlap
-                                    <span class="vectfox-cv-value" id="vectfox_cv_window_overlap_val">0</span>
+                                    <span class="vecttauri-cv-value" id="vecttauri_cv_window_overlap_val">0</span>
                                 </label>
-                                <input type="range" id="vectfox_cv_window_overlap"
+                                <input type="range" id="vecttauri_cv_window_overlap"
                                        min="0" max="5" step="1" value="0">
-                                <div class="vectfox-cv-slider-hints">
+                                <div class="vecttauri-cv-slider-hints">
                                     <span>0 (none)</span>
                                     <span>5 (high)</span>
                                 </div>
@@ -348,40 +348,40 @@ function createModal() {
                     </div>
 
                     <!-- Step 4: Type-Specific Options -->
-                    <div class="vectfox-cv-section vectfox-cv-options-section vectfox-cv-subsequent">
-                        <div class="vectfox-cv-section-header">
-                            <span class="vectfox-cv-step-number">4</span>
-                            <span class="vectfox-cv-section-title">Options</span>
-                            <button class="vectfox-cv-collapse-btn" data-target="options">
+                    <div class="vecttauri-cv-section vecttauri-cv-options-section vecttauri-cv-subsequent">
+                        <div class="vecttauri-cv-section-header">
+                            <span class="vecttauri-cv-step-number">4</span>
+                            <span class="vecttauri-cv-section-title">Options</span>
+                            <button class="vecttauri-cv-collapse-btn" data-target="options">
                                 <i class="fa-solid fa-chevron-down"></i>
                             </button>
                         </div>
-                        <div class="vectfox-cv-collapsible" id="vectfox_cv_options_content">
+                        <div class="vecttauri-cv-collapsible" id="vecttauri_cv_options_content">
                             <!-- Dynamically populated based on content type -->
                         </div>
                     </div>
 
                     <!-- Preview Section -->
-                    <div class="vectfox-cv-section vectfox-cv-preview-section" style="display: none;">
-                        <div class="vectfox-cv-section-header">
-                            <span class="vectfox-cv-step-number"><i class="fa-solid fa-eye"></i></span>
-                            <span class="vectfox-cv-section-title">Preview</span>
+                    <div class="vecttauri-cv-section vecttauri-cv-preview-section" style="display: none;">
+                        <div class="vecttauri-cv-section-header">
+                            <span class="vecttauri-cv-step-number"><i class="fa-solid fa-eye"></i></span>
+                            <span class="vecttauri-cv-section-title">Preview</span>
                         </div>
-                        <div id="vectfox_cv_preview_content" class="vectfox-cv-preview">
+                        <div id="vecttauri_cv_preview_content" class="vecttauri-cv-preview">
                             <!-- Preview of chunks will appear here -->
                         </div>
                     </div>
                 </div>
 
-                <div class="vectfox-cv-footer">
-                    <button class="vectfox-btn-secondary" id="vectfox_cv_cancel">Cancel</button>
-                    <button class="vectfox-btn-secondary" id="vectfox_cv_preview_btn">
+                <div class="vecttauri-cv-footer">
+                    <button class="vecttauri-btn-secondary" id="vecttauri_cv_cancel">Cancel</button>
+                    <button class="vecttauri-btn-secondary" id="vecttauri_cv_preview_btn">
                         <i class="fa-solid fa-eye"></i> Preview Chunks
                     </button>
-                    <button class="vectfox-btn-secondary" id="vectfox_cv_continue" style="display: none;">
+                    <button class="vecttauri-btn-secondary" id="vecttauri_cv_continue" style="display: none;">
                         <i class="fa-solid fa-forward"></i> Resume
                     </button>
-                    <button class="vectfox-btn-primary" id="vectfox_cv_vectorize">
+                    <button class="vecttauri-btn-primary" id="vecttauri_cv_vectorize">
                         <i class="fa-solid fa-bolt"></i> Vectorize
                     </button>
                 </div>
@@ -420,9 +420,9 @@ function updateUIForContentType() {
 
     // Show Continue button only for chat type (backfills missing chunks via hash dedup)
     const isChatType = currentContentType === 'chat';
-    $('#vectfox_cv_continue').toggle(isChatType);
+    $('#vecttauri_cv_continue').toggle(isChatType);
     // Show Start From section only for chat
-    $('#vectfox_cv_startfrom_section').toggle(isChatType);
+    $('#vecttauri_cv_startfrom_section').toggle(isChatType);
     if (!isChatType) startFromMessage = 1;
 }
 
@@ -430,7 +430,7 @@ function updateUIForContentType() {
  * Updates the source selection section
  */
 function updateSourceSection(type) {
-    const container = $('#vectfox_cv_source_content');
+    const container = $('#vecttauri_cv_source_content');
     container.empty();
 
     let html = '';
@@ -472,24 +472,24 @@ function renderUrlSource(type) {
     const options = type.sourceOptions;
 
     return `
-        <div class="vectfox-cv-url-source">
+        <div class="vecttauri-cv-url-source">
             <label>Enter URL</label>
-            <div class="vectfox-cv-url-input-row">
-                <input type="text" id="vectfox_cv_url_input"
-                       class="vectfox-input"
+            <div class="vecttauri-cv-url-input-row">
+                <input type="text" id="vecttauri_cv_url_input"
+                       class="vecttauri-input"
                        placeholder="${options.placeholder || 'https://example.com'}">
-                <button id="vectfox_cv_fetch_url" class="vectfox-btn-primary">
+                <button id="vecttauri_cv_fetch_url" class="vecttauri-btn-primary">
                     <i class="fa-solid fa-download"></i> Fetch
                 </button>
             </div>
-            <div class="vectfox-cv-url-status" id="vectfox_cv_url_status"></div>
-            <div class="vectfox-cv-url-preview" id="vectfox_cv_url_preview" style="display: none;">
-                <div class="vectfox-cv-url-preview-header">
+            <div class="vecttauri-cv-url-status" id="vecttauri_cv_url_status"></div>
+            <div class="vecttauri-cv-url-preview" id="vecttauri_cv_url_preview" style="display: none;">
+                <div class="vecttauri-cv-url-preview-header">
                     <i class="fa-solid fa-check-circle"></i>
-                    <span id="vectfox_cv_url_title">Page loaded</span>
+                    <span id="vecttauri_cv_url_title">Page loaded</span>
                 </div>
-                <div class="vectfox-cv-url-preview-stats">
-                    <span><strong id="vectfox_cv_url_chars">0</strong> characters</span>
+                <div class="vecttauri-cv-url-preview-stats">
+                    <span><strong id="vecttauri_cv_url_chars">0</strong> characters</span>
                 </div>
             </div>
         </div>
@@ -506,40 +506,40 @@ function renderChatSource(type) {
     const options = type.sourceOptions;
 
     return `
-        <div class="vectfox-cv-chat-source">
-            <div class="vectfox-cv-source-tabs">
-                <button class="vectfox-cv-source-tab ${hasChat ? 'active' : ''}" data-source="current" ${!hasChat ? 'disabled' : ''}>
+        <div class="vecttauri-cv-chat-source">
+            <div class="vecttauri-cv-source-tabs">
+                <button class="vecttauri-cv-source-tab ${hasChat ? 'active' : ''}" data-source="current" ${!hasChat ? 'disabled' : ''}>
                     <i class="fa-solid fa-comment-dots"></i> Current Chat
                 </button>
-                <button class="vectfox-cv-source-tab ${!hasChat ? 'active' : ''}" data-source="upload">
+                <button class="vecttauri-cv-source-tab ${!hasChat ? 'active' : ''}" data-source="upload">
                     <i class="fa-solid fa-upload"></i> Upload
                 </button>
             </div>
 
             <!-- Current Chat Panel -->
-            <div class="vectfox-cv-source-panel" data-panel="current" ${!hasChat ? 'style="display: none;"' : ''}>
+            <div class="vecttauri-cv-source-panel" data-panel="current" ${!hasChat ? 'style="display: none;"' : ''}>
                 ${hasChat ? `
-                    <div class="vectfox-cv-chat-info">
-                        <div class="vectfox-cv-chat-stats">
-                            <div class="vectfox-cv-stat">
-                                <span class="vectfox-cv-stat-value">${messageCount}</span>
-                                <span class="vectfox-cv-stat-label">Messages</span>
+                    <div class="vecttauri-cv-chat-info">
+                        <div class="vecttauri-cv-chat-stats">
+                            <div class="vecttauri-cv-stat">
+                                <span class="vecttauri-cv-stat-value">${messageCount}</span>
+                                <span class="vecttauri-cv-stat-label">Messages</span>
                             </div>
-                            <div class="vectfox-cv-stat">
-                                <span class="vectfox-cv-stat-value">${context?.name2 || 'Unknown'}</span>
-                                <span class="vectfox-cv-stat-label">Character</span>
+                            <div class="vecttauri-cv-stat">
+                                <span class="vecttauri-cv-stat-value">${context?.name2 || 'Unknown'}</span>
+                                <span class="vecttauri-cv-stat-label">Character</span>
                             </div>
                         </div>
-                        <div class="vectfox-cv-chat-uuid" style="text-align: center; margin-top: 8px;">
+                        <div class="vecttauri-cv-chat-uuid" style="text-align: center; margin-top: 8px;">
                             <code style="font-size: 0.7em; opacity: 0.6; user-select: all;">${getChatUUID() || 'unknown'}</code>
                         </div>
-                        <div class="vectfox-cv-chat-note">
+                        <div class="vecttauri-cv-chat-note">
                             <i class="fa-solid fa-info-circle"></i>
                             Will vectorize all messages in the current chat
                         </div>
                     </div>
                 ` : `
-                    <div class="vectfox-cv-no-chat">
+                    <div class="vecttauri-cv-no-chat">
                         <i class="fa-solid fa-comment-slash"></i>
                         <span>No chat is currently open</span>
                     </div>
@@ -547,27 +547,27 @@ function renderChatSource(type) {
             </div>
 
             <!-- Upload Panel -->
-            <div class="vectfox-cv-source-panel" data-panel="upload" ${hasChat ? 'style="display: none;"' : ''}>
-                <div class="vectfox-cv-upload-zone" id="vectfox_cv_chat_upload_zone">
+            <div class="vecttauri-cv-source-panel" data-panel="upload" ${hasChat ? 'style="display: none;"' : ''}>
+                <div class="vecttauri-cv-upload-zone" id="vecttauri_cv_chat_upload_zone">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                     <span>Drop chat file here or click to browse</span>
-                    <span class="vectfox-cv-upload-formats">
+                    <span class="vecttauri-cv-upload-formats">
                         Formats: ${options.uploadFormats.join(', ')}
                     </span>
-                    <input type="file" id="vectfox_cv_chat_file_input"
+                    <input type="file" id="vecttauri_cv_chat_file_input"
                            accept="${options.uploadFormats.join(',')}" hidden>
                 </div>
-                <div class="vectfox-cv-upload-info" id="vectfox_cv_chat_upload_info" style="display: none;">
+                <div class="vecttauri-cv-upload-info" id="vecttauri_cv_chat_upload_info" style="display: none;">
                     <i class="fa-solid fa-file"></i>
-                    <span id="vectfox_cv_chat_upload_filename"></span>
-                    <button class="vectfox-cv-upload-clear" id="vectfox_cv_chat_upload_clear">
+                    <span id="vecttauri_cv_chat_upload_filename"></span>
+                    <button class="vecttauri-cv-upload-clear" id="vecttauri_cv_chat_upload_clear">
                         <i class="fa-solid fa-times"></i>
                     </button>
                 </div>
-                <div class="vectfox-cv-chat-upload-stats" id="vectfox_cv_chat_upload_stats" style="display: none;">
+                <div class="vecttauri-cv-chat-upload-stats" id="vecttauri_cv_chat_upload_stats" style="display: none;">
                     <!-- Populated after file upload -->
                 </div>
-                <div class="vectfox-cv-upload-hint">
+                <div class="vecttauri-cv-upload-hint">
                     <strong>Supported formats:</strong><br>
                     • <code>.jsonl</code> - JSON Lines (one message per line)<br>
                     • <code>.json</code> - SillyTavern chat export<br>
@@ -588,30 +588,30 @@ function renderCurrentChatSource(type) {
 
     if (!hasChat) {
         return `
-            <div class="vectfox-cv-no-chat">
+            <div class="vecttauri-cv-no-chat">
                 <i class="fa-solid fa-comment-slash"></i>
                 <span>No chat is currently open</span>
-                <span class="vectfox-cv-hint">Open a chat to vectorize its messages</span>
+                <span class="vecttauri-cv-hint">Open a chat to vectorize its messages</span>
             </div>
         `;
     }
 
     return `
-        <div class="vectfox-cv-chat-info">
-            <div class="vectfox-cv-chat-stats">
-                <div class="vectfox-cv-stat">
-                    <span class="vectfox-cv-stat-value">${messageCount}</span>
-                    <span class="vectfox-cv-stat-label">Messages</span>
+        <div class="vecttauri-cv-chat-info">
+            <div class="vecttauri-cv-chat-stats">
+                <div class="vecttauri-cv-stat">
+                    <span class="vecttauri-cv-stat-value">${messageCount}</span>
+                    <span class="vecttauri-cv-stat-label">Messages</span>
                 </div>
-                <div class="vectfox-cv-stat">
-                    <span class="vectfox-cv-stat-value">${context?.name2 || 'Unknown'}</span>
-                    <span class="vectfox-cv-stat-label">Character</span>
+                <div class="vecttauri-cv-stat">
+                    <span class="vecttauri-cv-stat-value">${context?.name2 || 'Unknown'}</span>
+                    <span class="vecttauri-cv-stat-label">Character</span>
                 </div>
             </div>
-            <div class="vectfox-cv-chat-uuid" style="text-align: center; margin-top: 8px;">
+            <div class="vecttauri-cv-chat-uuid" style="text-align: center; margin-top: 8px;">
                 <code style="font-size: 0.7em; opacity: 0.6; user-select: all;">${getChatUUID() || 'unknown'}</code>
             </div>
-            <div class="vectfox-cv-chat-note">
+            <div class="vecttauri-cv-chat-note">
                 <i class="fa-solid fa-info-circle"></i>
                 Will vectorize all messages in the current chat
             </div>
@@ -626,47 +626,47 @@ function renderSelectSource(type) {
     const options = type.sourceOptions;
 
     return `
-        <div class="vectfox-cv-source-select">
-            <div class="vectfox-cv-source-tabs">
-                <button class="vectfox-cv-source-tab active" data-source="existing">
+        <div class="vecttauri-cv-source-select">
+            <div class="vecttauri-cv-source-tabs">
+                <button class="vecttauri-cv-source-tab active" data-source="existing">
                     <i class="fa-solid fa-list"></i> Existing
                 </button>
                 ${options.allowUpload ? `
-                    <button class="vectfox-cv-source-tab" data-source="upload">
+                    <button class="vecttauri-cv-source-tab" data-source="upload">
                         <i class="fa-solid fa-upload"></i> Upload
                     </button>
                 ` : ''}
             </div>
 
-            <div class="vectfox-cv-source-panel" data-panel="existing">
+            <div class="vecttauri-cv-source-panel" data-panel="existing">
                 <label>${options.selectLabel || 'Select'}</label>
-                <select id="vectfox_cv_source_select" class="vectfox-select">
+                <select id="vecttauri_cv_source_select" class="vecttauri-select">
                     <option value="">-- Select --</option>
                     <!-- Populated dynamically -->
                 </select>
                 <!-- Stats display (shown after selection) -->
-                <div class="vectfox-cv-source-stats" id="vectfox_cv_source_stats" style="display: none;">
-                    <div class="vectfox-cv-stats-loading">
+                <div class="vecttauri-cv-source-stats" id="vecttauri_cv_source_stats" style="display: none;">
+                    <div class="vecttauri-cv-stats-loading">
                         <i class="fa-solid fa-spinner fa-spin"></i> Loading info...
                     </div>
                 </div>
             </div>
 
             ${options.allowUpload ? `
-                <div class="vectfox-cv-source-panel" data-panel="upload" style="display: none;">
-                    <div class="vectfox-cv-upload-zone" id="vectfox_cv_upload_zone">
+                <div class="vecttauri-cv-source-panel" data-panel="upload" style="display: none;">
+                    <div class="vecttauri-cv-upload-zone" id="vecttauri_cv_upload_zone">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
                         <span>Drop file here or click to browse</span>
-                        <span class="vectfox-cv-upload-formats">
+                        <span class="vecttauri-cv-upload-formats">
                             Formats: ${options.uploadFormats.join(', ')}
                         </span>
-                        <input type="file" id="vectfox_cv_file_input"
+                        <input type="file" id="vecttauri_cv_file_input"
                                accept="${options.uploadFormats.join(',')}" hidden>
                     </div>
-                    <div class="vectfox-cv-upload-info" id="vectfox_cv_upload_info" style="display: none;">
+                    <div class="vecttauri-cv-upload-info" id="vecttauri_cv_upload_info" style="display: none;">
                         <i class="fa-solid fa-file"></i>
-                        <span id="vectfox_cv_upload_filename"></span>
-                        <button class="vectfox-cv-upload-clear" id="vectfox_cv_upload_clear">
+                        <span id="vecttauri_cv_upload_filename"></span>
+                        <button class="vecttauri-cv-upload-clear" id="vecttauri_cv_upload_clear">
                             <i class="fa-solid fa-times"></i>
                         </button>
                     </div>
@@ -683,10 +683,10 @@ function renderInputSource(type) {
     const methods = type.sourceOptions.methods;
 
     return `
-        <div class="vectfox-cv-input-source">
-            <div class="vectfox-cv-input-tabs">
+        <div class="vecttauri-cv-input-source">
+            <div class="vecttauri-cv-input-tabs">
                 ${methods.map((m, i) => `
-                    <button class="vectfox-cv-input-tab ${i === 0 ? 'active' : ''}" data-method="${m.id}">
+                    <button class="vecttauri-cv-input-tab ${i === 0 ? 'active' : ''}" data-method="${m.id}">
                         <i class="fa-solid ${m.icon}"></i>
                         <span>${m.name}</span>
                     </button>
@@ -694,41 +694,41 @@ function renderInputSource(type) {
             </div>
 
             <!-- Paste Text Panel -->
-            <div class="vectfox-cv-input-panel" data-panel="paste">
-                <textarea id="vectfox_cv_paste_text"
+            <div class="vecttauri-cv-input-panel" data-panel="paste">
+                <textarea id="vecttauri_cv_paste_text"
                           placeholder="Paste or type your text here..."
                           rows="8"></textarea>
             </div>
 
             <!-- Upload File Panel -->
-            <div class="vectfox-cv-input-panel" data-panel="upload" style="display: none;">
-                <div class="vectfox-cv-upload-zone" id="vectfox_cv_doc_upload_zone">
+            <div class="vecttauri-cv-input-panel" data-panel="upload" style="display: none;">
+                <div class="vecttauri-cv-upload-zone" id="vecttauri_cv_doc_upload_zone">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                     <span>Drop file here or click to browse</span>
-                    <span class="vectfox-cv-upload-formats">
+                    <span class="vecttauri-cv-upload-formats">
                         Formats: ${methods.find(m => m.id === 'upload')?.formats?.join(', ') || '.txt, .md'}
                     </span>
-                    <input type="file" id="vectfox_cv_doc_file_input"
+                    <input type="file" id="vecttauri_cv_doc_file_input"
                            accept="${methods.find(m => m.id === 'upload')?.formats?.join(',') || '.txt,.md'}" hidden>
                 </div>
             </div>
 
             <!-- URL Fetch Panel -->
-            <div class="vectfox-cv-input-panel" data-panel="url" style="display: none;">
-                <div class="vectfox-cv-url-input">
-                    <input type="text" id="vectfox_cv_url_input"
+            <div class="vecttauri-cv-input-panel" data-panel="url" style="display: none;">
+                <div class="vecttauri-cv-url-input">
+                    <input type="text" id="vecttauri_cv_url_input"
                            placeholder="https://example.com/article">
-                    <button id="vectfox_cv_fetch_url" class="vectfox-btn-secondary">
+                    <button id="vecttauri_cv_fetch_url" class="vecttauri-btn-secondary">
                         <i class="fa-solid fa-download"></i> Fetch
                     </button>
                 </div>
-                <div class="vectfox-cv-url-status" id="vectfox_cv_url_status"></div>
+                <div class="vecttauri-cv-url-status" id="vecttauri_cv_url_status"></div>
             </div>
 
             <!-- Document Name -->
-            <div class="vectfox-cv-doc-name">
+            <div class="vecttauri-cv-doc-name">
                 <label>Collection Name</label>
-                <input type="text" id="vectfox_cv_doc_name"
+                <input type="text" id="vecttauri_cv_doc_name"
                        placeholder="My Document">
             </div>
         </div>
@@ -742,16 +742,16 @@ function renderWikiSource(type) {
     const options = type.sourceOptions;
 
     return `
-        <div class="vectfox-cv-wiki-source">
+        <div class="vecttauri-cv-wiki-source">
             <!-- Plugin Status -->
-            <div class="vectfox-cv-wiki-plugin-status" id="vectfox_cv_wiki_plugin_status">
+            <div class="vecttauri-cv-wiki-plugin-status" id="vecttauri_cv_wiki_plugin_status">
                 <i class="fa-solid fa-spinner fa-spin"></i> Checking plugin availability...
             </div>
 
             <!-- Wiki Type Selection -->
-            <div class="vectfox-cv-wiki-type">
+            <div class="vecttauri-cv-wiki-type">
                 <label>Wiki Type</label>
-                <select id="vectfox_cv_wiki_type" class="vectfox-select">
+                <select id="vecttauri_cv_wiki_type" class="vecttauri-select">
                     ${options.types.map(t => `
                         <option value="${t.id}">${t.name}</option>
                     `).join('')}
@@ -759,44 +759,44 @@ function renderWikiSource(type) {
             </div>
 
             <!-- Wiki URL/ID Input -->
-            <div class="vectfox-cv-wiki-url">
+            <div class="vecttauri-cv-wiki-url">
                 <label>Wiki URL or ID</label>
-                <input type="text" id="vectfox_cv_wiki_url"
-                       class="vectfox-input"
+                <input type="text" id="vecttauri_cv_wiki_url"
+                       class="vecttauri-input"
                        placeholder="${options.types[0].placeholder}">
             </div>
 
             <!-- Page Filter (for bulk scraping) -->
-            <div class="vectfox-cv-wiki-filter">
+            <div class="vecttauri-cv-wiki-filter">
                 <label>
                     Page Filter
-                    <span class="vectfox-cv-optional">(optional)</span>
+                    <span class="vecttauri-cv-optional">(optional)</span>
                 </label>
-                <input type="text" id="vectfox_cv_wiki_filter"
-                       class="vectfox-input"
+                <input type="text" id="vecttauri_cv_wiki_filter"
+                       class="vecttauri-input"
                        placeholder="${options.filterPlaceholder}">
-                <div class="vectfox-cv-hint">
+                <div class="vecttauri-cv-hint">
                     Leave empty to scrape single page, or enter comma-separated page names for bulk scrape
                 </div>
             </div>
 
             <!-- Scrape Button -->
-            <div class="vectfox-cv-wiki-actions">
-                <button id="vectfox_cv_scrape_wiki" class="vectfox-btn-primary">
+            <div class="vecttauri-cv-wiki-actions">
+                <button id="vecttauri_cv_scrape_wiki" class="vecttauri-btn-primary">
                     <i class="fa-solid fa-download"></i> Scrape Wiki
                 </button>
             </div>
 
             <!-- Status/Preview -->
-            <div class="vectfox-cv-wiki-status" id="vectfox_cv_wiki_status"></div>
-            <div class="vectfox-cv-wiki-preview" id="vectfox_cv_wiki_preview" style="display: none;">
-                <div class="vectfox-cv-wiki-preview-header">
+            <div class="vecttauri-cv-wiki-status" id="vecttauri_cv_wiki_status"></div>
+            <div class="vecttauri-cv-wiki-preview" id="vecttauri_cv_wiki_preview" style="display: none;">
+                <div class="vecttauri-cv-wiki-preview-header">
                     <i class="fa-solid fa-check-circle"></i>
-                    <span id="vectfox_cv_wiki_title">Wiki content loaded</span>
+                    <span id="vecttauri_cv_wiki_title">Wiki content loaded</span>
                 </div>
-                <div class="vectfox-cv-wiki-preview-stats">
-                    <span><strong id="vectfox_cv_wiki_pages">0</strong> pages</span>
-                    <span><strong id="vectfox_cv_wiki_chars">0</strong> characters</span>
+                <div class="vecttauri-cv-wiki-preview-stats">
+                    <span><strong id="vecttauri_cv_wiki_pages">0</strong> pages</span>
+                    <span><strong id="vecttauri_cv_wiki_chars">0</strong> characters</span>
                 </div>
             </div>
         </div>
@@ -810,46 +810,46 @@ function renderYouTubeSource(type) {
     const options = type.sourceOptions;
 
     return `
-        <div class="vectfox-cv-youtube-source">
+        <div class="vecttauri-cv-youtube-source">
             <!-- URL Input -->
-            <div class="vectfox-cv-youtube-url">
+            <div class="vecttauri-cv-youtube-url">
                 <label>YouTube URL or Video ID</label>
-                <div class="vectfox-cv-youtube-input-row">
-                    <input type="text" id="vectfox_cv_youtube_url"
-                           class="vectfox-input"
+                <div class="vecttauri-cv-youtube-input-row">
+                    <input type="text" id="vecttauri_cv_youtube_url"
+                           class="vecttauri-input"
                            placeholder="${options.placeholder}">
-                    <button id="vectfox_cv_fetch_youtube" class="vectfox-btn-primary">
+                    <button id="vecttauri_cv_fetch_youtube" class="vecttauri-btn-primary">
                         <i class="fa-brands fa-youtube"></i> Fetch
                     </button>
                 </div>
             </div>
 
             <!-- Language (optional) -->
-            <div class="vectfox-cv-youtube-lang">
+            <div class="vecttauri-cv-youtube-lang">
                 <label>
                     Language Code
-                    <span class="vectfox-cv-optional">(optional)</span>
+                    <span class="vecttauri-cv-optional">(optional)</span>
                 </label>
-                <input type="text" id="vectfox_cv_youtube_lang"
-                       class="vectfox-input vectfox-input-sm"
+                <input type="text" id="vecttauri_cv_youtube_lang"
+                       class="vecttauri-input vecttauri-input-sm"
                        placeholder="${options.langPlaceholder}"
                        maxlength="5"
                        style="width: 100px;">
-                <div class="vectfox-cv-hint">
+                <div class="vecttauri-cv-hint">
                     ISO 639-1 code (e.g., "en", "es", "ja"). Leave blank for auto-detect.
                 </div>
             </div>
 
             <!-- Status/Preview -->
-            <div class="vectfox-cv-youtube-status" id="vectfox_cv_youtube_status"></div>
-            <div class="vectfox-cv-youtube-preview" id="vectfox_cv_youtube_preview" style="display: none;">
-                <div class="vectfox-cv-youtube-preview-header">
+            <div class="vecttauri-cv-youtube-status" id="vecttauri_cv_youtube_status"></div>
+            <div class="vecttauri-cv-youtube-preview" id="vecttauri_cv_youtube_preview" style="display: none;">
+                <div class="vecttauri-cv-youtube-preview-header">
                     <i class="fa-solid fa-check-circle"></i>
-                    <span id="vectfox_cv_youtube_title">Transcript loaded</span>
+                    <span id="vecttauri_cv_youtube_title">Transcript loaded</span>
                 </div>
-                <div class="vectfox-cv-youtube-preview-stats">
-                    <span><strong id="vectfox_cv_youtube_chars">0</strong> characters</span>
-                    <span><strong id="vectfox_cv_youtube_duration">~0</strong> min estimated</span>
+                <div class="vecttauri-cv-youtube-preview-stats">
+                    <span><strong id="vecttauri_cv_youtube_chars">0</strong> characters</span>
+                    <span><strong id="vecttauri_cv_youtube_duration">~0</strong> min estimated</span>
                 </div>
             </div>
         </div>
@@ -888,50 +888,50 @@ function isReformatSupportedType() {
  * reformat state changes (source-load, accept, discard, re-run).
  */
 function renderReformatSection() {
-    const section = $('#vectfox_cv_reformat_section');
+    const section = $('#vecttauri_cv_reformat_section');
     if (!isReformatSupportedType()) {
         section.hide();
         return;
     }
     section.show();
 
-    const container = $('#vectfox_cv_reformat_content');
+    const container = $('#vecttauri_cv_reformat_content');
     const reformat = currentSettings.reformat;
 
     if (reformat?.accepted) {
         container.html(`
-            <div class="vectfox-cv-reformat-accepted">
+            <div class="vecttauri-cv-reformat-accepted">
                 <i class="fa-solid fa-circle-check"></i>
                 <span>Auto-Reformat accepted. Chunking Strategy below is bypassed — the reviewed entries will be stored as-is.</span>
             </div>
-            <div class="vectfox-cv-reformat-actions">
-                <button class="vectfox-btn-secondary" id="vectfox_cv_reformat_discard">
+            <div class="vecttauri-cv-reformat-actions">
+                <button class="vecttauri-btn-secondary" id="vecttauri_cv_reformat_discard">
                     <i class="fa-solid fa-rotate-left"></i> Discard &amp; Chunk Manually
                 </button>
-                <button class="vectfox-btn-secondary" id="vectfox_cv_reformat_rerun">
+                <button class="vecttauri-btn-secondary" id="vecttauri_cv_reformat_rerun">
                     <i class="fa-solid fa-arrows-rotate"></i> Re-run Auto-Reformat
                 </button>
             </div>
         `);
-        $('#vectfox_cv_reformat_discard').on('click', () => {
+        $('#vecttauri_cv_reformat_discard').on('click', () => {
             currentSettings.reformat = null;
             const type = getContentType(currentContentType);
             renderReformatSection();
             updateChunkingSection(type);
         });
-        $('#vectfox_cv_reformat_rerun').on('click', runAutoReformat);
+        $('#vecttauri_cv_reformat_rerun').on('click', runAutoReformat);
         return;
     }
 
     container.html(`
-        <div class="vectfox-cv-reformat-intro">
+        <div class="vecttauri-cv-reformat-intro">
             <span>Optional: have an LLM read this content, split it into clean per-entity/per-topic entries, and use those as the final chunks — instead of the mechanical strategy below. You'll review every entry before anything is stored.</span>
         </div>
-        <button class="vectfox-btn-secondary" id="vectfox_cv_reformat_run">
+        <button class="vecttauri-btn-secondary" id="vecttauri_cv_reformat_run">
             <i class="fa-solid fa-wand-magic-sparkles"></i> Run Auto-Reformat
         </button>
     `);
-    $('#vectfox_cv_reformat_run').on('click', runAutoReformat);
+    $('#vecttauri_cv_reformat_run').on('click', runAutoReformat);
 }
 
 /**
@@ -963,13 +963,13 @@ async function runAutoReformat() {
         return;
     }
 
-    const container = $('#vectfox_cv_reformat_content');
-    container.html('<div class="vectfox-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Preparing content...</div>');
+    const container = $('#vecttauri_cv_reformat_content');
+    container.html('<div class="vecttauri-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Preparing content...</div>');
 
     try {
         const text = await _resolveReformatSourceText(source);
         if (!text.trim()) {
-            container.html('<div class="vectfox-cv-error">Could not load content. Please check your selection.</div>');
+            container.html('<div class="vecttauri-cv-error">Could not load content. Please check your selection.</div>');
             return;
         }
 
@@ -983,11 +983,11 @@ async function runAutoReformat() {
             currentSettings.reformat = { accepted: true, sourceHash };
             renderReformatSection();
             updateChunkingSection(getContentType(currentContentType));
-            toastr.info(`This exact content was already reformatted (${existing.chunks.length} chunks) — reusing the saved result.`, 'VectFox');
+            toastr.info(`This exact content was already reformatted (${existing.chunks.length} chunks) — reusing the saved result.`, 'VectTauri');
             return;
         }
 
-        container.html('<div class="vectfox-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Running Auto-Reformat...</div>');
+        container.html('<div class="vecttauri-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Running Auto-Reformat...</div>');
 
         const { reformatDocument } = await import('../core/reformat-extractor.js');
         const result = await reformatDocument({
@@ -995,7 +995,7 @@ async function runAutoReformat() {
             contentType: currentContentType,
             settings: mergedSettings,
             onProgress: (done, total) => {
-                container.find('.vectfox-cv-loading').html(
+                container.find('.vecttauri-cv-loading').html(
                     `<i class="fa-solid fa-spinner fa-spin"></i> Running Auto-Reformat (${done}/${total} batches)...`
                 );
             },
@@ -1003,7 +1003,7 @@ async function runAutoReformat() {
 
         if (result.chunks.length === 0) {
             const extra = result.warnings.length ? ` ${result.warnings.join(' ')}` : '';
-            container.html(`<div class="vectfox-cv-error">Auto-Reformat produced no entries.${extra}</div>`);
+            container.html(`<div class="vecttauri-cv-error">Auto-Reformat produced no entries.${extra}</div>`);
             return;
         }
 
@@ -1025,8 +1025,8 @@ async function runAutoReformat() {
             onRerun: () => runAutoReformat(),
         });
     } catch (e) {
-        console.error('VectFox: Auto-Reformat failed:', e);
-        container.html(`<div class="vectfox-cv-error">Auto-Reformat failed: ${e.message}</div>`);
+        console.error('VectTauri: Auto-Reformat failed:', e);
+        container.html(`<div class="vecttauri-cv-error">Auto-Reformat failed: ${e.message}</div>`);
     }
 }
 
@@ -1082,7 +1082,7 @@ async function _finalizeReformatAccept({ acceptedRecords, sourceHash, text, sour
             // Surface that plainly rather than guessing at which collection to touch.
             toastr.info(
                 'This replaces the saved Auto-Reformat draft. If you already vectorized the previous version into a collection, that collection is untouched — delete it via Database Browser if you don\'t want both.',
-                'VectFox',
+                'VectTauri',
                 { timeOut: 10000 },
             );
         }
@@ -1090,7 +1090,7 @@ async function _finalizeReformatAccept({ acceptedRecords, sourceHash, text, sour
         if (text.length > 200000) {
             toastr.warning(
                 `Auto-Reformat retains the original source text for audit (~${Math.round(text.length / 1024)} KB), adding to your settings storage size. Use "Clear Auto-Reformat originals" in Database Browser if this grows large.`,
-                'VectFox',
+                'VectTauri',
                 { timeOut: 10000 },
             );
         }
@@ -1105,13 +1105,13 @@ async function _finalizeReformatAccept({ acceptedRecords, sourceHash, text, sour
         });
 
         currentSettings.reformat = { accepted: true, sourceHash };
-        toastr.success(`Auto-Reformat accepted: ${shapedChunks.length} chunk(s) ready. Click Vectorize to store them.`, 'VectFox');
+        toastr.success(`Auto-Reformat accepted: ${shapedChunks.length} chunk(s) ready. Click Vectorize to store them.`, 'VectTauri');
 
         renderReformatSection();
         updateChunkingSection(getContentType(currentContentType));
     } catch (e) {
-        console.error('VectFox: Failed to finalize Auto-Reformat accept:', e);
-        toastr.error('Failed to save Auto-Reformat result: ' + e.message, 'VectFox');
+        console.error('VectTauri: Failed to finalize Auto-Reformat accept:', e);
+        toastr.error('Failed to save Auto-Reformat result: ' + e.message, 'VectTauri');
     }
 }
 
@@ -1123,15 +1123,15 @@ function updateChunkingSection(type) {
 
     // Default: ensure section is visible. The chat branch below may hide it for the
     // archive+EventBase route; non-chat types always need it visible.
-    $('.vectfox-cv-chunking-section').show();
+    $('.vecttauri-cv-chunking-section').show();
 
     // Window Size / Overlap / Parallel Windows are EventBase-extraction-path controls.
     // Show/hide them together based on the content type (single predicate above) so
     // they appear for chat history (+ chat upload) and, later, any chunk-based path.
-    $('#vectfox_cv_parallel_row, #vectfox_cv_window_size_row, #vectfox_cv_window_overlap_row')
+    $('#vecttauri_cv_parallel_row, #vecttauri_cv_window_size_row, #vecttauri_cv_window_overlap_row')
         .toggle(_usesEventBaseWindowControls(type.id));
 
-    const strategySelect = $('#vectfox_cv_strategy');
+    const strategySelect = $('#vecttauri_cv_strategy');
     strategySelect.empty();
 
     strategies.forEach(s => {
@@ -1141,7 +1141,7 @@ function updateChunkingSection(type) {
 
     // Update description
     const currentStrategy = getChunkingStrategy(strategySelect.val());
-    $('#vectfox_cv_strategy_desc').text(currentStrategy?.description || '');
+    $('#vecttauri_cv_strategy_desc').text(currentStrategy?.description || '');
 
     // Get strategy-specific defaults if available
     const strategyDefaults = currentStrategy || {};
@@ -1149,15 +1149,15 @@ function updateChunkingSection(type) {
     const chunkOverlap = currentSettings.chunkOverlap || strategyDefaults.defaultOverlap || defaults.chunkOverlap;
 
     // Update size controls values
-    $('#vectfox_cv_chunk_size').val(chunkSize);
-    $('#vectfox_cv_chunk_size_val').text(chunkSize);
-    $('#vectfox_cv_overlap').val(chunkOverlap);
-    $('#vectfox_cv_overlap_val').text(chunkOverlap === 0 ? 'Off' : chunkOverlap);
+    $('#vecttauri_cv_chunk_size').val(chunkSize);
+    $('#vecttauri_cv_chunk_size_val').text(chunkSize);
+    $('#vecttauri_cv_overlap').val(chunkOverlap);
+    $('#vecttauri_cv_overlap_val').text(chunkOverlap === 0 ? 'Off' : chunkOverlap);
 
     const batchSize = currentSettings.batchSize || defaults.batchSize || 4;
 
-    $('#vectfox_cv_batch_size').val(batchSize);
-    $('#vectfox_cv_batch_size_val').text(batchSize);
+    $('#vecttauri_cv_batch_size').val(batchSize);
+    $('#vecttauri_cv_batch_size_val').text(batchSize);
 
     // Chat history now follows EventBase extraction settings from the dedicated GUI,
     // so keep the legacy strategy selector populated for internal compatibility but
@@ -1169,18 +1169,18 @@ function updateChunkingSection(type) {
     // explicit if that ever changes.
     const isReformatActive = isReformatSupportedType() && currentSettings.reformat?.accepted === true;
 
-    $('#vectfox_cv_strategy_select_wrapper').toggle(!isChatType && !isReformatActive);
+    $('#vecttauri_cv_strategy_select_wrapper').toggle(!isChatType && !isReformatActive);
     if (isReformatActive) {
-        $('#vectfox_cv_strategy_desc').text('Chunking handled by Auto-Reformat — see the section above.');
-        $('#vectfox_cv_size_controls').hide();
-        $('.vectfox-cv-chunking-section').show();
-        $('#vectfox_cv_parallel_row').hide();
+        $('#vecttauri_cv_strategy_desc').text('Chunking handled by Auto-Reformat — see the section above.');
+        $('#vecttauri_cv_size_controls').hide();
+        $('.vecttauri-cv-chunking-section').show();
+        $('#vecttauri_cv_parallel_row').hide();
         return;
     }
     if (isChatType) {
-        $('#vectfox_cv_strategy_desc').text('');
-        $('#vectfox_cv_size_controls').hide();
-        $('.vectfox-cv-chunking-section').show();
+        $('#vecttauri_cv_strategy_desc').text('');
+        $('#vecttauri_cv_size_controls').hide();
+        $('.vecttauri-cv-chunking-section').show();
         // Parallel/window rows already toggled above via _usesEventBaseWindowControls.
         return;
     }
@@ -1195,7 +1195,7 @@ function updateChunkingSection(type) {
  * Text-based strategies (recursive, paragraph, sliding) need them
  */
 function updateSizeControlsVisibility() {
-    const strategyId = $('#vectfox_cv_strategy').val();
+    const strategyId = $('#vecttauri_cv_strategy').val();
     const strategy = getChunkingStrategy(strategyId);
 
     const needsSize = strategy?.needsSize ?? false;
@@ -1205,22 +1205,22 @@ function updateSizeControlsVisibility() {
 
     // Show/hide size controls based on strategy requirements
     const hasAnyControls = needsSize || needsOverlap;
-    $('#vectfox_cv_size_controls').toggle(hasAnyControls || needsMessageBatchControl);
+    $('#vecttauri_cv_size_controls').toggle(hasAnyControls || needsMessageBatchControl);
 
     // Show/hide individual controls
-    $('#vectfox_cv_chunk_size_row').toggle(needsSize);
-    $('#vectfox_cv_overlap_row').toggle(needsOverlap);
-    $('#vectfox_cv_batch_size_row').toggle(needsMessageBatchControl);
+    $('#vecttauri_cv_chunk_size_row').toggle(needsSize);
+    $('#vecttauri_cv_overlap_row').toggle(needsOverlap);
+    $('#vecttauri_cv_batch_size_row').toggle(needsMessageBatchControl);
 
     // Update description when strategy changes
-    $('#vectfox_cv_strategy_desc').text(strategy?.description || '');
+    $('#vecttauri_cv_strategy_desc').text(strategy?.description || '');
 }
 
 /**
  * Updates options section based on content type
  */
 function updateOptionsSection(type) {
-    const container = $('#vectfox_cv_options_content');
+    const container = $('#vecttauri_cv_options_content');
     container.empty();
 
     let html = '';
@@ -1242,14 +1242,14 @@ function updateOptionsSection(type) {
     // EventBase chat ingestion does not, so this is hidden for the chat type).
     if (hasFeature(type.id, 'keywordExtraction')) {
         html += `
-            <div class="vectfox-cv-option-row vectfox-cv-keyword-settings">
-                <div class="vectfox-cv-keyword-header">
+            <div class="vecttauri-cv-option-row vecttauri-cv-keyword-settings">
+                <div class="vecttauri-cv-keyword-header">
                     <span>Keyword Extraction</span>
                 </div>
-                <div class="vectfox-cv-keyword-controls">
-                    <div class="vectfox-cv-keyword-level">
-                        <label for="vectfox_cv_keyword_level">Level:</label>
-                        <select id="vectfox_cv_keyword_level" class="vectfox-select">
+                <div class="vecttauri-cv-keyword-controls">
+                    <div class="vecttauri-cv-keyword-level">
+                        <label for="vecttauri_cv_keyword_level">Level:</label>
+                        <select id="vecttauri_cv_keyword_level" class="vecttauri-select">
                             <option value="off" ${currentSettings.keywordLevel === 'off' ? 'selected' : ''}>
                                 Off - Manual only
                             </option>
@@ -1264,16 +1264,16 @@ function updateOptionsSection(type) {
                             </option>
                         </select>
                     </div>
-                    <div class="vectfox-cv-keyword-weight">
-                        <label for="vectfox_cv_keyword_weight">Base Weight:</label>
-                        <input type="number" id="vectfox_cv_keyword_weight"
+                    <div class="vecttauri-cv-keyword-weight">
+                        <label for="vecttauri_cv_keyword_weight">Base Weight:</label>
+                        <input type="number" id="vecttauri_cv_keyword_weight"
                                min="0.01" max="3.0" step="0.01"
                                value="${currentSettings.keywordBaseWeight || 1.5}"
-                               class="vectfox-input-number">
-                        <span class="vectfox-cv-weight-hint">×</span>
+                               class="vecttauri-input-number">
+                        <span class="vecttauri-cv-weight-hint">×</span>
                     </div>
                 </div>
-                <span class="vectfox-cv-option-hint">
+                <span class="vecttauri-cv-option-hint">
                     ${type.id === 'lorebook'
                         ? 'WI trigger keys always included. Auto-extraction adds more based on text frequency.'
                         : 'Higher frequency words get higher weights. Base weight applies to all extracted keywords.'}
@@ -1285,15 +1285,15 @@ function updateOptionsSection(type) {
     // Lorebook-specific: respect disabled entries
     if (hasFeature(type.id, 'respectDisabled')) {
         html += `
-            <div class="vectfox-cv-option-row">
-                <label class="vectfox-cv-toggle-label">
+            <div class="vecttauri-cv-option-row">
+                <label class="vecttauri-cv-toggle-label">
                     <span>Include Disabled Entries</span>
-                    <label class="vectfox-toggle-switch">
-                        <input type="checkbox" id="vectfox_cv_include_disabled">
-                        <span class="vectfox-toggle-slider"></span>
+                    <label class="vecttauri-toggle-switch">
+                        <input type="checkbox" id="vecttauri_cv_include_disabled">
+                        <span class="vecttauri-toggle-slider"></span>
                     </label>
                 </label>
-                <span class="vectfox-cv-option-hint">
+                <span class="vecttauri-cv-option-hint">
                     Vectorize entries even if disabled in World Info
                 </span>
             </div>
@@ -1344,18 +1344,18 @@ function renderScopeOptions(type) {
     ];
 
     return `
-        <div class="vectfox-cv-scope-select">
+        <div class="vecttauri-cv-scope-select">
             <label>Scope</label>
-            <div class="vectfox-cv-scope-options">
+            <div class="vecttauri-cv-scope-options">
                 ${scopeData.map(scope => `
-                    <label class="vectfox-cv-scope-option ${scope.id === defaultScope ? 'selected' : ''} ${!scope.enabled ? 'disabled' : ''}">
-                        <input type="radio" name="vectfox_cv_scope" value="${scope.id}"
+                    <label class="vecttauri-cv-scope-option ${scope.id === defaultScope ? 'selected' : ''} ${!scope.enabled ? 'disabled' : ''}">
+                        <input type="radio" name="vecttauri_cv_scope" value="${scope.id}"
                                ${scope.id === defaultScope ? 'checked' : ''}
                                ${!scope.enabled ? 'disabled' : ''}>
-                        <div class="vectfox-cv-scope-card">
+                        <div class="vecttauri-cv-scope-card">
                             <i class="fa-solid ${scope.icon}"></i>
-                            <span class="vectfox-cv-scope-name">${scope.name}</span>
-                            <span class="vectfox-cv-scope-desc">${scope.desc}</span>
+                            <span class="vecttauri-cv-scope-name">${scope.name}</span>
+                            <span class="vecttauri-cv-scope-desc">${scope.desc}</span>
                         </div>
                     </label>
                 `).join('')}
@@ -1371,15 +1371,15 @@ function renderFieldSelection() {
     const defaults = getContentTypeDefaults('character');
 
     return `
-        <div class="vectfox-cv-field-select">
+        <div class="vecttauri-cv-field-select">
             <label>Fields to Vectorize</label>
-            <div class="vectfox-cv-field-grid">
+            <div class="vecttauri-cv-field-grid">
                 ${CHARACTER_FIELDS.map(field => `
-                    <label class="vectfox-cv-field-option">
-                        <input type="checkbox" name="vectfox_cv_field"
+                    <label class="vecttauri-cv-field-option">
+                        <input type="checkbox" name="vecttauri_cv_field"
                                value="${field.id}"
                                ${defaults.fields?.[field.id] ? 'checked' : ''}>
-                        <span class="vectfox-cv-field-name">${field.name}</span>
+                        <span class="vecttauri-cv-field-name">${field.name}</span>
                     </label>
                 `).join('')}
             </div>
@@ -1406,17 +1406,17 @@ function renderTextCleaningOptions() {
     const currentPreset = currentSettings.cleaningPreset || getCleaningSettings().selectedPreset || 'custom';
 
     return `
-        <div class="vectfox-cv-option-row vectfox-cv-cleaning-settings">
-            <div class="vectfox-cv-cleaning-header">
+        <div class="vecttauri-cv-option-row vecttauri-cv-cleaning-settings">
+            <div class="vecttauri-cv-cleaning-header">
                 <span>Text Cleaning</span>
-                <button class="vectfox-btn-icon" id="vectfox_cv_manage_cleaning" title="Manage Cleaning Patterns">
+                <button class="vecttauri-btn-icon" id="vecttauri_cv_manage_cleaning" title="Manage Cleaning Patterns">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
-            <div class="vectfox-cv-cleaning-controls">
-                <div class="vectfox-cv-cleaning-preset">
-                    <label for="vectfox_cv_cleaning_preset">Preset:</label>
-                    <select id="vectfox_cv_cleaning_preset" class="vectfox-select">
+            <div class="vecttauri-cv-cleaning-controls">
+                <div class="vecttauri-cv-cleaning-preset">
+                    <label for="vecttauri_cv_cleaning_preset">Preset:</label>
+                    <select id="vecttauri_cv_cleaning_preset" class="vecttauri-select">
                         ${presets.map(p => `
                             <option value="${p.id}" ${p.id === currentPreset ? 'selected' : ''}>
                                 ${p.name}
@@ -1425,7 +1425,7 @@ function renderTextCleaningOptions() {
                     </select>
                 </div>
             </div>
-            <span class="vectfox-cv-option-hint" id="vectfox_cv_cleaning_hint">
+            <span class="vecttauri-cv-option-hint" id="vecttauri_cv_cleaning_hint">
                 ${presets.find(p => p.id === currentPreset)?.desc || ''}
             </span>
         </div>
@@ -1441,28 +1441,28 @@ function renderTextCleaningOptions() {
  */
 function bindEvents() {
     // Close handlers
-    $('#vectfox_cv_close').on('click', closeContentVectorizer);
-    $('#vectfox_cv_cancel').on('click', function() {
+    $('#vecttauri_cv_close').on('click', closeContentVectorizer);
+    $('#vecttauri_cv_cancel').on('click', function() {
         if (isVectorizing) {
             stopActiveVectorization();
             return;
         }
         closeContentVectorizer();
     });
-    $('#vectfox_content_vectorizer_modal .vectfox-modal-overlay').on('click', function() {
+    $('#vecttauri_content_vectorizer_modal .vecttauri-modal-overlay').on('click', function() {
         if (!isVectorizing) closeContentVectorizer();
     });
 
     // Content type dropdown selection
-    $('#vectfox_cv_type_select').on('change', function() {
+    $('#vecttauri_cv_type_select').on('change', function() {
         const type = $(this).val();
 
         if (!type) {
             // No selection - hide subsequent sections
             currentContentType = null;
             currentSettings = {};
-            $('.vectfox-cv-subsequent').slideUp(200);
-            $('#vectfox_cv_type_hint').text('Select a content type to continue');
+            $('.vecttauri-cv-subsequent').slideUp(200);
+            $('#vecttauri_cv_type_hint').text('Select a content type to continue');
             return;
         }
 
@@ -1471,24 +1471,24 @@ function bindEvents() {
 
         // Show type-specific hint
         const typeInfo = getContentType(type);
-        $('#vectfox_cv_type_hint').text(typeInfo?.description || '');
+        $('#vecttauri_cv_type_hint').text(typeInfo?.description || '');
 
         // Show subsequent sections and update UI
-        $('.vectfox-cv-subsequent').slideDown(200);
+        $('.vecttauri-cv-subsequent').slideDown(200);
         updateUIForContentType();
     });
 
     // Start From Message input
-    $(document).on('change input', '#vectfox_cv_startfrom', function() {
+    $(document).on('change input', '#vecttauri_cv_startfrom', function() {
         const v = parseInt($(this).val(), 10);
         startFromMessage = Number.isFinite(v) && v >= 1 ? v : 1;
         $(this).val(startFromMessage);
     });
 
     // Collapse toggles
-    $('.vectfox-cv-collapse-btn').on('click', function() {
+    $('.vecttauri-cv-collapse-btn').on('click', function() {
         const target = $(this).data('target');
-        const content = $(`#vectfox_cv_${target}_content`);
+        const content = $(`#vecttauri_cv_${target}_content`);
         const icon = $(this).find('i');
 
         content.slideToggle(200);
@@ -1496,87 +1496,87 @@ function bindEvents() {
     });
 
     // Strategy change
-    $('#vectfox_cv_strategy').on('change', function() {
+    $('#vecttauri_cv_strategy').on('change', function() {
         const strategy = $(this).val();
         const type = getContentType(currentContentType);
         const strategies = getChunkingStrategies(currentContentType);
         const selected = strategies.find(s => s.id === strategy);
 
-        $('#vectfox_cv_strategy_desc').text(selected?.description || '');
+        $('#vecttauri_cv_strategy_desc').text(selected?.description || '');
         currentSettings.strategy = strategy;
         updateSizeControlsVisibility();
     });
 
     // Size sliders
-    $('#vectfox_cv_chunk_size').on('input', function() {
+    $('#vecttauri_cv_chunk_size').on('input', function() {
         const val = $(this).val();
-        $('#vectfox_cv_chunk_size_val').text(val);
+        $('#vecttauri_cv_chunk_size_val').text(val);
         currentSettings.chunkSize = parseInt(val);
     });
 
-    $('#vectfox_cv_overlap').on('input', function() {
+    $('#vecttauri_cv_overlap').on('input', function() {
         const val = parseInt($(this).val());
-        $('#vectfox_cv_overlap_val').text(val === 0 ? 'Off' : val);
+        $('#vecttauri_cv_overlap_val').text(val === 0 ? 'Off' : val);
         currentSettings.chunkOverlap = val;
     });
 
-    $('#vectfox_cv_batch_size').on('input', function() {
+    $('#vecttauri_cv_batch_size').on('input', function() {
         const val = parseInt($(this).val());
-        $('#vectfox_cv_batch_size_val').text(val);
+        $('#vecttauri_cv_batch_size_val').text(val);
         currentSettings.batchSize = val;
     });
 
-    $('#vectfox_cv_parallel_windows').on('input', function() {
+    $('#vecttauri_cv_parallel_windows').on('input', function() {
         const val = parseInt($(this).val());
-        $('#vectfox_cv_parallel_val').text(val);
+        $('#vecttauri_cv_parallel_val').text(val);
     });
 
     // Window Size / Overlap (moved from the EventBase tab). Bind to the SAME setting
     // keys so the workflow + Continue path read them unchanged — no migration.
     {
-        const vf = extension_settings.vectfox || {};
+        const vf = extension_settings.vecttauri || {};
         const ws = vf.eventbase_window_size ?? 2;
         const wo = vf.eventbase_window_overlap ?? 0;
-        $('#vectfox_cv_window_size').val(ws);
-        $('#vectfox_cv_window_size_val').text(ws);
-        $('#vectfox_cv_window_overlap').val(wo);
-        $('#vectfox_cv_window_overlap_val').text(wo);
+        $('#vecttauri_cv_window_size').val(ws);
+        $('#vecttauri_cv_window_size_val').text(ws);
+        $('#vecttauri_cv_window_overlap').val(wo);
+        $('#vecttauri_cv_window_overlap_val').text(wo);
 
-        $('#vectfox_cv_window_size').on('input', function() {
+        $('#vecttauri_cv_window_size').on('input', function() {
             const val = parseInt($(this).val(), 10) || 2;
-            $('#vectfox_cv_window_size_val').text(val);
-            extension_settings.vectfox.eventbase_window_size = val;
+            $('#vecttauri_cv_window_size_val').text(val);
+            extension_settings.vecttauri.eventbase_window_size = val;
             saveSettingsDebounced();
         });
-        $('#vectfox_cv_window_overlap').on('input', function() {
+        $('#vecttauri_cv_window_overlap').on('input', function() {
             const val = parseInt($(this).val(), 10) || 0;
-            $('#vectfox_cv_window_overlap_val').text(val);
-            extension_settings.vectfox.eventbase_window_overlap = val;
+            $('#vecttauri_cv_window_overlap_val').text(val);
+            extension_settings.vecttauri.eventbase_window_overlap = val;
             saveSettingsDebounced();
         });
     }
 
     // Scope selection
-    $(document).on('change', 'input[name="vectfox_cv_scope"]', function() {
+    $(document).on('change', 'input[name="vecttauri_cv_scope"]', function() {
         currentSettings.scope = $(this).val();
-        $('.vectfox-cv-scope-option').removeClass('selected');
-        $(this).closest('.vectfox-cv-scope-option').addClass('selected');
+        $('.vecttauri-cv-scope-option').removeClass('selected');
+        $(this).closest('.vecttauri-cv-scope-option').addClass('selected');
     });
 
     // Keyword level dropdown
-    $(document).on('change', '#vectfox_cv_keyword_level', function() {
+    $(document).on('change', '#vecttauri_cv_keyword_level', function() {
         currentSettings.keywordLevel = $(this).val();
     });
 
     // Keyword base weight
-    $(document).on('change', '#vectfox_cv_keyword_weight', function() {
+    $(document).on('change', '#vecttauri_cv_keyword_weight', function() {
         const value = parseFloat($(this).val());
         currentSettings.keywordBaseWeight = isNaN(value) ? 1.5 : Math.min(3.0, Math.max(0.01, value));
         $(this).val(currentSettings.keywordBaseWeight);
     });
 
     // Cleaning preset dropdown
-    $(document).on('change', '#vectfox_cv_cleaning_preset', function() {
+    $(document).on('change', '#vecttauri_cv_cleaning_preset', function() {
         const presetId = $(this).val();
         currentSettings.cleaningPreset = presetId;
 
@@ -1591,7 +1591,7 @@ function bindEvents() {
             mvu_game_maker: 'Strips MVU engine tags (state updates, combat logs, game-system guides, cast/stats/choices) + standard formatting',
             custom: 'Your own pattern selection',
         };
-        $('#vectfox_cv_cleaning_hint').text(hints[presetId] || '');
+        $('#vecttauri_cv_cleaning_hint').text(hints[presetId] || '');
 
         // Save to extension settings
         saveCleaningPresetToSettings(presetId);
@@ -1599,19 +1599,19 @@ function bindEvents() {
 
     // Manage cleaning patterns button - opens the standalone Text Cleaning Manager
     // Uses modal-scoped delegation since modal has stopPropagation on all clicks
-    $('#vectfox_content_vectorizer_modal').on('click', '#vectfox_cv_manage_cleaning', function(e) {
+    $('#vecttauri_content_vectorizer_modal').on('click', '#vecttauri_cv_manage_cleaning', function(e) {
         e.preventDefault();
         openTextCleaningManager();
     });
 
     // Preview button
-    $('#vectfox_cv_preview_btn').on('click', previewChunks);
+    $('#vecttauri_cv_preview_btn').on('click', previewChunks);
 
     // Continue button (backfill - skips purge, DB dedup handles already-inserted chunks)
-    $('#vectfox_cv_continue').on('click', startContinueVectorization);
+    $('#vecttauri_cv_continue').on('click', startContinueVectorization);
 
     // Vectorize button
-    $('#vectfox_cv_vectorize').on('click', startVectorization);
+    $('#vecttauri_cv_vectorize').on('click', startVectorization);
 }
 
 /**
@@ -1619,13 +1619,13 @@ function bindEvents() {
  */
 function bindSourceEvents(type) {
     // Source tabs (skip disabled tabs)
-    $('.vectfox-cv-source-tab:not([disabled])').on('click', function() {
+    $('.vecttauri-cv-source-tab:not([disabled])').on('click', function() {
         if ($(this).prop('disabled')) return;
         const source = $(this).data('source');
-        $('.vectfox-cv-source-tab').removeClass('active');
+        $('.vecttauri-cv-source-tab').removeClass('active');
         $(this).addClass('active');
-        $('.vectfox-cv-source-panel').hide();
-        $(`.vectfox-cv-source-panel[data-panel="${source}"]`).show();
+        $('.vecttauri-cv-source-panel').hide();
+        $(`.vecttauri-cv-source-panel[data-panel="${source}"]`).show();
 
         // Clear sourceData when switching tabs
         sourceData = null;
@@ -1633,7 +1633,7 @@ function bindSourceEvents(type) {
         // Chat's window controls (Parallel Windows / Window Size / Overlap) live in
         // the chunking section and drive BOTH the live-chat and file-upload EventBase
         // routes — both call runEventBaseIngestion, and the upload route reads
-        // #vectfox_cv_parallel_windows directly (see handleEventBaseVectorize). So keep
+        // #vecttauri_cv_parallel_windows directly (see handleEventBaseVectorize). So keep
         // the section visible on the Upload sub-tab too. updateChunkingSection() already
         // hid the strategy/size controls and showed the window rows for the chat path,
         // so a plain show() reveals exactly the right controls.
@@ -1641,28 +1641,28 @@ function bindSourceEvents(type) {
         //  into this section from the old EventBase tab, which silently dropped Parallel
         //  Windows / Window Size / Overlap from the chat-upload screen.)
         if (currentContentType === 'chat') {
-            $('.vectfox-cv-chunking-section').show();
+            $('.vecttauri-cv-chunking-section').show();
         }
     });
 
     // Input method tabs (for document type)
-    $('.vectfox-cv-input-tab').on('click', function() {
+    $('.vecttauri-cv-input-tab').on('click', function() {
         const method = $(this).data('method');
-        $('.vectfox-cv-input-tab').removeClass('active');
+        $('.vecttauri-cv-input-tab').removeClass('active');
         $(this).addClass('active');
-        $('.vectfox-cv-input-panel').hide();
-        $(`.vectfox-cv-input-panel[data-panel="${method}"]`).show();
+        $('.vecttauri-cv-input-panel').hide();
+        $(`.vecttauri-cv-input-panel[data-panel="${method}"]`).show();
     });
 
     // Upload zone click (all upload zones)
-    $('#vectfox_cv_upload_zone, #vectfox_cv_doc_upload_zone, #vectfox_cv_chat_upload_zone').on('click', function(e) {
+    $('#vecttauri_cv_upload_zone, #vecttauri_cv_doc_upload_zone, #vecttauri_cv_chat_upload_zone').on('click', function(e) {
         // Don't trigger if clicking the input itself
         if (e.target.tagName === 'INPUT') return;
         $(this).find('input[type="file"]').trigger('click');
     });
 
     // Upload zone drag and drop
-    $('#vectfox_cv_upload_zone, #vectfox_cv_doc_upload_zone, #vectfox_cv_chat_upload_zone')
+    $('#vecttauri_cv_upload_zone, #vecttauri_cv_doc_upload_zone, #vecttauri_cv_chat_upload_zone')
         .on('dragover', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1692,41 +1692,41 @@ function bindSourceEvents(type) {
         });
 
     // File input change
-    $('#vectfox_cv_file_input, #vectfox_cv_doc_file_input').on('change', handleFileUpload);
+    $('#vecttauri_cv_file_input, #vecttauri_cv_doc_file_input').on('change', handleFileUpload);
 
     // Chat file input change (special handler for chat files)
-    $('#vectfox_cv_chat_file_input').on('change', handleChatFileUpload);
+    $('#vecttauri_cv_chat_file_input').on('change', handleChatFileUpload);
 
     // Clear upload
-    $('#vectfox_cv_upload_clear').on('click', clearUpload);
-    $('#vectfox_cv_chat_upload_clear').on('click', clearChatUpload);
+    $('#vecttauri_cv_upload_clear').on('click', clearUpload);
+    $('#vecttauri_cv_chat_upload_clear').on('click', clearChatUpload);
 
     // Fetch URL
-    $('#vectfox_cv_fetch_url').on('click', fetchUrl);
+    $('#vecttauri_cv_fetch_url').on('click', fetchUrl);
 
     // Wiki scraping
-    $('#vectfox_cv_scrape_wiki').on('click', scrapeWiki);
-    $('#vectfox_cv_wiki_type').on('change', function() {
+    $('#vecttauri_cv_scrape_wiki').on('click', scrapeWiki);
+    $('#vecttauri_cv_wiki_type').on('change', function() {
         const wikiType = $(this).val();
         const type = getContentType('wiki');
         const typeInfo = type.sourceOptions.types.find(t => t.id === wikiType);
         if (typeInfo) {
-            $('#vectfox_cv_wiki_url').attr('placeholder', typeInfo.placeholder);
+            $('#vecttauri_cv_wiki_url').attr('placeholder', typeInfo.placeholder);
         }
         // Re-check plugin availability
         checkWikiPluginStatus();
     });
 
     // YouTube fetch
-    $('#vectfox_cv_fetch_youtube').on('click', fetchYouTubeTranscript);
+    $('#vecttauri_cv_fetch_youtube').on('click', fetchYouTubeTranscript);
 
     // Source select change - show stats
-    $('#vectfox_cv_source_select').on('change', function() {
+    $('#vecttauri_cv_source_select').on('change', function() {
         const value = $(this).val();
         if (value) {
             loadSourceStats(type.id, value);
         } else {
-            $('#vectfox_cv_source_stats').hide();
+            $('#vecttauri_cv_source_stats').hide();
         }
     });
 
@@ -1745,8 +1745,8 @@ function bindSourceEvents(type) {
  * Loads and displays stats for the selected source
  */
 async function loadSourceStats(contentType, sourceId) {
-    const statsContainer = $('#vectfox_cv_source_stats');
-    statsContainer.show().html('<div class="vectfox-cv-stats-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading info...</div>');
+    const statsContainer = $('#vecttauri_cv_source_stats');
+    statsContainer.show().html('<div class="vecttauri-cv-stats-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading info...</div>');
 
     try {
         if (contentType === 'lorebook') {
@@ -1761,23 +1761,23 @@ async function loadSourceStats(contentType, sourceId) {
                 const totalChars = entries.reduce((sum, e) => sum + (e.content?.length || 0), 0);
 
                 statsContainer.html(`
-                    <div class="vectfox-cv-stats-grid">
-                        <div class="vectfox-cv-stat">
-                            <span class="vectfox-cv-stat-value">${entries.length}</span>
-                            <span class="vectfox-cv-stat-label">Total Entries</span>
+                    <div class="vecttauri-cv-stats-grid">
+                        <div class="vecttauri-cv-stat">
+                            <span class="vecttauri-cv-stat-value">${entries.length}</span>
+                            <span class="vecttauri-cv-stat-label">Total Entries</span>
                         </div>
-                        <div class="vectfox-cv-stat">
-                            <span class="vectfox-cv-stat-value">${enabledEntries.length}</span>
-                            <span class="vectfox-cv-stat-label">Enabled</span>
+                        <div class="vecttauri-cv-stat">
+                            <span class="vecttauri-cv-stat-value">${enabledEntries.length}</span>
+                            <span class="vecttauri-cv-stat-label">Enabled</span>
                         </div>
-                        <div class="vectfox-cv-stat">
-                            <span class="vectfox-cv-stat-value">${(totalChars / 1000).toFixed(1)}k</span>
-                            <span class="vectfox-cv-stat-label">Characters</span>
+                        <div class="vecttauri-cv-stat">
+                            <span class="vecttauri-cv-stat-value">${(totalChars / 1000).toFixed(1)}k</span>
+                            <span class="vecttauri-cv-stat-label">Characters</span>
                         </div>
                     </div>
                 `);
             } else {
-                statsContainer.html('<div class="vectfox-cv-stats-info">Lorebook selected</div>');
+                statsContainer.html('<div class="vecttauri-cv-stats-info">Lorebook selected</div>');
             }
 
         } else if (contentType === 'character') {
@@ -1791,24 +1791,24 @@ async function loadSourceStats(contentType, sourceId) {
                 const totalChars = fields.reduce((sum, f) => sum + (character[f]?.length || 0), 0);
 
                 statsContainer.html(`
-                    <div class="vectfox-cv-stats-grid">
-                        <div class="vectfox-cv-stat">
-                            <span class="vectfox-cv-stat-value">${filledFields.length}/${fields.length}</span>
-                            <span class="vectfox-cv-stat-label">Fields Used</span>
+                    <div class="vecttauri-cv-stats-grid">
+                        <div class="vecttauri-cv-stat">
+                            <span class="vecttauri-cv-stat-value">${filledFields.length}/${fields.length}</span>
+                            <span class="vecttauri-cv-stat-label">Fields Used</span>
                         </div>
-                        <div class="vectfox-cv-stat">
-                            <span class="vectfox-cv-stat-value">${(totalChars / 1000).toFixed(1)}k</span>
-                            <span class="vectfox-cv-stat-label">Characters</span>
+                        <div class="vecttauri-cv-stat">
+                            <span class="vecttauri-cv-stat-value">${(totalChars / 1000).toFixed(1)}k</span>
+                            <span class="vecttauri-cv-stat-label">Characters</span>
                         </div>
                     </div>
                 `);
             } else {
-                statsContainer.html('<div class="vectfox-cv-stats-info">Character selected</div>');
+                statsContainer.html('<div class="vecttauri-cv-stats-info">Character selected</div>');
             }
         }
     } catch (e) {
-        console.error('VectFox: Failed to load source stats:', e);
-        statsContainer.html('<div class="vectfox-cv-stats-info">Selected</div>');
+        console.error('VectTauri: Failed to load source stats:', e);
+        statsContainer.html('<div class="vecttauri-cv-stats-info">Selected</div>');
     }
 }
 
@@ -1816,7 +1816,7 @@ async function loadSourceStats(contentType, sourceId) {
  * Populates the source dropdown based on type
  */
 async function populateSourceSelect(type) {
-    const select = $('#vectfox_cv_source_select');
+    const select = $('#vecttauri_cv_source_select');
     select.empty().append('<option value="">-- Select --</option>');
 
     try {
@@ -1834,7 +1834,7 @@ async function populateSourceSelect(type) {
                     select.append('<option value="" disabled>No lorebooks found</option>');
                 }
             } catch (importError) {
-                console.warn('VectFox: Could not import world-info module:', importError);
+                console.warn('VectTauri: Could not import world-info module:', importError);
                 select.append('<option value="" disabled>Could not load lorebooks</option>');
             }
 
@@ -1863,7 +1863,7 @@ async function populateSourceSelect(type) {
             }
         }
     } catch (e) {
-        console.error('VectFox: Failed to populate source select:', e);
+        console.error('VectTauri: Failed to populate source select:', e);
         select.append('<option value="" disabled>Error loading sources</option>');
     }
 }
@@ -1910,11 +1910,11 @@ function handleFileUpload(e) {
                     const enabledCount = entries.filter(e => !e.disable).length;
                     const totalChars = entries.reduce((sum, e) => sum + (e.content?.length || 0), 0);
 
-                    $('#vectfox_cv_upload_zone').hide();
-                    $('#vectfox_cv_upload_info').show();
-                    $('#vectfox_cv_upload_filename').text(file.name);
+                    $('#vecttauri_cv_upload_zone').hide();
+                    $('#vecttauri_cv_upload_info').show();
+                    $('#vecttauri_cv_upload_filename').text(file.name);
 
-                    toastr.success(`Loaded lorebook: ${entries.length} entries (${enabledCount} enabled)`, 'VectFox');
+                    toastr.success(`Loaded lorebook: ${entries.length} entries (${enabledCount} enabled)`, 'VectTauri');
                 } else {
                     throw new Error('Invalid lorebook format - missing entries');
                 }
@@ -1936,11 +1936,11 @@ function handleFileUpload(e) {
                         name: data.name || file.name.replace(/\.[^/.]+$/, ''),
                     };
 
-                    $('#vectfox_cv_upload_zone').hide();
-                    $('#vectfox_cv_upload_info').show();
-                    $('#vectfox_cv_upload_filename').text(`${data.name || file.name}`);
+                    $('#vecttauri_cv_upload_zone').hide();
+                    $('#vecttauri_cv_upload_info').show();
+                    $('#vecttauri_cv_upload_filename').text(`${data.name || file.name}`);
 
-                    toastr.success(`Loaded character: ${data.name || 'Unknown'}`, 'VectFox');
+                    toastr.success(`Loaded character: ${data.name || 'Unknown'}`, 'VectTauri');
                 } else {
                     throw new Error('Invalid character format - missing name/description');
                 }
@@ -1956,16 +1956,16 @@ function handleFileUpload(e) {
                 content: content,
             };
 
-            $('#vectfox_cv_upload_zone').hide();
-            $('#vectfox_cv_upload_info').show();
-            $('#vectfox_cv_upload_filename').text(file.name);
+            $('#vecttauri_cv_upload_zone').hide();
+            $('#vecttauri_cv_upload_info').show();
+            $('#vecttauri_cv_upload_filename').text(file.name);
 
             // Auto-fill document name
             if (currentContentType === 'document') {
-                $('#vectfox_cv_doc_name').val(file.name.replace(/\.[^/.]+$/, ''));
+                $('#vecttauri_cv_doc_name').val(file.name.replace(/\.[^/.]+$/, ''));
             }
 
-            toastr.success(`Loaded: ${file.name}`, 'VectFox');
+            toastr.success(`Loaded: ${file.name}`, 'VectTauri');
         }
     };
 
@@ -1997,19 +1997,19 @@ async function handleCharacterPngUpload(file) {
             name: characterData.name || file.name.replace(/\.[^/.]+$/, ''),
         };
 
-        $('#vectfox_cv_upload_zone').hide();
-        $('#vectfox_cv_upload_info').show();
-        $('#vectfox_cv_upload_filename').text(`${characterData.name || file.name}`);
+        $('#vecttauri_cv_upload_zone').hide();
+        $('#vecttauri_cv_upload_info').show();
+        $('#vecttauri_cv_upload_filename').text(`${characterData.name || file.name}`);
 
         // Show character stats
         const fields = ['description', 'personality', 'scenario', 'first_mes', 'mes_example'];
         const filledFields = fields.filter(f => characterData[f]?.trim());
         const totalChars = fields.reduce((sum, f) => sum + (characterData[f]?.length || 0), 0);
 
-        toastr.success(`Loaded character: ${characterData.name} (${filledFields.length} fields, ${(totalChars/1000).toFixed(1)}k chars)`, 'VectFox');
+        toastr.success(`Loaded character: ${characterData.name} (${filledFields.length} fields, ${(totalChars/1000).toFixed(1)}k chars)`, 'VectTauri');
 
     } catch (err) {
-        console.error('VectFox: PNG parse error:', err);
+        console.error('VectTauri: PNG parse error:', err);
         toastr.error(`Failed to parse character PNG: ${err.message}`);
     }
 }
@@ -2072,7 +2072,7 @@ function extractCharaFromPng(bytes) {
 
                     return charData;
                 } catch (e) {
-                    console.error('VectFox: Failed to decode character data:', e);
+                    console.error('VectTauri: Failed to decode character data:', e);
                     throw new Error('Invalid character data in PNG');
                 }
             }
@@ -2093,16 +2093,16 @@ function extractCharaFromPng(bytes) {
  */
 function clearUpload() {
     sourceData = null;
-    $('#vectfox_cv_upload_zone').show();
-    $('#vectfox_cv_upload_info').hide();
-    $('#vectfox_cv_file_input, #vectfox_cv_doc_file_input').val('');
+    $('#vecttauri_cv_upload_zone').show();
+    $('#vecttauri_cv_upload_info').hide();
+    $('#vecttauri_cv_file_input, #vecttauri_cv_doc_file_input').val('');
 }
 
 /**
  * Fetches content from URL
  */
 async function fetchUrl() {
-    const url = $('#vectfox_cv_url_input').val().trim();
+    const url = $('#vecttauri_cv_url_input').val().trim();
     if (!url) {
         toastr.warning('Please enter a URL');
         return;
@@ -2116,8 +2116,8 @@ async function fetchUrl() {
         return;
     }
 
-    const status = $('#vectfox_cv_url_status');
-    const preview = $('#vectfox_cv_url_preview');
+    const status = $('#vecttauri_cv_url_status');
+    const preview = $('#vecttauri_cv_url_preview');
     status.html('<i class="fa-solid fa-spinner fa-spin"></i> Fetching...');
     preview.hide();
 
@@ -2150,15 +2150,15 @@ async function fetchUrl() {
         status.html('');
 
         // Show preview
-        $('#vectfox_cv_url_title').text(sourceData.title);
-        $('#vectfox_cv_url_chars').text(content.length.toLocaleString());
+        $('#vecttauri_cv_url_title').text(sourceData.title);
+        $('#vecttauri_cv_url_chars').text(content.length.toLocaleString());
         preview.show();
 
-        toastr.success(`Fetched ${content.length.toLocaleString()} characters`, 'VectFox');
+        toastr.success(`Fetched ${content.length.toLocaleString()} characters`, 'VectTauri');
 
     } catch (e) {
-        console.error('VectFox: URL fetch failed:', e);
-        status.html(`<i class="fa-solid fa-times" style="color: var(--vectfox-danger);"></i> ${e.message}`);
+        console.error('VectTauri: URL fetch failed:', e);
+        status.html(`<i class="fa-solid fa-times" style="color: var(--vecttauri-danger);"></i> ${e.message}`);
         toastr.error('Failed to fetch URL: ' + e.message);
     }
 }
@@ -2171,9 +2171,9 @@ async function fetchUrl() {
  * Checks if the wiki scraper plugin is available
  */
 async function checkWikiPluginStatus() {
-    const statusEl = $('#vectfox_cv_wiki_plugin_status');
-    const wikiType = $('#vectfox_cv_wiki_type').val() || 'fandom';
-    const scrapeBtn = $('#vectfox_cv_scrape_wiki');
+    const statusEl = $('#vecttauri_cv_wiki_plugin_status');
+    const wikiType = $('#vecttauri_cv_wiki_type').val() || 'fandom';
+    const scrapeBtn = $('#vecttauri_cv_scrape_wiki');
 
     statusEl.html('<i class="fa-solid fa-spinner fa-spin"></i> Checking plugin...');
 
@@ -2181,17 +2181,17 @@ async function checkWikiPluginStatus() {
 
     if (isAvailable) {
         statusEl.html(`
-            <i class="fa-solid fa-check-circle" style="color: var(--vectfox-success);"></i>
+            <i class="fa-solid fa-check-circle" style="color: var(--vecttauri-success);"></i>
             <span>${wikiType === 'fandom' ? 'Fandom' : 'MediaWiki'} scraper ready</span>
         `);
         scrapeBtn.prop('disabled', false);
     } else {
         const type = getContentType('wiki');
         statusEl.html(`
-            <div class="vectfox-cv-wiki-plugin-warning">
-                <i class="fa-solid fa-exclamation-triangle" style="color: var(--vectfox-warning);"></i>
+            <div class="vecttauri-cv-wiki-plugin-warning">
+                <i class="fa-solid fa-exclamation-triangle" style="color: var(--vecttauri-warning);"></i>
                 <span>Wiki scraping requires the Fandom Scraper plugin</span>
-                <a href="${type.sourceOptions.pluginUrl}" target="_blank" rel="noopener" class="vectfox-cv-plugin-link">
+                <a href="${type.sourceOptions.pluginUrl}" target="_blank" rel="noopener" class="vecttauri-cv-plugin-link">
                     <i class="fa-solid fa-external-link"></i> Install Plugin
                 </a>
             </div>
@@ -2216,7 +2216,7 @@ async function isWikiPluginAvailable(wikiType) {
 
         return response.ok;
     } catch (error) {
-        console.debug('VectFox: Wiki plugin probe failed:', error);
+        console.debug('VectTauri: Wiki plugin probe failed:', error);
         return false;
     }
 }
@@ -2225,18 +2225,18 @@ async function isWikiPluginAvailable(wikiType) {
  * Scrapes wiki content using ST's fandom scraper plugin
  */
 async function scrapeWiki() {
-    const wikiType = $('#vectfox_cv_wiki_type').val();
-    const url = $('#vectfox_cv_wiki_url').val().trim();
-    const filter = $('#vectfox_cv_wiki_filter').val().trim();
+    const wikiType = $('#vecttauri_cv_wiki_type').val();
+    const url = $('#vecttauri_cv_wiki_url').val().trim();
+    const filter = $('#vecttauri_cv_wiki_filter').val().trim();
 
     if (!url) {
         toastr.warning('Please enter a wiki URL or ID');
         return;
     }
 
-    const status = $('#vectfox_cv_wiki_status');
-    const preview = $('#vectfox_cv_wiki_preview');
-    const scrapeBtn = $('#vectfox_cv_scrape_wiki');
+    const status = $('#vecttauri_cv_wiki_status');
+    const preview = $('#vecttauri_cv_wiki_preview');
+    const scrapeBtn = $('#vecttauri_cv_scrape_wiki');
 
     status.html('<i class="fa-solid fa-spinner fa-spin"></i> Scraping wiki...');
     preview.hide();
@@ -2293,16 +2293,16 @@ async function scrapeWiki() {
         scrapeBtn.prop('disabled', false);
 
         // Show preview
-        $('#vectfox_cv_wiki_title').text(`${pages.length} page(s) scraped`);
-        $('#vectfox_cv_wiki_pages').text(pages.length);
-        $('#vectfox_cv_wiki_chars').text(combinedContent.length.toLocaleString());
+        $('#vecttauri_cv_wiki_title').text(`${pages.length} page(s) scraped`);
+        $('#vecttauri_cv_wiki_pages').text(pages.length);
+        $('#vecttauri_cv_wiki_chars').text(combinedContent.length.toLocaleString());
         preview.show();
 
-        toastr.success(`Scraped ${pages.length} page(s), ${combinedContent.length.toLocaleString()} chars`, 'VectFox');
+        toastr.success(`Scraped ${pages.length} page(s), ${combinedContent.length.toLocaleString()} chars`, 'VectTauri');
 
     } catch (e) {
-        console.error('VectFox: Wiki scrape failed:', e);
-        status.html(`<i class="fa-solid fa-times" style="color: var(--vectfox-danger);"></i> ${e.message}`);
+        console.error('VectTauri: Wiki scrape failed:', e);
+        status.html(`<i class="fa-solid fa-times" style="color: var(--vecttauri-danger);"></i> ${e.message}`);
         scrapeBtn.prop('disabled', false);
         toastr.error('Failed to scrape wiki: ' + e.message);
     }
@@ -2345,8 +2345,8 @@ function extractWikiName(url, wikiType) {
  * Fetches YouTube transcript
  */
 async function fetchYouTubeTranscript() {
-    const url = $('#vectfox_cv_youtube_url').val().trim();
-    const lang = $('#vectfox_cv_youtube_lang').val().trim();
+    const url = $('#vecttauri_cv_youtube_url').val().trim();
+    const lang = $('#vecttauri_cv_youtube_lang').val().trim();
 
     if (!url) {
         toastr.warning('Please enter a YouTube URL or video ID');
@@ -2359,9 +2359,9 @@ async function fetchYouTubeTranscript() {
         return;
     }
 
-    const status = $('#vectfox_cv_youtube_status');
-    const preview = $('#vectfox_cv_youtube_preview');
-    const fetchBtn = $('#vectfox_cv_fetch_youtube');
+    const status = $('#vecttauri_cv_youtube_status');
+    const preview = $('#vecttauri_cv_youtube_preview');
+    const fetchBtn = $('#vecttauri_cv_fetch_youtube');
 
     status.html('<i class="fa-solid fa-spinner fa-spin"></i> Fetching transcript...');
     preview.hide();
@@ -2399,16 +2399,16 @@ async function fetchYouTubeTranscript() {
 
         // Show preview with estimated duration (assuming ~150 words/min speaking rate, ~5 chars/word)
         const estimatedMinutes = Math.round(transcript.length / 750);
-        $('#vectfox_cv_youtube_title').text(`Transcript loaded (${videoId})`);
-        $('#vectfox_cv_youtube_chars').text(transcript.length.toLocaleString());
-        $('#vectfox_cv_youtube_duration').text(`~${estimatedMinutes}`);
+        $('#vecttauri_cv_youtube_title').text(`Transcript loaded (${videoId})`);
+        $('#vecttauri_cv_youtube_chars').text(transcript.length.toLocaleString());
+        $('#vecttauri_cv_youtube_duration').text(`~${estimatedMinutes}`);
         preview.show();
 
-        toastr.success(`Fetched transcript: ${transcript.length.toLocaleString()} characters`, 'VectFox');
+        toastr.success(`Fetched transcript: ${transcript.length.toLocaleString()} characters`, 'VectTauri');
 
     } catch (e) {
-        console.error('VectFox: YouTube fetch failed:', e);
-        status.html(`<i class="fa-solid fa-times" style="color: var(--vectfox-danger);"></i> ${e.message}`);
+        console.error('VectTauri: YouTube fetch failed:', e);
+        status.html(`<i class="fa-solid fa-times" style="color: var(--vecttauri-danger);"></i> ${e.message}`);
         fetchBtn.prop('disabled', false);
         toastr.error('Failed to fetch transcript: ' + e.message);
     }
@@ -2568,7 +2568,7 @@ async function handleChatFileUpload(e) {
             }
         } catch (err) {
             parseError = err;
-            console.error('VectFox: Chat file parse error:', err);
+            console.error('VectTauri: Chat file parse error:', err);
         }
 
         if (parseError || messages.length === 0) {
@@ -2588,7 +2588,7 @@ async function handleChatFileUpload(e) {
         const integrity = metadata?.chat_metadata?.integrity;
         const archiveUUID = integrity || await sha1Hex(content);
         if (!integrity) {
-            console.warn(`[VectFox] Archive "${file.name}" has no chat_metadata.integrity — using SHA-1 hash as UUID`);
+            console.warn(`[VectTauri] Archive "${file.name}" has no chat_metadata.integrity — using SHA-1 hash as UUID`);
         }
 
         const filenameCharName = extractCharNameFromArchiveFilename(file.name)
@@ -2608,33 +2608,33 @@ async function handleChatFileUpload(e) {
         };
 
         // Show upload info
-        $('#vectfox_cv_chat_upload_zone').hide();
-        $('#vectfox_cv_chat_upload_info').show();
-        $('#vectfox_cv_chat_upload_filename').text(file.name);
+        $('#vecttauri_cv_chat_upload_zone').hide();
+        $('#vecttauri_cv_chat_upload_info').show();
+        $('#vecttauri_cv_chat_upload_filename').text(file.name);
 
         // Show stats
         const totalChars = messages.reduce((sum, m) => sum + (m.mes?.length || 0), 0);
         const userCount = messages.filter(m => m.is_user).length;
         const charCount = messages.filter(m => !m.is_user).length;
 
-        $('#vectfox_cv_chat_upload_stats').show().html(`
-            <div class="vectfox-cv-stats-grid">
-                <div class="vectfox-cv-stat">
-                    <span class="vectfox-cv-stat-value">${messages.length}</span>
-                    <span class="vectfox-cv-stat-label">Messages</span>
+        $('#vecttauri_cv_chat_upload_stats').show().html(`
+            <div class="vecttauri-cv-stats-grid">
+                <div class="vecttauri-cv-stat">
+                    <span class="vecttauri-cv-stat-value">${messages.length}</span>
+                    <span class="vecttauri-cv-stat-label">Messages</span>
                 </div>
-                <div class="vectfox-cv-stat">
-                    <span class="vectfox-cv-stat-value">${characterName}</span>
-                    <span class="vectfox-cv-stat-label">Character</span>
+                <div class="vecttauri-cv-stat">
+                    <span class="vecttauri-cv-stat-value">${characterName}</span>
+                    <span class="vecttauri-cv-stat-label">Character</span>
                 </div>
-                <div class="vectfox-cv-stat">
-                    <span class="vectfox-cv-stat-value">${(totalChars / 1000).toFixed(1)}k</span>
-                    <span class="vectfox-cv-stat-label">Characters</span>
+                <div class="vecttauri-cv-stat">
+                    <span class="vecttauri-cv-stat-value">${(totalChars / 1000).toFixed(1)}k</span>
+                    <span class="vecttauri-cv-stat-label">Characters</span>
                 </div>
             </div>
         `);
 
-        toastr.success(`Loaded ${messages.length} messages from ${file.name}`, 'VectFox');
+        toastr.success(`Loaded ${messages.length} messages from ${file.name}`, 'VectTauri');
     };
 
     reader.readAsText(file);
@@ -2645,10 +2645,10 @@ async function handleChatFileUpload(e) {
  */
 function clearChatUpload() {
     sourceData = null;
-    $('#vectfox_cv_chat_upload_zone').show();
-    $('#vectfox_cv_chat_upload_info').hide();
-    $('#vectfox_cv_chat_upload_stats').hide();
-    $('#vectfox_cv_chat_file_input').val('');
+    $('#vecttauri_cv_chat_upload_zone').show();
+    $('#vecttauri_cv_chat_upload_info').hide();
+    $('#vecttauri_cv_chat_upload_stats').hide();
+    $('#vecttauri_cv_chat_file_input').val('');
 }
 
 // ============================================================================
@@ -2672,9 +2672,9 @@ async function previewChunks() {
     // so there's nothing meaningful to preview. Mirrors the production gate
     // at startVectorization() so chat never reaches the chunk-prepare path.
     if (currentContentType === 'chat') {
-        $('.vectfox-cv-preview-section').show();
-        $('#vectfox_cv_preview_content').html(
-            '<div class="vectfox-cv-info">' +
+        $('.vecttauri-cv-preview-section').show();
+        $('#vecttauri_cv_preview_content').html(
+            '<div class="vecttauri-cv-info">' +
             'Chat content is processed by EventBase (LLM event extraction) ' +
             'rather than chunked. Click <strong>Vectorize</strong> to run extraction — ' +
             'there is no synchronous chunk preview for chat.' +
@@ -2687,48 +2687,48 @@ async function previewChunks() {
     // to mechanically re-chunk. Show the frozen result instead of running
     // chunkText(), mirroring the chat/EventBase special case above.
     if (isReformatSupportedType() && currentSettings.reformat?.accepted) {
-        $('.vectfox-cv-preview-section').show();
-        const reformatContainer = $('#vectfox_cv_preview_content');
-        reformatContainer.html('<div class="vectfox-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading Auto-Reformat result...</div>');
+        $('.vecttauri-cv-preview-section').show();
+        const reformatContainer = $('#vecttauri_cv_preview_content');
+        reformatContainer.html('<div class="vecttauri-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading Auto-Reformat result...</div>');
         try {
             const { getReformatCache } = await import('../core/reformat-store.js');
             const frozen = getReformatCache(currentSettings.reformat.sourceHash);
             const chunks = frozen?.chunks || [];
             if (chunks.length === 0) {
-                reformatContainer.html('<div class="vectfox-cv-error">No frozen Auto-Reformat chunks found — try Re-running Auto-Reformat above.</div>');
+                reformatContainer.html('<div class="vecttauri-cv-error">No frozen Auto-Reformat chunks found — try Re-running Auto-Reformat above.</div>');
                 return;
             }
             const totalChars = chunks.reduce((sum, c) => sum + (c.text?.length || 0), 0);
             const avgChars = Math.round(totalChars / chunks.length);
             reformatContainer.html(`
-                <div class="vectfox-cv-preview-stats">
+                <div class="vecttauri-cv-preview-stats">
                     <span><strong>${chunks.length}</strong> chunks (Auto-Reformat)</span>
                     <span>~<strong>${avgChars}</strong> chars avg</span>
                 </div>
-                <div class="vectfox-cv-preview-list">
+                <div class="vecttauri-cv-preview-list">
                     ${chunks.slice(0, 10).map((chunk, i) => {
                         const label = `[${chunk.metadata?.entry_type || 'entry'}] ${chunk.metadata?.name || ''}: `;
                         return `
-                        <div class="vectfox-cv-preview-chunk">
-                            <span class="vectfox-cv-preview-num">#${i + 1}</span>
-                            <span class="vectfox-cv-preview-text">${StringUtils.escapeHtml(label)}${StringUtils.escapeHtml(chunk.text.substring(0, 120))}${chunk.text.length > 120 ? '...' : ''}</span>
-                            <span class="vectfox-cv-preview-size">${chunk.text.length} chars</span>
+                        <div class="vecttauri-cv-preview-chunk">
+                            <span class="vecttauri-cv-preview-num">#${i + 1}</span>
+                            <span class="vecttauri-cv-preview-text">${StringUtils.escapeHtml(label)}${StringUtils.escapeHtml(chunk.text.substring(0, 120))}${chunk.text.length > 120 ? '...' : ''}</span>
+                            <span class="vecttauri-cv-preview-size">${chunk.text.length} chars</span>
                         </div>
                     `}).join('')}
-                    ${chunks.length > 10 ? `<div class="vectfox-cv-preview-more">...and ${chunks.length - 10} more</div>` : ''}
+                    ${chunks.length > 10 ? `<div class="vecttauri-cv-preview-more">...and ${chunks.length - 10} more</div>` : ''}
                 </div>
             `);
         } catch (e) {
-            console.error('VectFox: Auto-Reformat preview failed:', e);
-            reformatContainer.html(`<div class="vectfox-cv-error">Preview failed: ${e.message}</div>`);
+            console.error('VectTauri: Auto-Reformat preview failed:', e);
+            reformatContainer.html(`<div class="vecttauri-cv-error">Preview failed: ${e.message}</div>`);
         }
         return;
     }
 
     // Show preview section
-    $('.vectfox-cv-preview-section').show();
-    const container = $('#vectfox_cv_preview_content');
-    container.html('<div class="vectfox-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Generating preview...</div>');
+    $('.vecttauri-cv-preview-section').show();
+    const container = $('#vecttauri_cv_preview_content');
+    container.html('<div class="vecttauri-cv-loading"><i class="fa-solid fa-spinner fa-spin"></i> Generating preview...</div>');
 
     try {
         // Import modules for content resolution and chunking
@@ -2740,7 +2740,7 @@ async function previewChunks() {
         const contentText = prepared.text;
 
         if (!contentText || (Array.isArray(contentText) && contentText.length === 0)) {
-            container.html('<div class="vectfox-cv-error">Could not load content. Please check your selection.</div>');
+            container.html('<div class="vecttauri-cv-error">Could not load content. Please check your selection.</div>');
             return;
         }
 
@@ -2753,7 +2753,7 @@ async function previewChunks() {
 
         // Handle empty or undefined chunks
         if (!chunks || chunks.length === 0) {
-            container.html('<div class="vectfox-cv-error">No chunks generated. Content may be too short or empty.</div>');
+            container.html('<div class="vecttauri-cv-error">No chunks generated. Content may be too short or empty.</div>');
             return;
         }
 
@@ -2764,27 +2764,27 @@ async function previewChunks() {
         const avgChars = Math.round(totalChars / chunks.length);
 
         container.html(`
-            <div class="vectfox-cv-preview-stats">
+            <div class="vecttauri-cv-preview-stats">
                 <span><strong>${chunks.length}</strong> chunks</span>
                 <span>~<strong>${avgChars}</strong> chars avg</span>
             </div>
-            <div class="vectfox-cv-preview-list">
+            <div class="vecttauri-cv-preview-list">
                 ${chunks.slice(0, 10).map((chunk, i) => {
                     const chunkText = chunk.text || chunk;
                     return `
-                    <div class="vectfox-cv-preview-chunk">
-                        <span class="vectfox-cv-preview-num">#${i + 1}</span>
-                        <span class="vectfox-cv-preview-text">${StringUtils.escapeHtml(chunkText.substring(0, 150))}${chunkText.length > 150 ? '...' : ''}</span>
-                        <span class="vectfox-cv-preview-size">${chunkText.length} chars</span>
+                    <div class="vecttauri-cv-preview-chunk">
+                        <span class="vecttauri-cv-preview-num">#${i + 1}</span>
+                        <span class="vecttauri-cv-preview-text">${StringUtils.escapeHtml(chunkText.substring(0, 150))}${chunkText.length > 150 ? '...' : ''}</span>
+                        <span class="vecttauri-cv-preview-size">${chunkText.length} chars</span>
                     </div>
                 `}).join('')}
-                ${chunks.length > 10 ? `<div class="vectfox-cv-preview-more">...and ${chunks.length - 10} more</div>` : ''}
+                ${chunks.length > 10 ? `<div class="vecttauri-cv-preview-more">...and ${chunks.length - 10} more</div>` : ''}
             </div>
         `);
 
     } catch (e) {
-        console.error('VectFox: Preview failed:', e);
-        container.html(`<div class="vectfox-cv-error">Preview failed: ${e.message}</div>`);
+        console.error('VectTauri: Preview failed:', e);
+        container.html(`<div class="vecttauri-cv-error">Preview failed: ${e.message}</div>`);
     }
 }
 
@@ -2802,19 +2802,19 @@ function getSourceData() {
     switch (type.id) {
         case 'document': {
             // Check for paste content
-            const pasteContent = $('#vectfox_cv_paste_text').val()?.trim();
+            const pasteContent = $('#vecttauri_cv_paste_text').val()?.trim();
             if (pasteContent) {
                 return {
                     type: 'paste',
                     content: pasteContent,
-                    name: $('#vectfox_cv_doc_name').val() || 'Pasted Document',
+                    name: $('#vecttauri_cv_doc_name').val() || 'Pasted Document',
                 };
             }
             break;
         }
 
         case 'lorebook': {
-            const selectVal = $('#vectfox_cv_source_select').val();
+            const selectVal = $('#vecttauri_cv_source_select').val();
             if (selectVal) {
                 return {
                     type: 'select',
@@ -2826,7 +2826,7 @@ function getSourceData() {
         }
 
         case 'character': {
-            const selectVal = $('#vectfox_cv_source_select').val();
+            const selectVal = $('#vecttauri_cv_source_select').val();
             if (selectVal) {
                 const context = getContext();
                 const char = context?.characters?.find(c => c.avatar === selectVal);
@@ -2841,7 +2841,7 @@ function getSourceData() {
 
         case 'chat': {
             // Check which tab is active
-            const activeTab = $('.vectfox-cv-chat-source .vectfox-cv-source-tab.active').data('source');
+            const activeTab = $('.vecttauri-cv-chat-source .vecttauri-cv-source-tab.active').data('source');
 
             if (activeTab === 'current') {
                 // Use current chat
@@ -2863,7 +2863,7 @@ function getSourceData() {
         case 'url': {
             // URL type should have sourceData set by fetchUrl()
             // If not, check if URL input has a value (user hasn't clicked fetch yet)
-            const urlInput = $('#vectfox_cv_url_input').val()?.trim();
+            const urlInput = $('#vecttauri_cv_url_input').val()?.trim();
             if (urlInput) {
                 toastr.warning('Please click "Fetch" to load the URL content first');
             }
@@ -2872,7 +2872,7 @@ function getSourceData() {
 
         case 'wiki': {
             // Wiki type should have sourceData set by scrapeWiki()
-            const wikiUrl = $('#vectfox_cv_wiki_url').val()?.trim();
+            const wikiUrl = $('#vecttauri_cv_wiki_url').val()?.trim();
             if (wikiUrl) {
                 toastr.warning('Please click "Scrape Wiki" to load the content first');
             }
@@ -2881,7 +2881,7 @@ function getSourceData() {
 
         case 'youtube': {
             // YouTube type should have sourceData set by fetchYouTubeTranscript()
-            const ytUrl = $('#vectfox_cv_youtube_url').val()?.trim();
+            const ytUrl = $('#vecttauri_cv_youtube_url').val()?.trim();
             if (ytUrl) {
                 toastr.warning('Please click "Fetch" to load the transcript first');
             }
@@ -2908,10 +2908,10 @@ async function startContinueVectorization() {
         return;
     }
 
-    // currentSettings only carries content-type defaults — merge global VECTFOX settings
+    // currentSettings only carries content-type defaults — merge global VECTTAURI settings
     // so the user's chat_model / API key (set in Core → LLM Summarization) is visible.
     const mergedSettings = resolveEffectiveSettings(currentSettings);
-    console.log('[VectFox] LLM config check (vectorize-content):', {
+    console.log('[VectTauri] LLM config check (vectorize-content):', {
         provider: mergedSettings.chat_provider,
         model: mergedSettings.chat_model,
         hasOpenRouterKey: !!getOpenRouterApiKey(mergedSettings),
@@ -2920,7 +2920,7 @@ async function startContinueVectorization() {
     const llmCheck = validateLLMConfig(mergedSettings);
     if (!llmCheck.ok) {
         toastr.error(
-            `${llmCheck.reason} Open VECTFOX → Core → LLM Summarization & EventBase Extraction and fill in the required fields.`,
+            `${llmCheck.reason} Open VECTTAURI → Core → LLM Summarization & EventBase Extraction and fill in the required fields.`,
             'Configuration required',
             { timeOut: 8000 }
         );
@@ -2952,7 +2952,7 @@ async function startContinueVectorization() {
 
     try {
         const { vectorizeContent } = await import('../core/content-vectorization.js');
-        // Merge global VECTFOX settings (vector_backend, source, model, etc.) into currentSettings,
+        // Merge global VECTTAURI settings (vector_backend, source, model, etc.) into currentSettings,
         // which by itself is only the content-type defaults. Without this, the collection-ID builder
         // sees `settings.vector_backend` as undefined and drops the backend segment from the name.
         const mergedSettings = resolveEffectiveSettings(currentSettings);
@@ -2967,7 +2967,7 @@ async function startContinueVectorization() {
         if (result.chunkCount === 0) {
             // Already up to date — message shown by vectorizeContent
         } else {
-            toastr.success(`Inserted ${result.chunkCount} new chunks`, 'VectFox');
+            toastr.success(`Inserted ${result.chunkCount} new chunks`, 'VectTauri');
         }
         closeContentVectorizer();
         if (currentContentType === 'lorebook') {
@@ -2977,11 +2977,11 @@ async function startContinueVectorization() {
     } catch (e) {
         const isStopped = e?.name === 'AbortError' || String(e?.message || '').toLowerCase().includes('stopped by user');
         if (isStopped) {
-            toastr.info('Vectorization stopped', 'VectFox');
+            toastr.info('Vectorization stopped', 'VectTauri');
             return;
         }
-        console.error('VectFox: Continue vectorization failed:', e);
-        toastr.error('Vectorization failed: ' + e.message, 'VectFox');
+        console.error('VectTauri: Continue vectorization failed:', e);
+        toastr.error('Vectorization failed: ' + e.message, 'VectTauri');
     } finally {
         progressTracker.clearCancelHandler();
         isVectorizing = false;
@@ -3024,7 +3024,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
         const { runEventBaseIngestion, countUnfinishedWindows } = await import('../core/eventbase-workflow.js');
         const { chunkText } = await import('../core/chunking.js');
         const context = getContext();
-        const settings = extension_settings.vectfox || {};
+        const settings = extension_settings.vecttauri || {};
         const source = getSourceData();
 
         // Vectorize button = fresh start. Drop BOTH "already-extracted" caches for
@@ -3068,7 +3068,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
             await maybeResetCaches(chatUUID);
             console.log(`[EventBase] Archive upload route — collection: ${collectionIdOverride}, messages: ${messages.length}`);
 
-            const parallelWindows = parseInt($('#vectfox_cv_parallel_windows').val()) || 1;
+            const parallelWindows = parseInt($('#vecttauri_cv_parallel_windows').val()) || 1;
             const result = await runEventBaseIngestion({
                 messages,
                 chatUUID,
@@ -3085,7 +3085,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
 
             if (activeVectorizeAbortController?.signal?.aborted) {
                 progressTracker.complete(false, `Stopped — saved ${result.eventsExtracted} events from ${result.windowsProcessed} windows so far`);
-                toastr.info('EventBase ingestion stopped', 'VectFox');
+                toastr.info('EventBase ingestion stopped', 'VectTauri');
             } else if (countUnfinishedWindows(result) > 0) {
                 // Keep the workflow's complete(false, …) verdict rather than
                 // painting over it with a green tick (see countUnfinishedWindows).
@@ -3093,12 +3093,12 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
                 toastr.warning(
                     `EventBase: extracted ${result.eventsExtracted} events from ${result.windowsProcessed} windows, `
                     + `but ${unfinishedWindows} window(s) produced nothing. They were not stored and will be retried next run — see the console.`,
-                    'VectFox',
+                    'VectTauri',
                 );
                 closeContentVectorizer();
             } else {
                 progressTracker.complete(true, `EventBase: extracted ${result.eventsExtracted} events from ${result.windowsProcessed} windows`);
-                toastr.success(`EventBase: extracted ${result.eventsExtracted} events across ${result.windowsProcessed} windows`, 'VectFox');
+                toastr.success(`EventBase: extracted ${result.eventsExtracted} events across ${result.windowsProcessed} windows`, 'VectTauri');
                 closeContentVectorizer();
             }
         } else {
@@ -3145,7 +3145,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
                 );
                 if (!proceed) {
                     progressTracker.complete(false, 'Cancelled — window size mismatch');
-                    toastr.info('Resume cancelled', 'VectFox');
+                    toastr.info('Resume cancelled', 'VectTauri');
                     return;
                 }
                 // Stamp the new window size NOW, not at run-end. The workflow's
@@ -3178,7 +3178,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
                 batchSize: legacyBatchSize,
             });
             const legacyTotalChunks = Array.isArray(legacyChunks) ? legacyChunks.length : 0;
-            const parallelWindows = parseInt($('#vectfox_cv_parallel_windows').val()) || 1;
+            const parallelWindows = parseInt($('#vecttauri_cv_parallel_windows').val()) || 1;
 
             await vectorizeAll(settings, legacyBatchSize, activeVectorizeAbortController.signal, {
                 startFromMessage,
@@ -3206,7 +3206,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
     } catch (e) {
         const isStopped = e?.name === 'AbortError' || String(e?.message || '').toLowerCase().includes('stopped by user');
         if (isStopped) {
-            toastr.info('EventBase ingestion stopped', 'VectFox');
+            toastr.info('EventBase ingestion stopped', 'VectTauri');
             console.log('[EventBase] Ingestion stopped by user');
             return;
         }
@@ -3220,7 +3220,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
             await callGenericPopup(
                 `<div style="text-align: left;">
                     <p><strong>Vectorization stopped — database insert failed</strong></p>
-                    <p>VectFox tried 3 times to write a batch of events to the vector store and the database rejected every attempt. Your collection is consistent (no partial writes), and the next run will pick up where this one stopped.</p>
+                    <p>VectTauri tried 3 times to write a batch of events to the vector store and the database rejected every attempt. Your collection is consistent (no partial writes), and the next run will pick up where this one stopped.</p>
                     <p>Underlying error:</p>
                     <pre style="white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto;">${StringUtils.escapeHtml(e.message)}</pre>
                 </div>`,
@@ -3240,7 +3240,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
             await callGenericPopup(
                 `<div style="text-align: left;">
                     <p><strong>Vectorization stopped — silent data loss detected</strong></p>
-                    <p>The number of events stored in the database is smaller than the number VectFox tried to insert. Some events were dropped between the workflow and Qdrant without any error being raised. <strong>Your collection is incomplete</strong> and should not be trusted until this is resolved.</p>
+                    <p>The number of events stored in the database is smaller than the number VectTauri tried to insert. Some events were dropped between the workflow and Qdrant without any error being raised. <strong>Your collection is incomplete</strong> and should not be trusted until this is resolved.</p>
                     <p>This is usually one of: (a) a hash collision (two events colliding to the same point ID, where Qdrant treats the second as an overwrite of the first), (b) the Similharity plugin silently rejecting a payload field, or (c) a Qdrant capacity / network issue under the gateway.</p>
                     <p>Details:</p>
                     <pre style="white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto;">${StringUtils.escapeHtml(e.message)}</pre>
@@ -3253,7 +3253,7 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
             return;
         }
         console.error('[EventBase] Backfill failed:', e);
-        toastr.error('EventBase ingestion failed: ' + e.message, 'VectFox');
+        toastr.error('EventBase ingestion failed: ' + e.message, 'VectTauri');
     } finally {
         progressTracker.clearCancelHandler();
         isVectorizing = false;
@@ -3313,7 +3313,7 @@ async function startVectorization() {
     // rather than letting it blow up mid-ingest. Merge global settings so the user's
     // chat_model / API key set in Core → LLM Summarization is visible here.
     const mergedSettings = resolveEffectiveSettings(currentSettings);
-    console.log('[VectFox] LLM config check (start-vectorization):', {
+    console.log('[VectTauri] LLM config check (start-vectorization):', {
         provider: mergedSettings.chat_provider,
         model: mergedSettings.chat_model,
         hasOpenRouterKey: !!getOpenRouterApiKey(mergedSettings),
@@ -3322,7 +3322,7 @@ async function startVectorization() {
     const llmCheck = validateLLMConfig(mergedSettings);
     if (!llmCheck.ok) {
         toastr.error(
-            `${llmCheck.reason} Open VECTFOX → Core → LLM Summarization & EventBase Extraction and fill in the required fields.`,
+            `${llmCheck.reason} Open VECTTAURI → Core → LLM Summarization & EventBase Extraction and fill in the required fields.`,
             'Configuration required',
             { timeOut: 8000 }
         );
@@ -3348,7 +3348,7 @@ async function startVectorization() {
                 { okButton: 'Reset & Vectorize', cancelButton: 'Cancel' },
             );
             if (!proceed) {
-                toastr.info('Vectorize cancelled', 'VectFox');
+                toastr.info('Vectorize cancelled', 'VectTauri');
                 return;
             }
         }
@@ -3384,10 +3384,10 @@ async function startVectorization() {
                 const { unregisterCollection } = await import('../core/collection-loader.js');
                 await purgeVectorIndex(existing.collectionId, currentSettings);
                 unregisterCollection(existing.collectionId);
-                toastr.info('Cleared existing vectors', 'VectFox');
+                toastr.info('Cleared existing vectors', 'VectTauri');
             }
         } catch (e) {
-            console.warn('VectFox: Could not check for existing vectors:', e);
+            console.warn('VectTauri: Could not check for existing vectors:', e);
             // Continue anyway
         }
     }
@@ -3402,7 +3402,7 @@ async function startVectorization() {
         // Import the appropriate handler
         const { vectorizeContent } = await import('../core/content-vectorization.js');
 
-        // Merge global VECTFOX settings (vector_backend, source, model, etc.) into currentSettings.
+        // Merge global VECTTAURI settings (vector_backend, source, model, etc.) into currentSettings.
         const mergedSettings = resolveEffectiveSettings(currentSettings);
         const result = await vectorizeContent({
             contentType: currentContentType,
@@ -3412,7 +3412,7 @@ async function startVectorization() {
             startFromMessage,
         });
 
-        toastr.success(`Vectorized ${result.chunkCount} chunks`, 'VectFox');
+        toastr.success(`Vectorized ${result.chunkCount} chunks`, 'VectTauri');
         renderCollections();
         closeContentVectorizer();
 
@@ -3427,22 +3427,22 @@ async function startVectorization() {
         const isStopped = e?.name === 'AbortError' || String(e?.message || '').toLowerCase().includes('stopped by user');
 
         if (isStopped) {
-            toastr.info('Vectorization stopped', 'VectFox');
+            toastr.info('Vectorization stopped', 'VectTauri');
             return;
         }
 
-        console.error('VectFox: Vectorization failed:', e);
+        console.error('VectTauri: Vectorization failed:', e);
 
         // Check for dimension mismatch error and provide helpful guidance
         if (e.message.includes('dimension mismatch') || e.message.includes('Vector dimension error')) {
             toastr.error(
                 'Vector dimension mismatch detected. You likely switched embedding models. ' +
                 'Please delete this collection in Database Browser and try again.',
-                'VECTFOX - Dimension Mismatch',
+                'VECTTAURI - Dimension Mismatch',
                 { timeOut: 10000 }
             );
         } else {
-            toastr.error('Vectorization failed: ' + e.message, 'VectFox');
+            toastr.error('Vectorization failed: ' + e.message, 'VectTauri');
         }
 
     } finally {

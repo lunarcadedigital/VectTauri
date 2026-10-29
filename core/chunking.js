@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VECTFOX CHUNKING STRATEGIES
+ * VECTTAURI CHUNKING STRATEGIES
  * ============================================================================
  * Unified chunking system for all content types.
  * Each strategy is a pure function that takes text and options, returns chunks.
@@ -21,8 +21,8 @@
  * - per_field: Each character field = one chunk
  * - combined: Merge then chunk with adaptive
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 

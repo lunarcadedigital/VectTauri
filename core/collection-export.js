@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VECTFOX COLLECTION EXPORT/IMPORT
+ * VECTTAURI COLLECTION EXPORT/IMPORT
  * ============================================================================
  * Handles exporting collections to portable JSON files and importing them back.
  *
@@ -12,8 +12,8 @@
  * On import, if user's settings match the export's source/model, vectors are
  * imported directly. Otherwise, user is warned to switch settings.
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -56,8 +56,8 @@ import { getPluginUrl } from '../utils/similharity-url.js';
 /** Current export format version */
 const EXPORT_VERSION = '1.0.0';
 
-/** File extension for VectFox exports */
-export const EXPORT_FILE_EXTENSION = '.vectfox.json';
+/** File extension for VectTauri exports */
+export const EXPORT_FILE_EXTENSION = '.vecttauri.json';
 
 /** Maximum chunks to export at once (for progress updates) */
 const EXPORT_BATCH_SIZE = 100;
@@ -74,7 +74,7 @@ const EXPORT_BATCH_SIZE = 100;
 /**
  * Fetches chunks with vectors from the backend
  * @param {string} collectionId - Collection to fetch from
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<Array>} Chunks with vectors
  */
 async function fetchChunksWithVectors(collectionId, settings) {
@@ -120,7 +120,7 @@ async function fetchChunksWithVectors(collectionId, settings) {
  * backend returned none.
  *
  * @param {string} collectionId - Collection to fetch from
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<Array<{ hash: number|string, text: string, index: number, vector: number[]|null, metadata: object }>>}
  */
 export async function fetchPortableChunks(collectionId, settings) {
@@ -147,7 +147,7 @@ export async function fetchPortableChunks(collectionId, settings) {
 /**
  * Exports a single collection to a portable JSON format (includes vectors)
  * @param {string} collectionId - The collection to export
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {object} collectionInfo - Optional collection info (backend, source, model)
  * @returns {Promise<object>} Export data object
  */
@@ -175,7 +175,7 @@ export async function exportCollection(collectionId, settings, collectionInfo = 
         // Step 2: Get all chunks WITH vectors
         progressTracker.updateProgress(2, 'Loading chunks and vectors...');
         const chunks = (await fetchPortableChunks(collectionId, exportSettings)).map(chunk => {
-            // Get per-chunk metadata from VectFox settings
+            // Get per-chunk metadata from VectTauri settings
             const chunkMeta = getChunkMetadata(chunk.hash);
             return chunkMeta ? { ...chunk, chunkMeta } : chunk;
         });
@@ -194,7 +194,7 @@ export async function exportCollection(collectionId, settings, collectionInfo = 
             // Header
             version: EXPORT_VERSION,
             exportDate: new Date().toISOString(),
-            generator: 'VectFox',
+            generator: 'VectTauri',
 
             // Embedding info - CRITICAL for import compatibility
             // NOTE: source + model must match for vectors to be compatible
@@ -270,7 +270,7 @@ export async function exportCollection(collectionId, settings, collectionInfo = 
 /**
  * Exports multiple collections to a single file
  * @param {string[]} collectionIds - Collections to export
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<object>} Export data with multiple collections
  */
 export async function exportMultipleCollections(collectionIds, settings) {
@@ -367,7 +367,7 @@ export async function exportMultipleCollections(collectionIds, settings) {
                 },
             });
         } catch (error) {
-            log.error(`VectFox Export: Failed to export ${collectionId}:`, error);
+            log.error(`VectTauri Export: Failed to export ${collectionId}:`, error);
             errors.push({ collectionId, error: error.message });
         }
     }
@@ -377,7 +377,7 @@ export async function exportMultipleCollections(collectionIds, settings) {
     return {
         version: EXPORT_VERSION,
         exportDate: new Date().toISOString(),
-        generator: 'VectFox',
+        generator: 'VectTauri',
         type: 'multi',
         collections: exports,
         errors: errors,
@@ -396,8 +396,8 @@ export async function exportMultipleCollections(collectionIds, settings) {
  */
 export function downloadExport(exportData, filename = null) {
     const defaultName = exportData.type === 'multi'
-        ? `vectfox-export-${exportData.stats.totalCollections}-collections`
-        : `vectfox-${exportData.collection?.id || 'collection'}`;
+        ? `vecttauri-export-${exportData.stats.totalCollections}-collections`
+        : `vecttauri-${exportData.collection?.id || 'collection'}`;
 
     const rawName = filename || defaultName;
     // Strip emojis, colons, and other characters that are invalid or ugly in filenames.
@@ -424,7 +424,7 @@ export function downloadExport(exportData, filename = null) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    log.lifecycle(`VectFox Export: Downloaded ${finalFilename}`);
+    log.lifecycle(`VectTauri Export: Downloaded ${finalFilename}`);
 }
 
 // ============================================================================
@@ -434,7 +434,7 @@ export function downloadExport(exportData, filename = null) {
 /**
  * Validates an import file structure and checks embedding compatibility
  * @param {object} data - Parsed JSON data
- * @param {object} currentSettings - Current VectFox settings (to check compatibility)
+ * @param {object} currentSettings - Current VectTauri settings (to check compatibility)
  * @returns {{ valid: boolean, errors: string[], warnings: string[], compatible: boolean, embeddingInfo: object }}
  */
 export function validateImportData(data, currentSettings = {}) {
@@ -517,7 +517,7 @@ export function validateImportData(data, currentSettings = {}) {
  * Takes the portable chunk shape returned by {@link fetchPortableChunks}.
  * @param {string} collectionId - Collection to insert into
  * @param {Array} chunks - Chunks with vectors
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {Function} [onBatchProgress] - Called after each batch: (insertedSoFar, total)
  * @param {AbortSignal} [abortSignal] - Cancel between batches
  */
@@ -624,7 +624,7 @@ export async function insertChunksWithVectors(collectionId, chunks, settings, on
             const mod = await import('./corpus-stats.js');
             mod.clearCorpusStatsCache(collectionId);
         } catch (err) {
-            log.warn(`VectFox Import: corpus-stats cache clear failed for ${collectionId} (BM25 stats stay stale until the next rebuild):`, err);
+            log.warn(`VectTauri Import: corpus-stats cache clear failed for ${collectionId} (BM25 stats stay stale until the next rebuild):`, err);
         }
     }
 }
@@ -634,7 +634,7 @@ export async function insertChunksWithVectors(collectionId, chunks, settings, on
  * Uses pre-computed vectors if available and settings match, otherwise re-embeds
  *
  * @param {object} exportData - Single collection export data (or one item from multi-export)
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {object} options - Import options
  * @param {string} options.collectionId - Override collection ID (for rename/duplicate)
  * @param {boolean} options.overwrite - If true, purge existing collection first
@@ -663,7 +663,7 @@ export async function importCollection(exportData, settings, options = {}) {
     const wasRemapped = collectionId !== sourceId;
     if (wasRemapped) {
         const srcLabel = normalizeBackendForId(exportData.embedding?.backend || '?');
-        log.lifecycle(`VectFox Import: remapped collection ID (backend ${srcLabel} → ${targetBackendLabel}, handle → ${targetHandle}): "${sourceId}" → "${collectionId}"`);
+        log.lifecycle(`VectTauri Import: remapped collection ID (backend ${srcLabel} → ${targetBackendLabel}, handle → ${targetHandle}): "${sourceId}" → "${collectionId}"`);
     }
 
     const chunks = exportData.chunks || [];
@@ -750,10 +750,10 @@ export async function importCollection(exportData, settings, options = {}) {
         if (options.overwrite) {
             try {
                 await purgeVectorIndex(collectionId, settings);
-                log.lifecycle(`VectFox Import: Purged existing collection ${collectionId}`);
+                log.lifecycle(`VectTauri Import: Purged existing collection ${collectionId}`);
             } catch (e) {
                 // Collection might not exist, that's fine - log at debug level
-                log.trace(`VectFox Import: Could not purge ${collectionId} (may not exist):`, e.message);
+                log.trace(`VectTauri Import: Could not purge ${collectionId} (may not exist):`, e.message);
             }
         }
 
@@ -781,7 +781,7 @@ export async function importCollection(exportData, settings, options = {}) {
                 await insertChunksWithVectors(collectionId, preparedChunks, settings, (done, total) => {
                     progressTracker.updateEmbeddingProgress(done, total);
                 }, abortController.signal);
-                log.lifecycle(`VectFox Import: Inserted ${preparedChunks.length} chunks with pre-computed vectors`);
+                log.lifecycle(`VectTauri Import: Inserted ${preparedChunks.length} chunks with pre-computed vectors`);
             } catch (error) {
                 if (error?.name === 'AbortError') throw error;
                 throw new Error(`Failed to insert chunks: ${error.message}`);
@@ -791,7 +791,7 @@ export async function importCollection(exportData, settings, options = {}) {
             progressTracker.updateProgress(3, `Embedding ${preparedChunks.length} chunks...`);
             try {
                 await insertVectorItems(collectionId, preparedChunks, settings, null, abortController.signal);
-                log.lifecycle(`VectFox Import: Embedded and inserted ${preparedChunks.length} chunks`);
+                log.lifecycle(`VectTauri Import: Embedded and inserted ${preparedChunks.length} chunks`);
             } catch (error) {
                 if (error?.name === 'AbortError') throw error;
                 throw new Error(`Failed to embed chunks: ${error.message}`);
@@ -893,7 +893,7 @@ export async function importCollection(exportData, settings, options = {}) {
             try {
                 await purgeVectorIndex(collectionId, settings);
             } catch (cleanupErr) {
-                log.trace(`VectFox Import: cleanup purge after stop failed:`, cleanupErr?.message);
+                log.trace(`VectTauri Import: cleanup purge after stop failed:`, cleanupErr?.message);
             }
             progressTracker.complete(false, 'Import stopped');
         } else {
@@ -909,7 +909,7 @@ export async function importCollection(exportData, settings, options = {}) {
 /**
  * Imports multiple collections from a multi-export file
  * @param {object} multiExportData - Multi-collection export data
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {object} options - Import options
  * @returns {Promise<{ success: boolean, imported: number, failed: number, results: object[] }>}
  */
@@ -939,7 +939,7 @@ export async function importMultipleCollections(multiExportData, settings, optio
             results.push(result);
             imported++;
         } catch (error) {
-            log.error(`VectFox Import: Failed to import ${collectionId}:`, error);
+            log.error(`VectTauri Import: Failed to import ${collectionId}:`, error);
             results.push({
                 success: false,
                 collectionId,
@@ -981,7 +981,7 @@ async function importCollectionSilent(exportData, settings, options = {}) {
     const collectionId = remapCollectionIdToHandle(backendRemapped, targetHandle);
     if (collectionId !== sourceId) {
         const srcLabel = normalizeBackendForId(exportData.embedding?.backend || '?');
-        log.lifecycle(`VectFox Import (silent): remapped (backend ${srcLabel} → ${targetBackendLabel}, handle → ${targetHandle}): "${sourceId}" → "${collectionId}"`);
+        log.lifecycle(`VectTauri Import (silent): remapped (backend ${srcLabel} → ${targetBackendLabel}, handle → ${targetHandle}): "${sourceId}" → "${collectionId}"`);
     }
 
     const chunks = exportData.chunks || [];
@@ -1029,7 +1029,7 @@ async function importCollectionSilent(exportData, settings, options = {}) {
             await purgeVectorIndex(collectionId, settings);
         } catch (e) {
             // Collection might not exist - log at debug level
-            log.trace(`VectFox Import: Could not purge ${collectionId} (may not exist):`, e.message);
+            log.trace(`VectTauri Import: Could not purge ${collectionId} (may not exist):`, e.message);
         }
     }
 

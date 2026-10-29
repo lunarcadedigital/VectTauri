@@ -23,7 +23,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: { collections: {} } },
+    extension_settings: { vecttauri: { collections: {} } },
     getContext: vi.fn(() => ({ characterId: '0', name1: 'TestPersona' })),
 }));
 
@@ -47,7 +47,7 @@ const CHARACTER_ID = '4';
 
 /** Write collection metadata the way setCollectionMeta would. */
 function setMeta(meta) {
-    extension_settings.vectfox.collections[COLLECTION] = meta;
+    extension_settings.vecttauri.collections[COLLECTION] = meta;
 }
 
 /** Context as the callers build it — trigger matching needs recentMessages. */
@@ -56,7 +56,7 @@ function context({ chatId = CHAT_ID, characterId = CHARACTER_ID, messages = ['Th
 }
 
 beforeEach(() => {
-    extension_settings.vectfox = { collections: {} };
+    extension_settings.vecttauri = { collections: {} };
     conditionResult.value = true;
 });
 

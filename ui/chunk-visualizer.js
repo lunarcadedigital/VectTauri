@@ -1,13 +1,13 @@
 /**
  * ============================================================================
- * VectFox CHUNK VISUALIZER
+ * VectTauri CHUNK VISUALIZER
  * ============================================================================
  * Split-panel master/detail layout for browsing and editing chunks
  * Left panel: scrollable chunk list with search/filter/sort
  * Right panel: full details of selected chunk
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -180,7 +180,7 @@ function updateChunkData(hash, updates) {
 async function saveAllChanges() {
     const count = pendingChanges.size;
     if (count === 0) {
-        toastr.info('No changes to save', 'VectFox');
+        toastr.info('No changes to save', 'VectTauri');
         return;
     }
 
@@ -251,8 +251,8 @@ async function saveAllChanges() {
                 } catch (e) {
                     // Backend is now the only store for these fields, so a failure means the
                     // change did NOT persist — surface it instead of swallowing it.
-                    console.error('VectFox: Failed to save chunk metadata to backend:', e);
-                    toastr.error(`Failed to save chunk metadata to the backend — change not persisted: ${e.message}`, 'VectFox');
+                    console.error('VectTauri: Failed to save chunk metadata to backend:', e);
+                    toastr.error(`Failed to save chunk metadata to the backend — change not persisted: ${e.message}`, 'VectTauri');
                     throw e;
                 }
             }
@@ -260,10 +260,10 @@ async function saveAllChanges() {
 
         pendingChanges.clear();
         hasUnsavedChanges = false;
-        toastr.success(`Saved changes to ${count} chunk(s)`, 'VectFox');
+        toastr.success(`Saved changes to ${count} chunk(s)`, 'VectTauri');
     } catch (error) {
-        console.error('VectFox: Failed to save changes', error);
-        toastr.error(`Failed to save changes: ${error.message}`, 'VectFox');
+        console.error('VectTauri: Failed to save changes', error);
+        toastr.error(`Failed to save changes: ${error.message}`, 'VectTauri');
     }
 }
 
@@ -313,18 +313,18 @@ export function openVisualizer(results, collectionId, settings, onReload = null)
     // Sync persisted UI state into the freshly-rendered dropdowns. createModal()
     // rebuilds the HTML, so without this the dropdowns silently revert to their
     // first option on reload while sortBy/filterBy retain the user's choice.
-    $('#VectFox_chunk_sort').val(sortBy);
-    $('#VectFox_chunk_filter').val(filterBy);
+    $('#VectTauri_chunk_sort').val(sortBy);
+    $('#VectTauri_chunk_filter').val(filterBy);
     renderChunkList();
     renderDetailPanel();
     bindEvents();
 
-    $('#VectFox_visualizer_modal').fadeIn(200);
+    $('#VectTauri_visualizer_modal').fadeIn(200);
 
     // Async fetch collection-level metadata (sentinel point) and render in footer.
     // Read-only — surfaces internal lock state without making it look editable.
     _loadAndRenderCollectionMetaFooter(collectionId, settings).catch(err => {
-        console.debug('[VectFox] Collection metadata footer load skipped:', err?.message);
+        console.debug('[VectTauri] Collection metadata footer load skipped:', err?.message);
     });
 }
 
@@ -367,7 +367,7 @@ async function _loadAndRenderCollectionMetaFooter(collectionId, settings) {
         .map(([k, v]) => `<span style="margin-right:1.2em;"><b>${StringUtils.escapeHtml(k)}</b>: ${StringUtils.escapeHtml(v)}</span>`)
         .join('');
 
-    $('#VectFox_collection_meta_footer')
+    $('#VectTauri_collection_meta_footer')
         .html(`<span style="margin-right:0.8em;">🔒 Collection metadata (read-only, internal — do not delete the sentinel point in Qdrant):</span>${lines}`)
         .show();
 }
@@ -379,7 +379,7 @@ export function closeVisualizer() {
         }
     }
     hasUnsavedChanges = false;
-    $('#VectFox_visualizer_modal').fadeOut(200);
+    $('#VectTauri_visualizer_modal').fadeOut(200);
     currentResults = null;
     currentCollectionId = null;
     selectedChunkId = null;
@@ -477,7 +477,7 @@ function applyFilters() {
 
 function createModal() {
     // Remove existing
-    $('#VectFox_visualizer_modal').remove();
+    $('#VectTauri_visualizer_modal').remove();
 
     const collectionName = currentCollectionId || 'Collection';
     const icon = getCollectionIcon();
@@ -487,30 +487,30 @@ function createModal() {
         : 'Unknown';
 
     const html = `
-        <div id="VectFox_visualizer_modal" class="vectfox-visualizer-modal">
-            <div class="vectfox-visualizer-container">
+        <div id="VectTauri_visualizer_modal" class="vecttauri-visualizer-modal">
+            <div class="vecttauri-visualizer-container">
                 <!-- Header -->
-                <div class="vectfox-visualizer-header">
-                    <div class="vectfox-visualizer-title">
-                        <span class="vectfox-visualizer-title-icon">${icon}</span>
+                <div class="vecttauri-visualizer-header">
+                    <div class="vecttauri-visualizer-title">
+                        <span class="vecttauri-visualizer-title-icon">${icon}</span>
                         <span>${StringUtils.escapeHtml(collectionName)}</span>
                     </div>
-                    <div class="vectfox-visualizer-header-actions">
-                        <button class="vectfox-visualizer-save" id="VectFox_visualizer_save" title="Save changes">
+                    <div class="vecttauri-visualizer-header-actions">
+                        <button class="vecttauri-visualizer-save" id="VectTauri_visualizer_save" title="Save changes">
                             <i class="fa-solid fa-floppy-disk"></i> Save
                         </button>
-                        <button class="vectfox-visualizer-close" id="VectFox_visualizer_close">✕</button>
+                        <button class="vecttauri-visualizer-close" id="VectTauri_visualizer_close">✕</button>
                     </div>
                 </div>
 
                 <!-- Body: Chunk Split Panel -->
-                <div class="vectfox-visualizer-body">
+                <div class="vecttauri-visualizer-body">
                     <!-- Left: Chunk List -->
-                    <div class="vectfox-chunk-list-panel">
-                        <div class="vectfox-list-toolbar">
-                            <input type="text" class="vectfox-list-search" id="VectFox_chunk_search" placeholder="🔍 Search...">
-                            <div class="vectfox-list-controls">
-                                <select class="vectfox-list-sort" id="VectFox_chunk_sort">
+                    <div class="vecttauri-chunk-list-panel">
+                        <div class="vecttauri-list-toolbar">
+                            <input type="text" class="vecttauri-list-search" id="VectTauri_chunk_search" placeholder="🔍 Search...">
+                            <div class="vecttauri-list-controls">
+                                <select class="vecttauri-list-sort" id="VectTauri_chunk_sort">
                                     <option value="index">Sort: Message Order</option>
                                     <option value="length-desc">Sort: Longest First</option>
                                     <option value="length-asc">Sort: Shortest First</option>
@@ -519,7 +519,7 @@ function createModal() {
                                     <option value="index-r">Sort: Message order Reversed</option>
 
                                 </select>
-                                <select class="vectfox-list-filter" id="VectFox_chunk_filter">
+                                <select class="vecttauri-list-filter" id="VectTauri_chunk_filter">
                                     <option value="all">Filter: All</option>
                                     <option value="enabled">Enabled</option>
                                     <option value="disabled">Disabled</option>
@@ -527,36 +527,36 @@ function createModal() {
                                     <option value="conditions">Has Conditions</option>
                                 </select>
                             </div>
-                                <div class="vectfox-fetch-limit-control">
+                                <div class="vecttauri-fetch-limit-control">
                                     <label>Fetch limit:</label>
-                                    <input type="number" id="VectFox_fetch_limit" min="0" max="99999" step="100" value="${chunkFetchLimit}" title="Max chunks loaded from server (0 = all)">
-                                    <button id="VectFox_reload_chunks" title="Reload chunks from server with new limit">↺ Reload</button>
+                                    <input type="number" id="VectTauri_fetch_limit" min="0" max="99999" step="100" value="${chunkFetchLimit}" title="Max chunks loaded from server (0 = all)">
+                                    <button id="VectTauri_reload_chunks" title="Reload chunks from server with new limit">↺ Reload</button>
                                 </div>
-                                <div class="vectfox-db-total" id="VectFox_db_chunk_total">DB max chunks: ${dbChunkText}</div>
+                                <div class="vecttauri-db-total" id="VectTauri_db_chunk_total">DB max chunks: ${dbChunkText}</div>
                         </div>
-                        <div class="vectfox-chunk-list" id="VectFox_chunk_list"></div>
-                        <div class="vectfox-bulk-actions">
-                            <label class="vectfox-bulk-toggle">
-                                <input type="checkbox" id="VectFox_bulk_mode">
+                        <div class="vecttauri-chunk-list" id="VectTauri_chunk_list"></div>
+                        <div class="vecttauri-bulk-actions">
+                            <label class="vecttauri-bulk-toggle">
+                                <input type="checkbox" id="VectTauri_bulk_mode">
                                 <span>Bulk Select Mode</span>
                             </label>
-                            <div class="vectfox-bulk-buttons" id="VectFox_bulk_buttons" style="display: none;">
-                                <button class="vectfox-bulk-btn" id="VectFox_bulk_enable">Enable All</button>
-                                <button class="vectfox-bulk-btn" id="VectFox_bulk_disable">Disable All</button>
-                                <button class="vectfox-bulk-btn vectfox-bulk-btn-danger" id="VectFox_bulk_delete">Delete Selected</button>
+                            <div class="vecttauri-bulk-buttons" id="VectTauri_bulk_buttons" style="display: none;">
+                                <button class="vecttauri-bulk-btn" id="VectTauri_bulk_enable">Enable All</button>
+                                <button class="vecttauri-bulk-btn" id="VectTauri_bulk_disable">Disable All</button>
+                                <button class="vecttauri-bulk-btn vecttauri-bulk-btn-danger" id="VectTauri_bulk_delete">Delete Selected</button>
                             </div>
                         </div>
-                        <div class="vectfox-list-status" id="VectFox_list_status"></div>
+                        <div class="vecttauri-list-status" id="VectTauri_list_status"></div>
                     </div>
 
                     <!-- Right: Detail Panel -->
-                    <div class="vectfox-chunk-detail-panel" id="VectFox_detail_panel">
-                        <div class="vectfox-detail-empty">Select a chunk to view details</div>
+                    <div class="vecttauri-chunk-detail-panel" id="VectTauri_detail_panel">
+                        <div class="vecttauri-detail-empty">Select a chunk to view details</div>
                     </div>
                 </div>
 
                 <!-- Read-only collection metadata footer (sentinel point). Populated async after modal opens. -->
-                <div class="vectfox-visualizer-meta-footer" id="VectFox_collection_meta_footer" style="display:none; padding: 8px 16px; border-top: 1px solid var(--grey30); font-size: 0.78em; color: var(--SmartThemeBodyColor); opacity: 0.7; font-family: monospace;"></div>
+                <div class="vecttauri-visualizer-meta-footer" id="VectTauri_collection_meta_footer" style="display:none; padding: 8px 16px; border-top: 1px solid var(--grey30); font-size: 0.78em; color: var(--SmartThemeBodyColor); opacity: 0.7; font-family: monospace;"></div>
             </div>
         </div>
     `;
@@ -569,13 +569,13 @@ function createModal() {
 // ============================================================================
 
 function renderChunkList() {
-    const container = $('#VectFox_chunk_list');
+    const container = $('#VectTauri_chunk_list');
     const displayChunks = filteredChunks.slice(0, displayLimit);
 
     let html = displayChunks.map((chunk, idx) => renderChunkItem(chunk, idx)).join('');
 
     if (filteredChunks.length > displayLimit) {
-        html += `<div class="vectfox-load-more" id="VectFox_load_more">[Load ${Math.min(50, filteredChunks.length - displayLimit)} more...]</div>`;
+        html += `<div class="vecttauri-load-more" id="VectTauri_load_more">[Load ${Math.min(50, filteredChunks.length - displayLimit)} more...]</div>`;
     }
 
     container.html(html);
@@ -625,33 +625,33 @@ function renderChunkItem(chunk, listIndex) {
 
     // Build info badges
     const infoBadges = [];
-    infoBadges.push(`<span class="vectfox-chunk-item-badge msg">${msgLabel}</span>`);
+    infoBadges.push(`<span class="vecttauri-chunk-item-badge msg">${msgLabel}</span>`);
     if (totalChunks > 1) {
-        infoBadges.push(`<span class="vectfox-chunk-item-badge chunk-part">${chunkIdx + 1}/${totalChunks}</span>`);
+        infoBadges.push(`<span class="vecttauri-chunk-item-badge chunk-part">${chunkIdx + 1}/${totalChunks}</span>`);
     }
-    infoBadges.push(`<span class="vectfox-chunk-item-badge chars">${textLengthDisplay} chars</span>`);
+    infoBadges.push(`<span class="vecttauri-chunk-item-badge chars">${textLengthDisplay} chars</span>`);
 
     // Build feature badges
     const featureBadges = [];
-    if (hasConditions) featureBadges.push(`<span class="vectfox-chunk-item-badge conditions" title="Has ${data.conditions.rules.length} condition(s)">⚡${data.conditions.rules.length}</span>`);
-    if (hasKeywords) featureBadges.push(`<span class="vectfox-chunk-item-badge keywords" title="Has ${data.keywords.length} keyword(s)">🏷️${data.keywords.length}</span>`);
+    if (hasConditions) featureBadges.push(`<span class="vecttauri-chunk-item-badge conditions" title="Has ${data.conditions.rules.length} condition(s)">⚡${data.conditions.rules.length}</span>`);
+    if (hasKeywords) featureBadges.push(`<span class="vecttauri-chunk-item-badge keywords" title="Has ${data.keywords.length} keyword(s)">🏷️${data.keywords.length}</span>`);
 
     const bulkCheckbox = bulkSelectMode
-        ? `<input type="checkbox" class="vectfox-bulk-checkbox" data-uid="${chunk.uniqueId}" ${selectedChunksSet.has(chunk.uniqueId) ? 'checked' : ''} title="Select for bulk action">`
+        ? `<input type="checkbox" class="vecttauri-bulk-checkbox" data-uid="${chunk.uniqueId}" ${selectedChunksSet.has(chunk.uniqueId) ? 'checked' : ''} title="Select for bulk action">`
         : '';
 
     return `
-        <div class="vectfox-chunk-item ${isSelected ? 'selected' : ''} ${!data.enabled ? 'disabled' : ''} ${bulkSelectMode && selectedChunksSet.has(chunk.uniqueId) ? 'bulk-checked' : ''}"
+        <div class="vecttauri-chunk-item ${isSelected ? 'selected' : ''} ${!data.enabled ? 'disabled' : ''} ${bulkSelectMode && selectedChunksSet.has(chunk.uniqueId) ? 'bulk-checked' : ''}"
              data-uid="${chunk.uniqueId}" data-list-index="${listIndex}">
             ${bulkCheckbox}
-            <div class="vectfox-chunk-item-content">
-                <div class="vectfox-chunk-item-header">
-                    <span class="vectfox-chunk-item-index">${displayNumber}.</span>
-                    <span class="vectfox-chunk-item-name">${StringUtils.escapeHtml(displayName)}</span>
+            <div class="vecttauri-chunk-item-content">
+                <div class="vecttauri-chunk-item-header">
+                    <span class="vecttauri-chunk-item-index">${displayNumber}.</span>
+                    <span class="vecttauri-chunk-item-name">${StringUtils.escapeHtml(displayName)}</span>
                 </div>
-                <div class="vectfox-chunk-item-stats">
-                    <div class="vectfox-chunk-item-badges info-badges">${infoBadges.join('')}</div>
-                    ${featureBadges.length > 0 ? `<div class="vectfox-chunk-item-badges feature-badges">${featureBadges.join('')}</div>` : ''}
+                <div class="vecttauri-chunk-item-stats">
+                    <div class="vecttauri-chunk-item-badges info-badges">${infoBadges.join('')}</div>
+                    ${featureBadges.length > 0 ? `<div class="vecttauri-chunk-item-badges feature-badges">${featureBadges.join('')}</div>` : ''}
                 </div>
             </div>
         </div>
@@ -667,7 +667,7 @@ function updateStatusBar() {
         if (c.data.keywords?.length > 0) withKeywords++;
     }
 
-    $('#VectFox_list_status').html(`
+    $('#VectTauri_list_status').html(`
         <span>${shown} chunks</span>
         ${withKeywords > 0 ? `<span>• 🏷️${withKeywords}</span>` : ''}
         ${withConditions > 0 ? `<span>• ⚡${withConditions}</span>` : ''}
@@ -679,18 +679,18 @@ function updateStatusBar() {
 // ============================================================================
 
 function renderDetailPanel() {
-    const panel = $('#VectFox_detail_panel');
+    const panel = $('#VectTauri_detail_panel');
 
     if (!selectedChunkId) {
-        panel.html('<div class="vectfox-detail-empty">Select a chunk to view details</div>');
+        panel.html('<div class="vecttauri-detail-empty">Select a chunk to view details</div>');
         return;
     }
 
     // PERF: Use Map for O(1) lookup instead of O(n) find()
     const chunk = allChunksMap.get(selectedChunkId);
     if (!chunk) {
-        console.error('VectFox: Chunk not found for uniqueId:', selectedChunkId);
-        panel.html('<div class="vectfox-detail-empty">Chunk not found</div>');
+        console.error('VectTauri: Chunk not found for uniqueId:', selectedChunkId);
+        panel.html('<div class="vecttauri-detail-empty">Chunk not found</div>');
         return;
     }
 
@@ -716,49 +716,49 @@ function renderDetailPanel() {
 
     panel.html(`
         <!-- Header -->
-        <div class="vectfox-detail-header">
+        <div class="vecttauri-detail-header">
             <!-- Chunk Name - Primary/Biggest -->
-            <div class="vectfox-detail-name-section">
-                <input type="text" class="vectfox-chunk-name-input" id="VectFox_chunk_name"
+            <div class="vecttauri-detail-name-section">
+                <input type="text" class="vecttauri-chunk-name-input" id="VectTauri_chunk_name"
                        placeholder="Name this chunk..."
                        value="${StringUtils.escapeHtml(data.name || '')}">
             </div>
-            <button class="vectfox-detail-delete${bulkSelectMode ? ' vectfox-btn-dimmed' : ''}" id="VectFox_delete_chunk" ${bulkSelectMode ? 'disabled' : ''}>
+            <button class="vecttauri-detail-delete${bulkSelectMode ? ' vecttauri-btn-dimmed' : ''}" id="VectTauri_delete_chunk" ${bulkSelectMode ? 'disabled' : ''}>
                 <i class="fa-solid fa-trash"></i> Delete
             </button>
         </div>
 
         <!-- Chunk Info Bar - Secondary -->
-        <div class="vectfox-detail-info-bar">
-            <span class="vectfox-info-item">
-                <span class="vectfox-info-label">Chunk</span>
-                <span class="vectfox-info-value">#${displayNumber}</span>
+        <div class="vecttauri-detail-info-bar">
+            <span class="vecttauri-info-item">
+                <span class="vecttauri-info-label">Chunk</span>
+                <span class="vecttauri-info-value">#${displayNumber}</span>
             </span>
-            <span class="vectfox-info-divider">•</span>
-            <span class="vectfox-info-item">
-                <span class="vectfox-info-label">from Message</span>
-                <span class="vectfox-info-value">#${chunk.index}</span>
+            <span class="vecttauri-info-divider">•</span>
+            <span class="vecttauri-info-item">
+                <span class="vecttauri-info-label">from Message</span>
+                <span class="vecttauri-info-value">#${chunk.index}</span>
             </span>
             ${data.realWorldDate ? `
-            <span class="vectfox-info-divider">•</span>
-            <span class="vectfox-info-item" title="Real-world send time of the source message (fallback date anchor — NOT the in-story TIME)">
-                <span class="vectfox-info-label">Real-world</span>
-                <span class="vectfox-info-value">${StringUtils.escapeHtml(String(data.realWorldDate))}</span>
+            <span class="vecttauri-info-divider">•</span>
+            <span class="vecttauri-info-item" title="Real-world send time of the source message (fallback date anchor — NOT the in-story TIME)">
+                <span class="vecttauri-info-label">Real-world</span>
+                <span class="vecttauri-info-value">${StringUtils.escapeHtml(String(data.realWorldDate))}</span>
             </span>` : ''}
-            <span class="vectfox-info-divider">•</span>
-            <span class="vectfox-info-item vectfox-info-hash" title="Click to copy hash" id="VectFox_copy_hash">
-                <span class="vectfox-info-value">${chunk.hash}</span>
+            <span class="vecttauri-info-divider">•</span>
+            <span class="vecttauri-info-item vecttauri-info-hash" title="Click to copy hash" id="VectTauri_copy_hash">
+                <span class="vecttauri-info-value">${chunk.hash}</span>
             </span>
         </div>
 
         <!-- Content -->
-        <div class="vectfox-detail-content">
+        <div class="vecttauri-detail-content">
             <!-- Text Block - Inline Editable -->
-            <div class="vectfox-detail-text-block">
-                <div class="vectfox-detail-text" id="VectFox_chunk_text" contenteditable="true">${StringUtils.escapeHtml(data.text)}</div>
-                <div class="vectfox-detail-text-meta">
+            <div class="vecttauri-detail-text-block">
+                <div class="vecttauri-detail-text" id="VectTauri_chunk_text" contenteditable="true">${StringUtils.escapeHtml(data.text)}</div>
+                <div class="vecttauri-detail-text-meta">
                     <span>${wordCount} words • ~${tokenEstimate} tokens</span>
-                    <button class="vectfox-detail-save-btn vectfox-hidden" id="VectFox_save_text">
+                    <button class="vecttauri-detail-save-btn vecttauri-hidden" id="VectTauri_save_text">
                         <i class="fa-solid fa-save"></i> Save & Re-embed
                     </button>
                 </div>
@@ -766,40 +766,40 @@ function renderDetailPanel() {
 
             <!-- EventBase Metadata Section (read-only) -->
             ${isEventBase ? `
-            <div class="vectfox-detail-section vectfox-eventbase-meta">
-                <div class="vectfox-detail-section-title">
+            <div class="vecttauri-detail-section vecttauri-eventbase-meta">
+                <div class="vecttauri-detail-section-title">
                     <i class="fa-solid fa-database"></i> Event Metadata
-                    <span class="vectfox-section-hint">(extracted by EventBase)</span>
+                    <span class="vecttauri-section-hint">(extracted by EventBase)</span>
                 </div>
-                <div class="vectfox-eventbase-meta-grid">
-                    <div class="vectfox-meta-row">
-                        <span class="vectfox-meta-label">Type</span>
-                        <span class="vectfox-meta-value">${data.eventType
-                            ? `<span class="vectfox-event-type-badge">${StringUtils.escapeHtml(data.eventType)}</span>`
-                            : '<span class="vectfox-meta-empty">—</span>'}</span>
+                <div class="vecttauri-eventbase-meta-grid">
+                    <div class="vecttauri-meta-row">
+                        <span class="vecttauri-meta-label">Type</span>
+                        <span class="vecttauri-meta-value">${data.eventType
+                            ? `<span class="vecttauri-event-type-badge">${StringUtils.escapeHtml(data.eventType)}</span>`
+                            : '<span class="vecttauri-meta-empty">—</span>'}</span>
                     </div>
-                    <div class="vectfox-meta-row">
-                        <span class="vectfox-meta-label">Importance</span>
-                        <span class="vectfox-meta-value">${data.importance != null
-                            ? `<span class="vectfox-importance-badge vectfox-imp-${Math.min(10, Math.max(1, Math.round(data.importance)))}">${data.importance}<span class="vectfox-imp-scale">/10</span></span>`
-                            : '<span class="vectfox-meta-empty">—</span>'}</span>
+                    <div class="vecttauri-meta-row">
+                        <span class="vecttauri-meta-label">Importance</span>
+                        <span class="vecttauri-meta-value">${data.importance != null
+                            ? `<span class="vecttauri-importance-badge vecttauri-imp-${Math.min(10, Math.max(1, Math.round(data.importance)))}">${data.importance}<span class="vecttauri-imp-scale">/10</span></span>`
+                            : '<span class="vecttauri-meta-empty">—</span>'}</span>
                     </div>
-                    <div class="vectfox-meta-row">
-                        <span class="vectfox-meta-label">Concepts</span>
-                        <span class="vectfox-meta-value">${data.concepts.length
-                            ? data.concepts.map(c => `<span class="vectfox-concept-tag">${StringUtils.escapeHtml(c)}</span>`).join('')
-                            : '<span class="vectfox-meta-empty">—</span>'}</span>
+                    <div class="vecttauri-meta-row">
+                        <span class="vecttauri-meta-label">Concepts</span>
+                        <span class="vecttauri-meta-value">${data.concepts.length
+                            ? data.concepts.map(c => `<span class="vecttauri-concept-tag">${StringUtils.escapeHtml(c)}</span>`).join('')
+                            : '<span class="vecttauri-meta-empty">—</span>'}</span>
                     </div>
-                    <div class="vectfox-meta-row">
-                        <span class="vectfox-meta-label">Items</span>
-                        <span class="vectfox-meta-value">${data.eventItems.length
-                            ? data.eventItems.map(it => `<span class="vectfox-concept-tag">${StringUtils.escapeHtml(it)}</span>`).join('')
-                            : '<span class="vectfox-meta-empty">—</span>'}</span>
+                    <div class="vecttauri-meta-row">
+                        <span class="vecttauri-meta-label">Items</span>
+                        <span class="vecttauri-meta-value">${data.eventItems.length
+                            ? data.eventItems.map(it => `<span class="vecttauri-concept-tag">${StringUtils.escapeHtml(it)}</span>`).join('')
+                            : '<span class="vecttauri-meta-empty">—</span>'}</span>
                     </div>
                     ${data.openThreads.length ? `
-                    <div class="vectfox-meta-row vectfox-meta-row-full">
-                        <span class="vectfox-meta-label">Open Threads</span>
-                        <ul class="vectfox-open-threads-list">
+                    <div class="vecttauri-meta-row vecttauri-meta-row-full">
+                        <span class="vecttauri-meta-label">Open Threads</span>
+                        <ul class="vecttauri-open-threads-list">
                             ${data.openThreads.map(t => `<li>${StringUtils.escapeHtml(t)}</li>`).join('')}
                         </ul>
                     </div>
@@ -810,15 +810,15 @@ function renderDetailPanel() {
 
             <!-- Status Section -->
             ${showEnabledToggle ? `
-            <div class="vectfox-detail-section">
-                <div class="vectfox-detail-section-title">Status</div>
-                <div class="vectfox-detail-status-row">
+            <div class="vecttauri-detail-section">
+                <div class="vecttauri-detail-section-title">Status</div>
+                <div class="vecttauri-detail-status-row">
                     ${showEnabledToggle ? `
-                    <div class="vectfox-detail-toggle-item">
-                        <span class="vectfox-toggle-label">Enabled</span>
-                        <label class="vectfox-toggle-switch">
-                            <input type="checkbox" id="VectFox_detail_enabled" ${data.enabled ? 'checked' : ''}>
-                            <span class="vectfox-toggle-slider"></span>
+                    <div class="vecttauri-detail-toggle-item">
+                        <span class="vecttauri-toggle-label">Enabled</span>
+                        <label class="vecttauri-toggle-switch">
+                            <input type="checkbox" id="VectTauri_detail_enabled" ${data.enabled ? 'checked' : ''}>
+                            <span class="vecttauri-toggle-slider"></span>
                         </label>
                     </div>
                     ` : ''}
@@ -827,62 +827,62 @@ function renderDetailPanel() {
             ` : ''}
 
             <!-- Prompt Context Section -->
-            <div class="vectfox-detail-section">
-                <div class="vectfox-detail-section-title">
+            <div class="vecttauri-detail-section">
+                <div class="vecttauri-detail-section-title">
                     <i class="fa-solid fa-quote-left"></i> Prompt Context
-                    <span class="vectfox-section-hint">(help AI understand this chunk)</span>
+                    <span class="vecttauri-section-hint">(help AI understand this chunk)</span>
                 </div>
-                <div class="vectfox-detail-context">
-                    <textarea class="vectfox-chunk-context-input" id="VectFox_chunk_context"
+                <div class="vecttauri-detail-context">
+                    <textarea class="vecttauri-chunk-context-input" id="VectTauri_chunk_context"
                               placeholder="e.g., A secret {{char}} keeps hidden from {{user}}"
                               rows="2">${StringUtils.escapeHtml(data.context || '')}</textarea>
-                    <div class="vectfox-context-xmltag-row">
+                    <div class="vecttauri-context-xmltag-row">
                         <label>XML tag:</label>
-                        <input type="text" class="vectfox-chunk-xmltag-input" id="VectFox_chunk_xmltag"
+                        <input type="text" class="vecttauri-chunk-xmltag-input" id="VectTauri_chunk_xmltag"
                                placeholder="e.g., secret" value="${StringUtils.escapeHtml(data.xmlTag || '')}">
                     </div>
-                    <div class="vectfox-context-injection-row">
+                    <div class="vecttauri-context-injection-row">
                         <label>Injection position:</label>
-                        <select id="VectFox_chunk_position" class="vectfox-chunk-position-select">
+                        <select id="VectTauri_chunk_position" class="vecttauri-chunk-position-select">
                             <option value="" ${data.position == null ? 'selected' : ''}>Use default</option>
                             <option value="2" ${data.position === 2 ? 'selected' : ''}>Before Main Prompt</option>
                             <option value="0" ${data.position === 0 ? 'selected' : ''}>After Main Prompt</option>
                             <option value="1" ${data.position === 1 ? 'selected' : ''}>In-Chat @ Depth</option>
                         </select>
                     </div>
-                    <div class="vectfox-context-depth-row" id="VectFox_chunk_depth_row" style="display: ${data.position === 1 ? 'flex' : 'none'};">
-                        <label>Depth: <span id="VectFox_chunk_depth_value">${data.depth ?? 2}</span></label>
-                        <input type="range" id="VectFox_chunk_depth" class="vectfox-chunk-depth-slider"
+                    <div class="vecttauri-context-depth-row" id="VectTauri_chunk_depth_row" style="display: ${data.position === 1 ? 'flex' : 'none'};">
+                        <label>Depth: <span id="VectTauri_chunk_depth_value">${data.depth ?? 2}</span></label>
+                        <input type="range" id="VectTauri_chunk_depth" class="vecttauri-chunk-depth-slider"
                                min="0" max="50" step="1" value="${data.depth ?? 2}">
                     </div>
-                    <div class="vectfox-context-hint">Supports {{user}} and {{char}}. XML tag wraps just this chunk.</div>
+                    <div class="vecttauri-context-hint">Supports {{user}} and {{char}}. XML tag wraps just this chunk.</div>
                 </div>
             </div>
 
             <!-- Keywords Section -->
             ${showKeywords ? `
-            <div class="vectfox-detail-section">
-                <div class="vectfox-detail-section-header">
-                    <span class="vectfox-detail-section-title">Keywords <span class="vectfox-section-hint">(boost when query matches)</span></span>
-                    <button class="vectfox-keyword-mode-toggle" id="VectFox_keyword_mode" title="Toggle plaintext mode">
+            <div class="vecttauri-detail-section">
+                <div class="vecttauri-detail-section-header">
+                    <span class="vecttauri-detail-section-title">Keywords <span class="vecttauri-section-hint">(boost when query matches)</span></span>
+                    <button class="vecttauri-keyword-mode-toggle" id="VectTauri_keyword_mode" title="Toggle plaintext mode">
                         <i class="fa-solid ${plaintextKeywordMode ? 'fa-tag' : 'fa-code'}"></i>
                     </button>
                 </div>
-                <div class="vectfox-detail-keywords" id="VectFox_keywords_container">
+                <div class="vecttauri-detail-keywords" id="VectTauri_keywords_container">
                     ${plaintextKeywordMode ? `
-                        <textarea class="vectfox-keyword-plaintext" id="VectFox_keywords_plaintext" placeholder="keyword:1.5x, another:2x, plain">${data.keywords.map(k => k.weight !== 1.0 ? `${k.text}:${k.weight}x` : k.text).join(', ')}</textarea>
-                        <div class="vectfox-keyword-plaintext-hint">Format: keyword:2x for boost, or just keyword (defaults to 1.5x)</div>
+                        <textarea class="vecttauri-keyword-plaintext" id="VectTauri_keywords_plaintext" placeholder="keyword:1.5x, another:2x, plain">${data.keywords.map(k => k.weight !== 1.0 ? `${k.text}:${k.weight}x` : k.text).join(', ')}</textarea>
+                        <div class="vecttauri-keyword-plaintext-hint">Format: keyword:2x for boost, or just keyword (defaults to 1.5x)</div>
                     ` : `
-                        <div class="vectfox-keywords-list">
+                        <div class="vecttauri-keywords-list">
                             ${data.keywords.map((k, idx) => `
-                                <span class="vectfox-keyword-tag" data-index="${idx}">
-                                    <span class="vectfox-keyword-tag-text">${StringUtils.escapeHtml(k.text || 'unnamed')}</span>
-                                    <span class="vectfox-keyword-tag-weight">${k.weight}x</span>
-                                    <i class="fa-solid fa-xmark vectfox-keyword-remove" data-index="${idx}"></i>
+                                <span class="vecttauri-keyword-tag" data-index="${idx}">
+                                    <span class="vecttauri-keyword-tag-text">${StringUtils.escapeHtml(k.text || 'unnamed')}</span>
+                                    <span class="vecttauri-keyword-tag-weight">${k.weight}x</span>
+                                    <i class="fa-solid fa-xmark vecttauri-keyword-remove" data-index="${idx}"></i>
                                 </span>
                             `).join('')}
                         </div>
-                        <button class="vectfox-keyword-add" id="VectFox_add_keyword">+ Add keyword...</button>
+                        <button class="vecttauri-keyword-add" id="VectTauri_add_keyword">+ Add keyword...</button>
                     `}
                 </div>
             </div>
@@ -890,80 +890,80 @@ function renderDetailPanel() {
 
             <!-- Conditions Section -->
             ${showConditions ? `
-            <div class="vectfox-detail-section">
-                <div class="vectfox-detail-section-title">Conditions</div>
-                <div class="vectfox-detail-conditions">
-                    <div class="vectfox-conditions-header">
-                        <label class="vectfox-conditions-toggle">
-                            <input type="checkbox" id="VectFox_conditions_enabled" ${data.conditions?.enabled ? 'checked' : ''}>
+            <div class="vecttauri-detail-section">
+                <div class="vecttauri-detail-section-title">Conditions</div>
+                <div class="vecttauri-detail-conditions">
+                    <div class="vecttauri-conditions-header">
+                        <label class="vecttauri-conditions-toggle">
+                            <input type="checkbox" id="VectTauri_conditions_enabled" ${data.conditions?.enabled ? 'checked' : ''}>
                             <span>Enable conditional activation</span>
                         </label>
-                        <div class="vectfox-conditions-logic">
-                            <button class="vectfox-logic-btn ${data.conditions?.logic === 'AND' ? 'active' : ''}" data-logic="AND">AND</button>
-                            <button class="vectfox-logic-btn ${data.conditions?.logic === 'OR' ? 'active' : ''}" data-logic="OR">OR</button>
+                        <div class="vecttauri-conditions-logic">
+                            <button class="vecttauri-logic-btn ${data.conditions?.logic === 'AND' ? 'active' : ''}" data-logic="AND">AND</button>
+                            <button class="vecttauri-logic-btn ${data.conditions?.logic === 'OR' ? 'active' : ''}" data-logic="OR">OR</button>
                         </div>
                     </div>
-                    <div class="vectfox-conditions-list" id="VectFox_conditions_list">
+                    <div class="vecttauri-conditions-list" id="VectTauri_conditions_list">
                         ${(data.conditions?.rules || []).map((rule, i) => `
-                            <div class="vectfox-condition-item" data-index="${i}">
-                                <span class="vectfox-condition-item-num">${i + 1}.</span>
-                                <span class="vectfox-condition-item-text">${StringUtils.escapeHtml(formatConditionRule(rule))}</span>
-                                <i class="fa-solid fa-xmark vectfox-condition-item-remove"></i>
+                            <div class="vecttauri-condition-item" data-index="${i}">
+                                <span class="vecttauri-condition-item-num">${i + 1}.</span>
+                                <span class="vecttauri-condition-item-text">${StringUtils.escapeHtml(formatConditionRule(rule))}</span>
+                                <i class="fa-solid fa-xmark vecttauri-condition-item-remove"></i>
                             </div>
                         `).join('')}
                     </div>
-                    <button class="vectfox-add-condition-btn" id="VectFox_add_condition">+ Add Condition Rule</button>
+                    <button class="vecttauri-add-condition-btn" id="VectTauri_add_condition">+ Add Condition Rule</button>
                 </div>
             </div>
             ` : ''}
 
             <!-- Chunk Links Section -->
             ${showChunkLinks ? `
-            <div class="vectfox-detail-section">
-                <div class="vectfox-detail-section-title">
+            <div class="vecttauri-detail-section">
+                <div class="vecttauri-detail-section-title">
                     <i class="fa-solid fa-link"></i> Chunk Links
-                    <span class="vectfox-section-hint">(pull related chunks into results)</span>
+                    <span class="vecttauri-section-hint">(pull related chunks into results)</span>
                 </div>
-                <div class="vectfox-detail-links">
-                    <div class="vectfox-links-list" id="VectFox_links_list">
+                <div class="vecttauri-detail-links">
+                    <div class="vecttauri-links-list" id="VectTauri_links_list">
                         ${(data.chunkLinks || []).map((link, i) => `
-                            <div class="vectfox-link-item ${link.mode}" data-index="${i}">
-                                <span class="vectfox-link-mode-badge ${link.mode}">${link.mode === 'force' ? '🔗 Force' : '〰️ Soft'}</span>
-                                <span class="vectfox-link-target" title="Target hash: ${link.targetHash}">${link.targetHash.toString().substring(0, 12)}...</span>
-                                <i class="fa-solid fa-xmark vectfox-link-item-remove"></i>
+                            <div class="vecttauri-link-item ${link.mode}" data-index="${i}">
+                                <span class="vecttauri-link-mode-badge ${link.mode}">${link.mode === 'force' ? '🔗 Force' : '〰️ Soft'}</span>
+                                <span class="vecttauri-link-target" title="Target hash: ${link.targetHash}">${link.targetHash.toString().substring(0, 12)}...</span>
+                                <i class="fa-solid fa-xmark vecttauri-link-item-remove"></i>
                             </div>
                         `).join('')}
                     </div>
-                    <div class="vectfox-links-help">
-                        <span class="vectfox-help-badge force">Force</span> = Target chunk MUST appear if this chunk appears<br>
-                        <span class="vectfox-help-badge soft">Soft</span> = Target chunk gets score boost if this chunk appears
+                    <div class="vecttauri-links-help">
+                        <span class="vecttauri-help-badge force">Force</span> = Target chunk MUST appear if this chunk appears<br>
+                        <span class="vecttauri-help-badge soft">Soft</span> = Target chunk gets score boost if this chunk appears
                     </div>
-                    <button class="vectfox-add-link-btn" id="VectFox_add_link">+ Add Link</button>
+                    <button class="vecttauri-add-link-btn" id="VectTauri_add_link">+ Add Link</button>
                 </div>
             </div>
             ` : ''}
 
             <!-- Summaries Section -->
-            <div class="vectfox-detail-section">
-                <div class="vectfox-detail-section-title">Dual-Vector Summaries</div>
-                <div class="vectfox-detail-summaries">
-                    <div class="vectfox-summaries-header">
+            <div class="vecttauri-detail-section">
+                <div class="vecttauri-detail-section-title">Dual-Vector Summaries</div>
+                <div class="vecttauri-detail-summaries">
+                    <div class="vecttauri-summaries-header">
                         <span>Alternative search vectors for this chunk</span>
                     </div>
-                    <div class="vectfox-summaries-list" id="VectFox_summaries_list">
+                    <div class="vecttauri-summaries-list" id="VectTauri_summaries_list">
                         ${(data.summaries || []).map((summary, i) => {
                             const summaryHash = getStringHash(summary);
                             return `
-                            <div class="vectfox-summary-item" data-index="${i}">
-                                <div class="vectfox-summary-item-content">
-                                    <span class="vectfox-summary-item-text">${StringUtils.escapeHtml(summary)}</span>
-                                    <span class="vectfox-summary-item-hash" title="Summary vector hash">#${summaryHash}</span>
+                            <div class="vecttauri-summary-item" data-index="${i}">
+                                <div class="vecttauri-summary-item-content">
+                                    <span class="vecttauri-summary-item-text">${StringUtils.escapeHtml(summary)}</span>
+                                    <span class="vecttauri-summary-item-hash" title="Summary vector hash">#${summaryHash}</span>
                                 </div>
-                                <i class="fa-solid fa-xmark vectfox-summary-item-remove"></i>
+                                <i class="fa-solid fa-xmark vecttauri-summary-item-remove"></i>
                             </div>
                         `}).join('')}
                     </div>
-                    <button class="vectfox-add-summary-btn" id="VectFox_add_summary">+ Add Summary</button>
+                    <button class="vecttauri-add-summary-btn" id="VectTauri_add_summary">+ Add Summary</button>
                 </div>
             </div>
         </div>
@@ -1013,62 +1013,62 @@ function formatConditionRule(rule) {
 
 function bindEvents() {
     // Save
-    $('#VectFox_visualizer_save').on('click', saveAllChanges);
+    $('#VectTauri_visualizer_save').on('click', saveAllChanges);
 
     // Close
-    $('#VectFox_visualizer_close').on('click', closeVisualizer);
+    $('#VectTauri_visualizer_close').on('click', closeVisualizer);
     // Stop mousedown propagation (ST closes drawers on mousedown/touchstart)
-    $('#VectFox_visualizer_modal').on('mousedown touchstart', function(e) {
+    $('#VectTauri_visualizer_modal').on('mousedown touchstart', function(e) {
         e.stopPropagation();
     });
     // Close on background click
-    $('#VectFox_visualizer_modal').on('click', function(e) {
+    $('#VectTauri_visualizer_modal').on('click', function(e) {
         if (e.target === this) closeVisualizer();
     });
 
     // Search
-    $('#VectFox_chunk_search').on('input', debounce(function() {
+    $('#VectTauri_chunk_search').on('input', debounce(function() {
         searchQuery = $(this).val();
         applyFilters();
         renderChunkList();
     }, 200));
 
     // Sort
-    $('#VectFox_chunk_sort').on('change', function() {
+    $('#VectTauri_chunk_sort').on('change', function() {
         sortBy = $(this).val();
         applyFilters();
         renderChunkList();
     });
 
     // Filter
-    $('#VectFox_chunk_filter').on('change', function() {
+    $('#VectTauri_chunk_filter').on('change', function() {
         filterBy = $(this).val();
         applyFilters();
         renderChunkList();
     });
 
     // Fetch limit (0 = no limit)
-    $('#VectFox_fetch_limit').on('change', function() {
+    $('#VectTauri_fetch_limit').on('change', function() {
         const val = parseInt($(this).val());
         chunkFetchLimit = isNaN(val) || val < 0 ? 0 : val;
         $(this).val(chunkFetchLimit);
     });
 
     // Reload button
-    $('#VectFox_reload_chunks').off('click').on('click', function() {
+    $('#VectTauri_reload_chunks').off('click').on('click', function() {
         if (onReloadCallback) onReloadCallback(chunkFetchLimit);
     });
 
     // Chunk selection - bind to container, not document (because modal stops propagation)
-    $('#VectFox_visualizer_modal').on('click', '.vectfox-chunk-item', function(e) {
+    $('#VectTauri_visualizer_modal').on('click', '.vecttauri-chunk-item', function(e) {
         // Let the checkbox handle its own click/change — e.preventDefault() below would cancel the toggle
-        if ($(e.target).hasClass('vectfox-bulk-checkbox')) return;
+        if ($(e.target).hasClass('vecttauri-bulk-checkbox')) return;
         e.preventDefault();
         e.stopPropagation();
         const uid = $(this).attr('data-uid');
-        if (currentSettings?.eventbase_debug_logging) console.log('VectFox: Clicked chunk with uniqueId:', uid);
+        if (currentSettings?.eventbase_debug_logging) console.log('VectTauri: Clicked chunk with uniqueId:', uid);
         if (!uid) {
-            console.error('VectFox: No uniqueId found on clicked element');
+            console.error('VectTauri: No uniqueId found on clicked element');
             return;
         }
         // Warn if switching chunks with unsaved changes
@@ -1084,25 +1084,25 @@ function bindEvents() {
     });
 
     // Load more
-    $('#VectFox_visualizer_modal').on('click', '#VectFox_load_more', function() {
+    $('#VectTauri_visualizer_modal').on('click', '#VectTauri_load_more', function() {
         displayLimit += 50;
         renderChunkList();
     });
 
     // Bulk mode
-    $('#VectFox_bulk_mode').on('change', function() {
+    $('#VectTauri_bulk_mode').on('change', function() {
         bulkSelectMode = $(this).is(':checked');
         if (!bulkSelectMode) {
             selectedChunksSet.clear();
-            $('#VectFox_bulk_delete').text('Delete Selected');
+            $('#VectTauri_bulk_delete').text('Delete Selected');
         }
-        $('#VectFox_bulk_buttons').toggle(bulkSelectMode);
-        $('#VectFox_delete_chunk').prop('disabled', bulkSelectMode).toggleClass('vectfox-btn-dimmed', bulkSelectMode);
+        $('#VectTauri_bulk_buttons').toggle(bulkSelectMode);
+        $('#VectTauri_delete_chunk').prop('disabled', bulkSelectMode).toggleClass('vecttauri-btn-dimmed', bulkSelectMode);
         renderChunkList();
     });
 
     // Per-chunk bulk checkboxes (delegated — list is re-rendered frequently)
-    $('#VectFox_chunk_list').on('change', '.vectfox-bulk-checkbox', function(e) {
+    $('#VectTauri_chunk_list').on('change', '.vecttauri-bulk-checkbox', function(e) {
         e.stopPropagation();
         const uid = $(this).data('uid');
         if ($(this).is(':checked')) {
@@ -1111,18 +1111,18 @@ function bindEvents() {
             selectedChunksSet.delete(uid);
         }
         // Update the row highlight without a full re-render
-        $(this).closest('.vectfox-chunk-item').toggleClass('bulk-checked', $(this).is(':checked'));
+        $(this).closest('.vecttauri-chunk-item').toggleClass('bulk-checked', $(this).is(':checked'));
         // Update button labels to show selection count
         const count = selectedChunksSet.size;
         const label = count > 0 ? ` (${count})` : '';
-        $('#VectFox_bulk_enable').text(`Enable All${label}`);
-        $('#VectFox_bulk_disable').text(`Disable All${label}`);
-        $('#VectFox_bulk_delete').text(count > 0 ? `Delete Selected (${count})` : 'Delete Selected');
+        $('#VectTauri_bulk_enable').text(`Enable All${label}`);
+        $('#VectTauri_bulk_disable').text(`Disable All${label}`);
+        $('#VectTauri_bulk_delete').text(count > 0 ? `Delete Selected (${count})` : 'Delete Selected');
     });
 
-    $('#VectFox_bulk_enable').on('click', () => bulkSetEnabled(true));
-    $('#VectFox_bulk_disable').on('click', () => bulkSetEnabled(false));
-    $('#VectFox_bulk_delete').on('click', () => bulkDelete());
+    $('#VectTauri_bulk_enable').on('click', () => bulkSetEnabled(true));
+    $('#VectTauri_bulk_disable').on('click', () => bulkSetEnabled(false));
+    $('#VectTauri_bulk_delete').on('click', () => bulkDelete());
 }
 
 function bindDetailEvents() {
@@ -1133,7 +1133,7 @@ function bindDetailEvents() {
     const originalText = chunk.data.text;
 
     // Chunk name input
-    $('#VectFox_chunk_name').on('input', debounce(function() {
+    $('#VectTauri_chunk_name').on('input', debounce(function() {
         const name = $(this).val().trim();
         chunk.data.name = name || null;
         updateChunkData(chunk.hash, { name: chunk.data.name });
@@ -1141,20 +1141,20 @@ function bindDetailEvents() {
     }, 300));
 
     // Inline text editing - track changes
-    $('#VectFox_chunk_text').on('input', function() {
+    $('#VectTauri_chunk_text').on('input', function() {
         const newText = $(this).text().trim();
         if (newText !== originalText) {
             hasUnsavedChanges = true;
-            $('#VectFox_save_text').removeClass('vectfox-hidden');
+            $('#VectTauri_save_text').removeClass('vecttauri-hidden');
         } else {
             hasUnsavedChanges = false;
-            $('#VectFox_save_text').addClass('vectfox-hidden');
+            $('#VectTauri_save_text').addClass('vecttauri-hidden');
         }
     });
 
     // Save text changes
-    $('#VectFox_save_text').on('click', async function() {
-        const newText = $('#VectFox_chunk_text').text().trim();
+    $('#VectTauri_save_text').on('click', async function() {
+        const newText = $('#VectTauri_chunk_text').text().trim();
         if (!newText) return;
 
         $(this).prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Saving...');
@@ -1201,16 +1201,16 @@ function bindDetailEvents() {
 
             renderChunkList();
             renderDetailPanel();
-            toastr.success('Chunk updated successfully', 'VectFox');
+            toastr.success('Chunk updated successfully', 'VectTauri');
         } catch (error) {
             console.error('Failed to update chunk:', error);
-            toastr.error('Failed to update chunk', 'VectFox');
+            toastr.error('Failed to update chunk', 'VectTauri');
             $(this).prop('disabled', false).html('<i class="fa-solid fa-save"></i> Save & Re-embed');
         }
     });
 
     // Enabled toggle
-    $('#VectFox_detail_enabled').on('change', function() {
+    $('#VectTauri_detail_enabled').on('change', function() {
         const enabled = $(this).is(':checked');
         updateChunkData(chunk.hash, { enabled });
         chunk.data.enabled = enabled;
@@ -1218,14 +1218,14 @@ function bindDetailEvents() {
     });
 
     // Prompt context input
-    $('#VectFox_chunk_context').on('input', debounce(function() {
+    $('#VectTauri_chunk_context').on('input', debounce(function() {
         const context = $(this).val();
         chunk.data.context = context || '';
         updateChunkData(chunk.hash, { context: chunk.data.context });
     }, 300));
 
     // XML tag input (sanitize to alphanumeric + underscore/hyphen)
-    $('#VectFox_chunk_xmltag').on('input', debounce(function() {
+    $('#VectTauri_chunk_xmltag').on('input', debounce(function() {
         const sanitized = $(this).val().replace(/[^a-zA-Z0-9_-]/g, '');
         $(this).val(sanitized);
         chunk.data.xmlTag = sanitized || '';
@@ -1233,31 +1233,31 @@ function bindDetailEvents() {
     }, 300));
 
     // Injection position select
-    $('#VectFox_chunk_position').on('change', function() {
+    $('#VectTauri_chunk_position').on('change', function() {
         const val = $(this).val();
         const position = val === '' ? null : parseInt(val);
         chunk.data.position = position;
         updateChunkData(chunk.hash, { position: chunk.data.position });
         // Show/hide depth row
-        $('#VectFox_chunk_depth_row').toggle(position === 1);
+        $('#VectTauri_chunk_depth_row').toggle(position === 1);
     });
 
     // Injection depth slider
-    $('#VectFox_chunk_depth').on('input', function() {
+    $('#VectTauri_chunk_depth').on('input', function() {
         const depth = parseInt($(this).val()) || 2;
-        $('#VectFox_chunk_depth_value').text(depth);
+        $('#VectTauri_chunk_depth_value').text(depth);
         chunk.data.depth = depth;
         updateChunkData(chunk.hash, { depth: chunk.data.depth });
     });
 
     // Delete chunk
-    $('#VectFox_delete_chunk').on('click', () => deleteChunk(chunk));
+    $('#VectTauri_delete_chunk').on('click', () => deleteChunk(chunk));
 
     // Keyword mode toggle (plaintext vs badge)
-    $('#VectFox_keyword_mode').on('click', function() {
+    $('#VectTauri_keyword_mode').on('click', function() {
         // If in plaintext mode, parse and save before switching
         if (plaintextKeywordMode) {
-            const plaintext = $('#VectFox_keywords_plaintext').val();
+            const plaintext = $('#VectTauri_keywords_plaintext').val();
             chunk.data.keywords = parsePlaintextKeywords(plaintext);
             updateChunkData(chunk.hash, { keywords: chunk.data.keywords });
         }
@@ -1266,16 +1266,16 @@ function bindDetailEvents() {
     });
 
     // Plaintext keywords - save on blur
-    $('#VectFox_keywords_plaintext').on('blur', function() {
+    $('#VectTauri_keywords_plaintext').on('blur', function() {
         const plaintext = $(this).val();
         chunk.data.keywords = parsePlaintextKeywords(plaintext);
         updateChunkData(chunk.hash, { keywords: chunk.data.keywords });
     });
 
     // Keywords - add new
-    $('#VectFox_add_keyword').on('click', function() {
-        $(this).replaceWith('<input type="text" class="vectfox-keyword-input" id="VectFox_keyword_input" placeholder="Enter keyword...">');
-        $('#VectFox_keyword_input').focus().on('keydown', function(e) {
+    $('#VectTauri_add_keyword').on('click', function() {
+        $(this).replaceWith('<input type="text" class="vecttauri-keyword-input" id="VectTauri_keyword_input" placeholder="Enter keyword...">');
+        $('#VectTauri_keyword_input').focus().on('keydown', function(e) {
             if (e.key === 'Enter') {
                 const keyword = $(this).val().trim();
                 if (keyword && !chunk.data.keywords.some(k => k.text === keyword)) {
@@ -1292,7 +1292,7 @@ function bindDetailEvents() {
     });
 
     // Keyword remove button
-    $('.vectfox-keyword-remove').on('click', function() {
+    $('.vecttauri-keyword-remove').on('click', function() {
         const index = $(this).data('index');
         chunk.data.keywords.splice(index, 1);
         updateChunkData(chunk.hash, { keywords: chunk.data.keywords });
@@ -1300,21 +1300,21 @@ function bindDetailEvents() {
     });
 
     // Conditions
-    $('#VectFox_conditions_enabled').on('change', function() {
+    $('#VectTauri_conditions_enabled').on('change', function() {
         chunk.data.conditions.enabled = $(this).is(':checked');
         updateChunkData(chunk.hash, { conditions: chunk.data.conditions });
     });
 
-    $('.vectfox-logic-btn').on('click', function() {
+    $('.vecttauri-logic-btn').on('click', function() {
         const logic = $(this).data('logic');
         chunk.data.conditions.logic = logic;
         updateChunkData(chunk.hash, { conditions: chunk.data.conditions });
-        $('.vectfox-logic-btn').removeClass('active');
+        $('.vecttauri-logic-btn').removeClass('active');
         $(this).addClass('active');
     });
 
-    $('.vectfox-condition-item-remove').on('click', function() {
-        const index = $(this).closest('.vectfox-condition-item').data('index');
+    $('.vecttauri-condition-item-remove').on('click', function() {
+        const index = $(this).closest('.vecttauri-condition-item').data('index');
         chunk.data.conditions.rules.splice(index, 1);
         updateChunkData(chunk.hash, { conditions: chunk.data.conditions });
         renderDetailPanel();
@@ -1322,25 +1322,25 @@ function bindDetailEvents() {
     });
 
     // Add condition rule
-    $('#VectFox_add_condition').on('click', function() {
+    $('#VectTauri_add_condition').on('click', function() {
         openConditionEditor(chunk);
     });
 
     // Chunk links
-    $('#VectFox_add_link').on('click', function() {
+    $('#VectTauri_add_link').on('click', function() {
         openLinkEditor(chunk);
     });
 
-    $('.vectfox-link-item-remove').on('click', function() {
-        const index = $(this).closest('.vectfox-link-item').data('index');
+    $('.vecttauri-link-item-remove').on('click', function() {
+        const index = $(this).closest('.vecttauri-link-item').data('index');
         chunk.data.chunkLinks.splice(index, 1);
         updateChunkData(chunk.hash, { chunkLinks: chunk.data.chunkLinks });
         renderDetailPanel();
     });
 
     // Summaries
-    $('.vectfox-summary-item-remove').on('click', function() {
-        const index = $(this).closest('.vectfox-summary-item').data('index');
+    $('.vecttauri-summary-item-remove').on('click', function() {
+        const index = $(this).closest('.vecttauri-summary-item').data('index');
         const summaryText = chunk.data.summaries[index];
 
         // Track for deletion on save
@@ -1353,7 +1353,7 @@ function bindDetailEvents() {
         renderDetailPanel();
     });
 
-    $('#VectFox_add_summary').on('click', function() {
+    $('#VectTauri_add_summary').on('click', function() {
         const summary = prompt('Enter summary text:');
         if (summary && summary.trim()) {
             const summaryText = summary.trim();
@@ -1396,31 +1396,31 @@ function parsePlaintextKeywords(text) {
 
 function openTextEditor(chunk) {
     const overlay = $(`
-        <div class="vectfox-text-editor-overlay" id="VectFox_text_editor_overlay">
-            <div class="vectfox-text-editor-modal">
-                <div class="vectfox-text-editor-header">
+        <div class="vecttauri-text-editor-overlay" id="VectTauri_text_editor_overlay">
+            <div class="vecttauri-text-editor-modal">
+                <div class="vecttauri-text-editor-header">
                     <h4>Edit Chunk Text</h4>
                 </div>
-                <div class="vectfox-text-editor-body">
-                    <textarea class="vectfox-text-editor-textarea" id="VectFox_text_editor_textarea">${StringUtils.escapeHtml(chunk.data.text)}</textarea>
+                <div class="vecttauri-text-editor-body">
+                    <textarea class="vecttauri-text-editor-textarea" id="VectTauri_text_editor_textarea">${StringUtils.escapeHtml(chunk.data.text)}</textarea>
                 </div>
-                <div class="vectfox-text-editor-footer">
-                    <button class="vectfox-text-editor-btn vectfox-text-editor-cancel" id="VectFox_text_cancel">Cancel</button>
-                    <button class="vectfox-text-editor-btn vectfox-text-editor-save" id="VectFox_text_save">Save & Re-embed</button>
+                <div class="vecttauri-text-editor-footer">
+                    <button class="vecttauri-text-editor-btn vecttauri-text-editor-cancel" id="VectTauri_text_cancel">Cancel</button>
+                    <button class="vecttauri-text-editor-btn vecttauri-text-editor-save" id="VectTauri_text_save">Save & Re-embed</button>
                 </div>
             </div>
         </div>
     `);
 
-    $('.vectfox-visualizer-container').append(overlay);
+    $('.vecttauri-visualizer-container').append(overlay);
 
-    $('#VectFox_text_cancel').on('click', () => overlay.remove());
+    $('#VectTauri_text_cancel').on('click', () => overlay.remove());
     overlay.on('click', function(e) {
         if (e.target === this) overlay.remove();
     });
 
-    $('#VectFox_text_save').on('click', async function() {
-        const newText = $('#VectFox_text_editor_textarea').val().trim();
+    $('#VectTauri_text_save').on('click', async function() {
+        const newText = $('#VectTauri_text_editor_textarea').val().trim();
         if (!newText) return;
 
         $(this).prop('disabled', true).text('Saving...');
@@ -1468,10 +1468,10 @@ function openTextEditor(chunk) {
             overlay.remove();
             renderChunkList();
             renderDetailPanel();
-            toastr.success('Chunk updated successfully', 'VectFox');
+            toastr.success('Chunk updated successfully', 'VectTauri');
         } catch (error) {
             console.error('Failed to update chunk:', error);
-            toastr.error('Failed to update chunk', 'VectFox');
+            toastr.error('Failed to update chunk', 'VectTauri');
             $(this).prop('disabled', false).text('Save & Re-embed');
         }
     });
@@ -1492,52 +1492,52 @@ const CONDITION_TYPES = [
 
 function openConditionEditor(chunk) {
     const overlay = $(`
-        <div class="vectfox-editor-overlay" id="VectFox_condition_editor">
-            <div class="vectfox-editor-modal">
-                <div class="vectfox-editor-header">
+        <div class="vecttauri-editor-overlay" id="VectTauri_condition_editor">
+            <div class="vecttauri-editor-modal">
+                <div class="vecttauri-editor-header">
                     <h4><i class="fa-solid fa-bolt"></i> Add Condition Rule</h4>
-                    <button class="vectfox-editor-close" id="VectFox_condition_close">×</button>
+                    <button class="vecttauri-editor-close" id="VectTauri_condition_close">×</button>
                 </div>
-                <div class="vectfox-editor-body">
-                    <div class="vectfox-editor-field">
+                <div class="vecttauri-editor-body">
+                    <div class="vecttauri-editor-field">
                         <label>Condition Type</label>
-                        <select id="VectFox_condition_type" class="vectfox-editor-select">
+                        <select id="VectTauri_condition_type" class="vecttauri-editor-select">
                             ${CONDITION_TYPES.map(t => `<option value="${t.value}">${t.icon} ${t.label}</option>`).join('')}
                         </select>
                     </div>
-                    <div class="vectfox-editor-field" id="VectFox_condition_settings">
+                    <div class="vecttauri-editor-field" id="VectTauri_condition_settings">
                         <label>Pattern</label>
-                        <input type="text" id="VectFox_condition_value" class="vectfox-editor-input" placeholder="Enter pattern or value...">
+                        <input type="text" id="VectTauri_condition_value" class="vecttauri-editor-input" placeholder="Enter pattern or value...">
                     </div>
-                    <div class="vectfox-editor-field">
-                        <label class="vectfox-editor-checkbox">
-                            <input type="checkbox" id="VectFox_condition_negate">
+                    <div class="vecttauri-editor-field">
+                        <label class="vecttauri-editor-checkbox">
+                            <input type="checkbox" id="VectTauri_condition_negate">
                             <span>Negate (NOT)</span>
                         </label>
                     </div>
                 </div>
-                <div class="vectfox-editor-footer">
-                    <button class="vectfox-editor-btn cancel" id="VectFox_condition_cancel">Cancel</button>
-                    <button class="vectfox-editor-btn primary" id="VectFox_condition_add">Add Condition</button>
+                <div class="vecttauri-editor-footer">
+                    <button class="vecttauri-editor-btn cancel" id="VectTauri_condition_cancel">Cancel</button>
+                    <button class="vecttauri-editor-btn primary" id="VectTauri_condition_add">Add Condition</button>
                 </div>
             </div>
         </div>
     `);
 
-    $('.vectfox-visualizer-container').append(overlay);
+    $('.vecttauri-visualizer-container').append(overlay);
 
-    $('#VectFox_condition_close, #VectFox_condition_cancel').on('click', () => overlay.remove());
+    $('#VectTauri_condition_close, #VectTauri_condition_cancel').on('click', () => overlay.remove());
     overlay.on('click', function(e) {
         if (e.target === this) overlay.remove();
     });
 
-    $('#VectFox_condition_add').on('click', function() {
-        const type = $('#VectFox_condition_type').val();
-        const value = $('#VectFox_condition_value').val().trim();
-        const negated = $('#VectFox_condition_negate').is(':checked');
+    $('#VectTauri_condition_add').on('click', function() {
+        const type = $('#VectTauri_condition_type').val();
+        const value = $('#VectTauri_condition_value').val().trim();
+        const negated = $('#VectTauri_condition_negate').is(':checked');
 
         if (!value && type !== 'isGroupChat' && type !== 'randomChance') {
-            toastr.warning('Please enter a value', 'VectFox');
+            toastr.warning('Please enter a value', 'VectTauri');
             return;
         }
 
@@ -1556,7 +1556,7 @@ function openConditionEditor(chunk) {
         overlay.remove();
         renderDetailPanel();
         renderChunkList();
-        toastr.success('Condition added', 'VectFox');
+        toastr.success('Condition added', 'VectTauri');
     });
 }
 
@@ -1569,27 +1569,27 @@ function openLinkEditor(chunk) {
     const availableChunks = allChunks.filter(c => c.hash !== chunk.hash);
 
     const overlay = $(`
-        <div class="vectfox-editor-overlay" id="VectFox_link_editor">
-            <div class="vectfox-editor-modal">
-                <div class="vectfox-editor-header">
+        <div class="vecttauri-editor-overlay" id="VectTauri_link_editor">
+            <div class="vecttauri-editor-modal">
+                <div class="vecttauri-editor-header">
                     <h4><i class="fa-solid fa-link"></i> Add Chunk Link</h4>
-                    <button class="vectfox-editor-close" id="VectFox_link_close">×</button>
+                    <button class="vecttauri-editor-close" id="VectTauri_link_close">×</button>
                 </div>
-                <div class="vectfox-editor-body">
-                    <div class="vectfox-editor-field">
+                <div class="vecttauri-editor-body">
+                    <div class="vecttauri-editor-field">
                         <label>Link Mode</label>
-                        <div class="vectfox-link-mode-selector">
-                            <label class="vectfox-link-mode-option">
+                        <div class="vecttauri-link-mode-selector">
+                            <label class="vecttauri-link-mode-option">
                                 <input type="radio" name="link_mode" value="force" checked>
-                                <span class="vectfox-link-mode-card force">
+                                <span class="vecttauri-link-mode-card force">
                                     <span class="icon">🔗</span>
                                     <span class="title">Force Link</span>
                                     <span class="desc">Target MUST appear when this chunk appears</span>
                                 </span>
                             </label>
-                            <label class="vectfox-link-mode-option">
+                            <label class="vecttauri-link-mode-option">
                                 <input type="radio" name="link_mode" value="soft">
-                                <span class="vectfox-link-mode-card soft">
+                                <span class="vecttauri-link-mode-card soft">
                                     <span class="icon">〰️</span>
                                     <span class="title">Soft Link</span>
                                     <span class="desc">Target gets score boost when this chunk appears</span>
@@ -1597,9 +1597,9 @@ function openLinkEditor(chunk) {
                             </label>
                         </div>
                     </div>
-                    <div class="vectfox-editor-field">
+                    <div class="vecttauri-editor-field">
                         <label>Target Chunk</label>
-                        <select id="VectFox_link_target" class="vectfox-editor-select">
+                        <select id="VectTauri_link_target" class="vecttauri-editor-select">
                             ${availableChunks.map(c => {
                                 const preview = c.data.text.substring(0, 40).replace(/\s+/g, ' ') + '...';
                                 const name = c.data.name || preview;
@@ -1608,33 +1608,33 @@ function openLinkEditor(chunk) {
                         </select>
                     </div>
                 </div>
-                <div class="vectfox-editor-footer">
-                    <button class="vectfox-editor-btn cancel" id="VectFox_link_cancel">Cancel</button>
-                    <button class="vectfox-editor-btn primary" id="VectFox_link_add">Add Link</button>
+                <div class="vecttauri-editor-footer">
+                    <button class="vecttauri-editor-btn cancel" id="VectTauri_link_cancel">Cancel</button>
+                    <button class="vecttauri-editor-btn primary" id="VectTauri_link_add">Add Link</button>
                 </div>
             </div>
         </div>
     `);
 
-    $('.vectfox-visualizer-container').append(overlay);
+    $('.vecttauri-visualizer-container').append(overlay);
 
-    $('#VectFox_link_close, #VectFox_link_cancel').on('click', () => overlay.remove());
+    $('#VectTauri_link_close, #VectTauri_link_cancel').on('click', () => overlay.remove());
     overlay.on('click', function(e) {
         if (e.target === this) overlay.remove();
     });
 
-    $('#VectFox_link_add').on('click', function() {
+    $('#VectTauri_link_add').on('click', function() {
         const mode = $('input[name="link_mode"]:checked').val();
-        const targetHash = $('#VectFox_link_target').val();
+        const targetHash = $('#VectTauri_link_target').val();
 
         if (!targetHash) {
-            toastr.warning('Please select a target chunk', 'VectFox');
+            toastr.warning('Please select a target chunk', 'VectTauri');
             return;
         }
 
         // Check for duplicate
         if (chunk.data.chunkLinks.some(l => l.targetHash === targetHash)) {
-            toastr.warning('Link to this chunk already exists', 'VectFox');
+            toastr.warning('Link to this chunk already exists', 'VectTauri');
             return;
         }
 
@@ -1643,7 +1643,7 @@ function openLinkEditor(chunk) {
 
         overlay.remove();
         renderDetailPanel();
-        toastr.success('Link added', 'VectFox');
+        toastr.success('Link added', 'VectTauri');
     });
 }
 
@@ -1666,10 +1666,10 @@ async function deleteChunk(chunk) {
         applyFilters();
         renderChunkList();
         renderDetailPanel();
-        toastr.success('Chunk deleted', 'VectFox');
+        toastr.success('Chunk deleted', 'VectTauri');
     } catch (error) {
         console.error('Failed to delete chunk:', error);
-        toastr.error('Failed to delete chunk', 'VectFox');
+        toastr.error('Failed to delete chunk', 'VectTauri');
     }
 }
 
@@ -1682,7 +1682,7 @@ async function bulkDelete() {
         ? filteredChunks.filter(c => selectedChunksSet.has(c.uniqueId))
         : [];
     if (targets.length === 0) {
-        toastr.warning('No chunks selected', 'VectFox');
+        toastr.warning('No chunks selected', 'VectTauri');
         return;
     }
     if (!confirm(`Delete ${targets.length} selected chunk${targets.length !== 1 ? 's' : ''}? This cannot be undone.`)) return;
@@ -1697,14 +1697,14 @@ async function bulkDelete() {
         }
         selectedChunksSet.clear();
         if (targets.some(c => c.uniqueId === selectedChunkId)) selectedChunkId = null;
-        $('#VectFox_bulk_delete').text('Delete Selected');
+        $('#VectTauri_bulk_delete').text('Delete Selected');
         applyFilters();
         renderChunkList();
         renderDetailPanel();
-        toastr.success(`Deleted ${targets.length} chunk${targets.length !== 1 ? 's' : ''}`, 'VectFox');
+        toastr.success(`Deleted ${targets.length} chunk${targets.length !== 1 ? 's' : ''}`, 'VectTauri');
     } catch (error) {
         console.error('Failed to bulk delete chunks:', error);
-        toastr.error('Failed to delete chunks', 'VectFox');
+        toastr.error('Failed to delete chunks', 'VectTauri');
     }
 }
 
@@ -1720,11 +1720,11 @@ function bulkSetEnabled(enabled) {
     renderChunkList();
     if (selectedChunkId) renderDetailPanel();
     // Reset button labels after action
-    $('#VectFox_bulk_enable').text('Enable All');
-    $('#VectFox_bulk_disable').text('Disable All');
-    $('#VectFox_bulk_delete').text('Delete Selected');
+    $('#VectTauri_bulk_enable').text('Enable All');
+    $('#VectTauri_bulk_disable').text('Disable All');
+    $('#VectTauri_bulk_delete').text('Delete Selected');
     selectedChunksSet.clear();
-    toastr.success(`${enabled ? 'Enabled' : 'Disabled'} ${targets.length} chunk${targets.length !== 1 ? 's' : ''}`, 'VectFox');
+    toastr.success(`${enabled ? 'Enabled' : 'Disabled'} ${targets.length} chunk${targets.length !== 1 ? 's' : ''}`, 'VectTauri');
 }
 
 
@@ -1745,7 +1745,7 @@ function debounce(func, wait) {
  * Called from index.js on extension load
  */
 export function initializeVisualizer() {
-    log.lifecycle('VectFox: Chunk visualizer initialized');
+    log.lifecycle('VectTauri: Chunk visualizer initialized');
     // No DOM setup needed - modal is created dynamically when opened
 }
 

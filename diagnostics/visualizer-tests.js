@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox DIAGNOSTICS - VISUALIZER TESTS
+ * VectTauri DIAGNOSTICS - VISUALIZER TESTS
  * ============================================================================
  * Unit tests for chunk visualizer operations across all backends
  * Tests: delete, edit/re-vectorize, summary vectors, metadata operations
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -25,14 +25,14 @@ import {
 import { unregisterCollection } from '../core/collection-loader.js';
 import { getStringHash } from '../../../../utils.js';
 
-// Test collection prefix using VectFox vf_ format
+// Test collection prefix using VectTauri vf_ format
 // Format: vf_test_{type}_{sourceId}
 const TEST_COLLECTION_PREFIX = 'vf_test_visualizer_';
 
 /**
  * Full cleanup for test collections - purges vectors AND unregisters from registry
  * @param {string} collectionId - The test collection to clean up
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  */
 async function cleanupTestCollection(collectionId, settings) {
     try {
@@ -94,7 +94,7 @@ export function checkVisualizerSettings(settings) {
  */
 export function checkHashGeneration() {
     try {
-        const testText = 'VectFox visualizer test string';
+        const testText = 'VectTauri visualizer test string';
         const hash1 = getStringHash(testText);
         const hash2 = getStringHash(testText);
 
@@ -232,7 +232,7 @@ export async function checkVectorInsert(settings) {
     }
 
     const testCollectionId = getTestCollectionId();
-    const testText = `VectFox visualizer insert test ${Date.now()}`;
+    const testText = `VectTauri visualizer insert test ${Date.now()}`;
     const testHash = getStringHash(testText);
 
     try {
@@ -290,7 +290,7 @@ export async function checkVectorDelete(settings) {
     }
 
     const testCollectionId = getTestCollectionId();
-    const testText = `VectFox visualizer delete test ${Date.now()}`;
+    const testText = `VectTauri visualizer delete test ${Date.now()}`;
     const testHash = getStringHash(testText);
 
     try {
@@ -719,7 +719,7 @@ export async function checkBackendResponsiveness(settings) {
 
 /**
  * Runs all visualizer diagnostic tests
- * @param {object} settings VectFox settings
+ * @param {object} settings VectTauri settings
  * @param {boolean} includeSlowTests Include tests that make API calls
  * @returns {Promise<object[]>} Array of test results
  */

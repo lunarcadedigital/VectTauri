@@ -1,8 +1,8 @@
 /**
  * ============================================================================
- * VectFox PNG EXPORT/IMPORT
+ * VectTauri PNG EXPORT/IMPORT
  * ============================================================================
- * Embeds VectFox collection data into PNG files using zTXt chunks.
+ * Embeds VectTauri collection data into PNG files using zTXt chunks.
  *
  * PNG Structure:
  * - 8-byte signature
@@ -16,7 +16,7 @@
  * Uses browser's native CompressionStream API for deflate compression.
  * Falls back to storing as tEXt (base64, uncompressed) if compression unavailable.
  *
- * @author VectFox
+ * @author Lunarcade Digital
  * @version 1.0.0
  * ============================================================================
  */
@@ -30,8 +30,8 @@ import { log } from './log.js';
 /** PNG file signature (magic bytes) */
 const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
 
-/** Keyword for VectFox data in PNG tEXt/zTXt chunks */
-const VectFox_KEYWORD = 'VectFox';
+/** Keyword for VectTauri data in PNG tEXt/zTXt chunks */
+const VectTauri_KEYWORD = 'VectTauri';
 
 /** Maximum keyword length in PNG text chunks */
 const MAX_KEYWORD_LENGTH = 79;
@@ -112,7 +112,7 @@ async function compressDeflateRaw(data) {
             return result;
         } catch (e) {
             // deflate-raw might not be supported, try regular deflate
-            log.warn('VectFox PNG: deflate-raw not supported, trying deflate');
+            log.warn('VectTauri PNG: deflate-raw not supported, trying deflate');
         }
 
         try {
@@ -146,7 +146,7 @@ async function compressDeflateRaw(data) {
             }
             return result;
         } catch (e) {
-            log.warn('VectFox PNG: Compression failed, will use uncompressed tEXt', e);
+            log.warn('VectTauri PNG: Compression failed, will use uncompressed tEXt', e);
             return null;
         }
     }
@@ -185,7 +185,7 @@ async function decompressDeflateRaw(data) {
             return result;
         } catch (e) {
             // Try wrapping in zlib format for regular deflate decoder
-            log.warn('VectFox PNG: deflate-raw decompress failed, trying with zlib wrapper');
+            log.warn('VectTauri PNG: deflate-raw decompress failed, trying with zlib wrapper');
         }
 
         try {
@@ -223,7 +223,7 @@ async function decompressDeflateRaw(data) {
             }
             return result;
         } catch (e) {
-            log.error('VectFox PNG: All decompression methods failed', e);
+            log.error('VectTauri PNG: All decompression methods failed', e);
             throw new Error('Failed to decompress PNG data. Browser may not support required compression.');
         }
     }
@@ -348,12 +348,12 @@ async function createZTXtChunk(keyword, text) {
         data[keywordBytes.length + 1] = 0; // Compression method 0 = deflate
         data.set(compressed, keywordBytes.length + 2);
 
-        log.lifecycle(`VectFox PNG: Compressed ${textBytes.length} bytes to ${compressed.length} bytes (${Math.round(compressed.length / textBytes.length * 100)}%)`);
+        log.lifecycle(`VectTauri PNG: Compressed ${textBytes.length} bytes to ${compressed.length} bytes (${Math.round(compressed.length / textBytes.length * 100)}%)`);
 
         return createChunk('zTXt', data);
     } else {
         // Fall back to tEXt with base64 encoding
-        log.warn('VectFox PNG: Using uncompressed tEXt chunk (compression unavailable)');
+        log.warn('VectTauri PNG: Using uncompressed tEXt chunk (compression unavailable)');
         const base64 = btoa(String.fromCharCode(...textBytes));
         const base64Bytes = new TextEncoder().encode(base64);
 
@@ -465,7 +465,7 @@ export async function convertToPNG(imageFile) {
  * @param {string} text - Text to display
  * @returns {Promise<Uint8Array>} PNG data
  */
-export async function createDefaultPNG(width = 512, height = 512, text = 'VectFox Collection') {
+export async function createDefaultPNG(width = 512, height = 512, text = 'VectTauri Collection') {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -505,7 +505,7 @@ export async function createDefaultPNG(width = 512, height = 512, text = 'VectFo
 
     ctx.font = '16px sans-serif';
     ctx.fillStyle = '#a78bfa';
-    ctx.fillText('VectFox Export', width/2, height - 30);
+    ctx.fillText('VectTauri Export', width/2, height - 30);
 
     return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -521,8 +521,8 @@ export async function createDefaultPNG(width = 512, height = 512, text = 'VectFo
 }
 
 /**
- * Embeds VectFox export data into a PNG image
- * @param {object} exportData - VectFox export data object
+ * Embeds VectTauri export data into a PNG image
+ * @param {object} exportData - VectTauri export data object
  * @param {Uint8Array|null} pngData - Base PNG image (null = use default)
  * @returns {Promise<Uint8Array>} PNG with embedded data
  */
@@ -538,36 +538,36 @@ export async function embedDataInPNG(exportData, pngData = null) {
     const jsonString = JSON.stringify(exportData);
 
     // Create zTXt chunk with compressed data
-    const textChunk = await createZTXtChunk(VectFox_KEYWORD, jsonString);
+    const textChunk = await createZTXtChunk(VectTauri_KEYWORD, jsonString);
 
     // Insert chunk into PNG
     const result = insertChunkBeforeIEND(pngData, textChunk);
 
-    log.lifecycle(`VectFox PNG: Created PNG export (${result.length} bytes, original JSON: ${jsonString.length} bytes)`);
+    log.lifecycle(`VectTauri PNG: Created PNG export (${result.length} bytes, original JSON: ${jsonString.length} bytes)`);
 
     return result;
 }
 
 /**
- * Extracts VectFox data from a PNG image
+ * Extracts VectTauri data from a PNG image
  * @param {Uint8Array} pngData - PNG file data
  * @returns {Promise<object|null>} Extracted export data or null if not found
  */
 export async function extractDataFromPNG(pngData) {
     const chunks = parseChunks(pngData);
 
-    // Look for VectFox keyword in text chunks
+    // Look for VectTauri keyword in text chunks
     for (const chunk of chunks) {
         if (chunk.type === 'tEXt' || chunk.type === 'zTXt') {
             try {
                 const textData = await readTextChunk(chunk);
-                if (textData && textData.keyword === VectFox_KEYWORD) {
+                if (textData && textData.keyword === VectTauri_KEYWORD) {
                     const exportData = JSON.parse(textData.text);
-                    log.lifecycle('VectFox PNG: Successfully extracted data from PNG');
+                    log.lifecycle('VectTauri PNG: Successfully extracted data from PNG');
                     return exportData;
                 }
             } catch (e) {
-                log.warn('VectFox PNG: Failed to read text chunk:', e);
+                log.warn('VectTauri PNG: Failed to read text chunk:', e);
             }
         }
     }
@@ -592,7 +592,7 @@ export function downloadPNG(pngData, filename) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    log.lifecycle(`VectFox PNG: Downloaded ${a.download}`);
+    log.lifecycle(`VectTauri PNG: Downloaded ${a.download}`);
 }
 
 /**
@@ -606,11 +606,11 @@ export async function readPNGFile(file) {
 }
 
 /**
- * Checks if a file is a PNG with VectFox data
+ * Checks if a file is a PNG with VectTauri data
  * @param {File} file - File to check
  * @returns {Promise<boolean>}
  */
-export async function isVectFoxPNG(file) {
+export async function isVectTauriPNG(file) {
     if (!file.type.includes('png') && !file.name.toLowerCase().endsWith('.png')) {
         return false;
     }
@@ -618,7 +618,7 @@ export async function isVectFoxPNG(file) {
     try {
         const data = await readPNGFile(file);
         const exportData = await extractDataFromPNG(data);
-        return exportData !== null && (exportData.generator === 'VectFox' || exportData.version);
+        return exportData !== null && (exportData.generator === 'VectTauri' || exportData.version);
     } catch {
         return false;
     }

@@ -192,7 +192,7 @@ describe('postChatCompletion — request body', () => {
         expect(sent.reasoning_effort).toBe('none');
     });
 
-    it('never sends sampling params VectFox does not support', async () => {
+    it('never sends sampling params VectTauri does not support', async () => {
         const fetchMock = vi.fn(async () => okResponse({ content: 'hi' }));
         vi.stubGlobal('fetch', fetchMock);
 
@@ -403,7 +403,7 @@ function noAnswerResponse({ content = '', finishReason = 'length', reasoningFiel
 }
 
 describe('postChatCompletion — budget spent without an answer', () => {
-    // The shape that actually reaches VectFox: no reasoning field to detect, so
+    // The shape that actually reaches VectTauri: no reasoning field to detect, so
     // finish_reason is the only signal. This is the case the first cut missed.
     it('classifies finish_reason "length" + empty content as model_config, not empty', async () => {
         vi.stubGlobal('fetch', vi.fn(async () => noAnswerResponse()));

@@ -13,7 +13,7 @@
  *
  * Returns null when the collection has no sentinel (legacy / non-migrated collections).
  *
- * @author VectFox
+ * @author Lunarcade Digital
  * @since Phase 2 — Qdrant native sparse vectors
  * ============================================================================
  */
@@ -71,7 +71,7 @@ export function invalidateCollectionMetadata(actualCollectionId) {
  * Compare saved tokenizer mode to the current setting. Returns null when no mismatch,
  * or `{ saved, current }` when the user must take action.
  *
- * @param {object} settings - VectFox settings (reads `cjk_tokenizer_mode`)
+ * @param {object} settings - VectTauri settings (reads `cjk_tokenizer_mode`)
  * @param {string} actualCollectionId
  * @returns {Promise<{saved: string, current: string} | null>}
  */
@@ -146,7 +146,7 @@ export async function showTokenizerMismatchModal(mismatch, actualCollectionId) {
  * uses the correct tokenizer.
  *
  * @param {string} savedMode - The collection's locked tokenizer mode
- * @param {object} settings - VectFox settings reference (caller's copy)
+ * @param {object} settings - VectTauri settings reference (caller's copy)
  */
 export async function applyTokenizerRevert(savedMode, settings) {
     const { setCjkTokenizerMode, ensureJiebaTokenizerLoaded, ensureJiebaTwLoaded, CJK_TOKENIZER_MODES } =
@@ -157,14 +157,14 @@ export async function applyTokenizerRevert(savedMode, settings) {
     settings.cjk_tokenizer_mode = savedMode;
     setCjkTokenizerMode(savedMode);
 
-    if (extension_settings?.vectfox) {
-        Object.assign(extension_settings.vectfox, settings);
+    if (extension_settings?.vecttauri) {
+        Object.assign(extension_settings.vecttauri, settings);
     }
     saveSettingsDebounced();
 
     try {
         if (typeof $ !== 'undefined') {
-            const $select = $('#VectFox_cjk_tokenizer_mode');
+            const $select = $('#VectTauri_cjk_tokenizer_mode');
             if ($select.length) {
                 $select.val(savedMode);
                 // Fire only the namespaced prompt-sync handler; the main
@@ -185,7 +185,7 @@ export async function applyTokenizerRevert(savedMode, settings) {
 /**
  * Handle the "Open Settings" choice from the tokenizer mismatch modal.
  *
- * Expands the VectFox inline drawer if collapsed, switches to the Core tab
+ * Expands the VectTauri inline drawer if collapsed, switches to the Core tab
  * (which contains the CJK Tokenizer Mode dropdown), scrolls the dropdown
  * into view, and briefly focuses it so the user can find what they came for.
  *
@@ -240,7 +240,7 @@ export async function openCjkTokenizerSetting() {
         await waitForPopupsClosed();
 
         // Step 1: open ST's top-bar Extensions drawer if it's collapsed.
-        // ST wraps #extensions_settings2 (where VectFox mounts) inside
+        // ST wraps #extensions_settings2 (where VectTauri mounts) inside
         // #extensions-settings-button, which is a .drawer with a .drawer-toggle.
         // The drawer-icon carries .closedIcon while collapsed and .openIcon when open.
         // Source: SillyTavern/public/index.html (release branch) — searched 2026-05-20.
@@ -250,8 +250,8 @@ export async function openCjkTokenizerSetting() {
             $extToggle.trigger('click');
         }
 
-        // Step 2: expand VectFox's own inline drawer if collapsed.
-        const $drawerToggle = $('#VectFox_settings .inline-drawer-toggle').first();
+        // Step 2: expand VectTauri's own inline drawer if collapsed.
+        const $drawerToggle = $('#VectTauri_settings .inline-drawer-toggle').first();
         if ($drawerToggle.length) {
             const $icon = $drawerToggle.find('.inline-drawer-icon');
             const $content = $drawerToggle.closest('.inline-drawer').find('.inline-drawer-content');
@@ -261,13 +261,13 @@ export async function openCjkTokenizerSetting() {
         }
 
         // Step 3: switch to the Core tab.
-        const $coreTab = $('#VectFox_settings .vectfox-tab-btn[data-tab="core"]');
+        const $coreTab = $('#VectTauri_settings .vecttauri-tab-btn[data-tab="core"]');
         if ($coreTab.length) $coreTab.trigger('click');
 
         // Step 4: scroll the dropdown into view (deferred so panels finish opening first).
         // 150ms gives ST's slide animations time to settle before we measure positions.
         setTimeout(() => {
-            const $select = $('#VectFox_cjk_tokenizer_mode');
+            const $select = $('#VectTauri_cjk_tokenizer_mode');
             if ($select.length && $select.is(':visible')) {
                 $select[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 $select.focus();
@@ -275,8 +275,8 @@ export async function openCjkTokenizerSetting() {
                 // Couldn't surface the panel automatically — tell the user where to look.
                 try {
                     toastr.info(
-                        'Open the Extensions drawer and look in VectFox → Core → CJK Tokenizer Mode.',
-                        'VectFox',
+                        'Open the Extensions drawer and look in VectTauri → Core → CJK Tokenizer Mode.',
+                        'VectTauri',
                         { timeOut: 8000 },
                     );
                 } catch { /* toastr may not be available */ }

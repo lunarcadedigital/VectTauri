@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VECTFOX - ADVANCED RAG SYSTEM
+ * VECTTAURI - ADVANCED RAG SYSTEM
  * ============================================================================
  * Entry point - lean and clean
  * All logic is in separate modules - see project guidelines
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -22,7 +22,7 @@ import {
 import { debounce } from '../../../utils.js';
 import { debounce_timeout } from '../../../constants.js';
 
-// VectFox modules - Core
+// VectTauri modules - Core
 import { synchronizeChat, rearrangeChat } from './core/chat-vectorization.js';
 import { purgeAllVectorIndexes, purgeVectorIndex } from './core/core-vector-api.js';
 import { migrateOldEnabledKeys } from './core/collection-metadata.js';
@@ -38,10 +38,10 @@ import {
     AGENTIC_QUERY_TIMEOUT_DEFAULT_MS,
     AGENTIC_MAX_TOKENS_DEFAULT,
 } from './core/constants.js';
-import { isVectFoxEnabled } from './core/feature-gate.js';
+import { isVectTauriEnabled } from './core/feature-gate.js';
 import { runNetworkStartup } from './core/network-startup.js';
 
-// VectFox modules - UI
+// VectTauri modules - UI
 import { renderSettings, openDiagnosticsModal, loadWebLlmModels, updateWebLlmStatus, refreshAutoSyncCheckbox } from './ui/ui-manager.js';
 import { initializeVisualizer } from './ui/chunk-visualizer.js';
 import { initializeDatabaseBrowser } from './ui/database-browser.js';
@@ -50,14 +50,14 @@ import { refreshWorldInfoEntryDepthCache } from './core/summarizer-injection.js'
 import { CJK_TOKENIZER_MODES, setCjkTokenizerMode, ensureJiebaTokenizerLoaded, ensureJiebaTwLoaded } from './core/bm25-scorer.js';
 import { getPluginUrl } from './utils/similharity-url.js';
 
-// SillyTavern display label — NOT the settings key. For settings, use 'vectfox' (lowercase).
-const MODULE_NAME = 'VectFox';
+// SillyTavern display label — NOT the settings key. For settings, use 'vecttauri' (lowercase).
+const MODULE_NAME = 'VectTauri';
 
 // Default settings
 const defaultSettings = {
-    // Master switch — when false, VectFox does no automatic runtime work
+    // Master switch — when false, VectTauri does no automatic runtime work
     // (retrieval injection, auto-sync, lorebook WI injection). Default ON.
-    // Single source of truth for reads: core/feature-gate.js::isVectFoxEnabled.
+    // Single source of truth for reads: core/feature-gate.js::isVectTauriEnabled.
     enabled: true,
 
     // Core vector settings
@@ -104,7 +104,7 @@ const defaultSettings = {
     // defaults). Reader: core/api-keys.js::getOpenRouterApiKey. The legacy
     // plaintext slot used to live here as `openrouter_api_key: ''` but kept
     // re-appearing in settings.json — every UI handler does
-    // Object.assign(extension_settings.vectfox, settings) which would re-add
+    // Object.assign(extension_settings.vecttauri, settings) which would re-add
     // any default-declared empty field after migrateLegacyApiKeys() deleted it.
     cohere_model: 'embed-english-v3.0',
     embedding_ollama_model: 'mxbai-embed-large',
@@ -112,7 +112,7 @@ const defaultSettings = {
     embedding_vllm_model: '',
     // vLLM key: stored in ST's SECRET_KEYS.CUSTOM (chat-side, via
     // chat_completion_source: 'custom' proxy) AND SECRET_KEYS.VLLM
-    // (embedding-side, via ST's vector handler). Dual-write from VectFox UI
+    // (embedding-side, via ST's vector handler). Dual-write from VectTauri UI
     // preserves the "one shared key" UX. NO plaintext field in settings.json
     // post-2026-05-26. Migration drains any legacy `vllm_api_key` plaintext
     // into both slots on first load. Reader: core/api-keys.js::getCustomApiKey
@@ -125,7 +125,7 @@ const defaultSettings = {
     chunking_strategy: 'per_message', // per_message, conversation_turns, message_batch, adaptive
     batch_size: 4, // Messages per batch for message_batch strategy
     depth: 2,
-    // Placement of every VectFox block (memory, summarizer, lorebook). Their text changes each
+    // Placement of every VectTauri block (memory, summarizer, lorebook). Their text changes each
     // turn, so In-Chat keeps it below the static prompt and leaves that prefix cacheable.
     position: extension_prompt_types.IN_CHAT,
     protect: 5,
@@ -212,13 +212,13 @@ const defaultSettings = {
     // RAG Prompt Context (Global level)
     // Wraps ALL injected content with context prompts and/or XML tags
     rag_context: '',      // Natural language context shown before all RAG content
-    rag_xml_tag: 'VectFoxMemory',      // XML tag to wrap all RAG content (e.g., "retrieved_context")
+    rag_xml_tag: 'VectTauriMemory',      // XML tag to wrap all RAG content (e.g., "retrieved_context")
 
     // Collection-level metadata (managed by collection-metadata.js)
     collections: {},
 
     // Collection registry (list of known collection IDs)
-    vectfox_collection_registry: [],
+    vecttauri_collection_registry: [],
 
     // World Info Integration
     enabled_world_info: false,          // Enable semantic WI activation
@@ -260,7 +260,7 @@ const defaultSettings = {
     eventbase_autosync_settle_lag: true,
     // Summarizer Injection (Feature B): when enabled, inject the most recent N
     // EventBase events (by source_window_end desc) into the prompt every turn,
-    // wrapped in <VectFoxSummarizer> tags — word-for-word-ish recent-turn memory,
+    // wrapped in <VectTauriSummarizer> tags — word-for-word-ish recent-turn memory,
     // independent of semantic retrieval. Only meaningful with auto-sync active, so
     // it lives on the AutoSync tab and forces the auto-sync window to 1 turn while on.
     summarizer_injection_enabled: false,
@@ -269,7 +269,7 @@ const defaultSettings = {
     // (cause, result, characters, locations, items, DateTime, concepts, keywords,
     // open_threads, message index) beneath the summary line. Off = summary only.
     summarizer_injection_full_detail: true,
-    // Safety cap (characters) on the whole <VectFoxSummarizer> block. Full-detail ×
+    // Safety cap (characters) on the whole <VectTauriSummarizer> block. Full-detail ×
     // many events can balloon the prompt past the model's context and kill generation
     // (the model returns ~0 tokens). When the requested events exceed this budget, the
     // OLDEST overflow is dropped (most-recent always kept); the latest event is always
@@ -426,7 +426,7 @@ const defaultSettings = {
 
     // ─── Hidden / Power-User ────────────────────────────────────────────
     // SUPERADMIN MODE — no GUI toggle. Set to true by hand-editing settings.json
-    // (the `vectfox` block under SillyTavern's extension_settings) to enable.
+    // (the `vecttauri` block under SillyTavern's extension_settings) to enable.
     // When true, the Database Browser bypasses ALL persona / handle ID filtering
     // and shows EVERY collection on the server regardless of creatorHandle. Locking
     // a foreign collection then works normally. Intended for dev / debugging /
@@ -457,12 +457,12 @@ const onChatEvent = debounce(async () => await moduleWorker.update(), debounce_t
 /**
  * Generation interceptor - searches and injects relevant messages
  */
-async function vectfox_rearrangeChat(chat, _contextSize, _abort, type) {
+async function vecttauri_rearrangeChat(chat, _contextSize, _abort, type) {
     await rearrangeChat(chat, settings, type);
 }
 
 // Export to window for ST to call
-window['vectfox_rearrangeChat'] = vectfox_rearrangeChat;
+window['vecttauri_rearrangeChat'] = vecttauri_rearrangeChat;
 
 /**
  * Action: Sync Chat — shortcut to the Vectorize Content screen.
@@ -482,7 +482,7 @@ async function onVectorizeAllClick() {
  */
 async function onPurgeClick() {
     const confirmed = confirm(
-        'WARNING: This will delete ALL vector data and reset VectFox settings.\n\n' +
+        'WARNING: This will delete ALL vector data and reset VectTauri settings.\n\n' +
         'This cannot be undone. Continue?'
     );
 
@@ -500,10 +500,10 @@ async function onPurgeClick() {
             headers: getRequestHeaders(),
         });
 
-        // 2. Clear extension_settings.vectfox
-        for (const key in extension_settings.vectfox) {
+        // 2. Clear extension_settings.vecttauri
+        for (const key in extension_settings.vecttauri) {
             if (key !== 'enabled') {
-                delete extension_settings.vectfox[key];
+                delete extension_settings.vecttauri[key];
             }
         }
 
@@ -514,7 +514,7 @@ async function onPurgeClick() {
         toastr.success('All vector data purged', 'Purge Complete');
 
     } catch (error) {
-        log.error('VectFox: Purge failed:', error);
+        log.error('VectTauri: Purge failed:', error);
         toastr.error('Purge failed: ' + error.message);
     }
 }
@@ -552,7 +552,7 @@ async function onCleanupCorruptedClick() {
             toastr.warning(summary, 'Cleanup Partial');
         }
     } catch (error) {
-        log.error('VectFox: Cleanup failed:', error);
+        log.error('VectTauri: Cleanup failed:', error);
         toastr.error('Cleanup failed: ' + error.message);
     }
 }
@@ -565,30 +565,30 @@ function onRunDiagnosticsClick() {
 }
 
 /**
- * Initialize VectFox extension
+ * Initialize VectTauri extension
  */
 jQuery(async () => {
-    log.lifecycle('VectFox: Initializing...');
+    log.lifecycle('VectTauri: Initializing...');
 
     // Load saved settings
-    if (!extension_settings.vectfox) {
-        extension_settings.vectfox = defaultSettings;
+    if (!extension_settings.vecttauri) {
+        extension_settings.vecttauri = defaultSettings;
     }
 
     // Merge saved settings with defaults
     settings = {
         ...defaultSettings,
-        ...extension_settings.vectfox,
+        ...extension_settings.vecttauri,
         collections: {
             ...defaultSettings.collections,
-            ...extension_settings.vectfox.collections
+            ...extension_settings.vecttauri.collections
         }
     };
 
     // Migrate old scattered enabled keys to new collections structure
     const migrationResult = migrateOldEnabledKeys();
     if (migrationResult.migrated > 0) {
-        log.lifecycle(`VectFox: Migrated ${migrationResult.migrated} old collection enabled keys`);
+        log.lifecycle(`VectTauri: Migrated ${migrationResult.migrated} old collection enabled keys`);
     }
 
     // Migrate legacy EventBase LLM overrides → unified Core chat settings.
@@ -598,7 +598,7 @@ jQuery(async () => {
     // legacy keys behind as stale empty strings in settings.json.
     // (Targets are the post-rename `chat_*` names — see the connection-key
     // rename migration just below; this maps eventbase_* straight to chat_*.)
-    const _ebs = extension_settings.vectfox;
+    const _ebs = extension_settings.vecttauri;
     const _ebLegacyMap = [
         ['eventbase_model', 'chat_model'],
         ['eventbase_provider', 'chat_provider'],
@@ -620,7 +620,7 @@ jQuery(async () => {
         // Persist deletions synchronously (NOT debounced). Migrations are
         // one-shot at init and the user may reload before a debounced save
         // would flush — leaving settings.json with stale legacy fields even
-        // though extension_settings.vectfox is clean in memory. Confirmed
+        // though extension_settings.vecttauri is clean in memory. Confirmed
         // 2026-05-26 against a user whose summarize_openrouter_api_key /
         // summarize_vllm_api_key persisted on disk across multiple reloads
         // because the debounced save never fired before page close.
@@ -636,9 +636,9 @@ jQuery(async () => {
     // no I/O. See Migration/mg_setting_name_for_connection.js +
     // plans/settings-naming-convention-migration.md. (Phase B — `source` →
     // `embedding_provider` — is a separate migration, intentionally not here.)
-    const _connRename = migration_setting_name_for_connection(extension_settings.vectfox);
+    const _connRename = migration_setting_name_for_connection(extension_settings.vecttauri);
     if (_connRename.migrated > 0) {
-        log.lifecycle(`VectFox: Renamed ${_connRename.migrated} connection setting key(s): ${_connRename.keys.join(', ')}`);
+        log.lifecycle(`VectTauri: Renamed ${_connRename.migrated} connection setting key(s): ${_connRename.keys.join(', ')}`);
         // Persist immediately (not debounced) — same reload-safety reason as the
         // eventbase block above (R5 in the plan's crash-safety checklist).
         const { saveSettings } = await import('../../../../script.js');
@@ -648,9 +648,9 @@ jQuery(async () => {
     // Phase B: rename the highest-churn embedding key `source` → `embedding_provider`.
     // Separate migration from Phase A (its blast radius spans nearly every backend/
     // query/UI path). Idempotent, in-memory only. See Migration/mg_embedding_source_key.js.
-    const _srcRename = migration_embedding_source_key(extension_settings.vectfox);
+    const _srcRename = migration_embedding_source_key(extension_settings.vecttauri);
     if (_srcRename.migrated > 0) {
-        log.lifecycle('VectFox: Renamed embedding `source` → `embedding_provider`');
+        log.lifecycle('VectTauri: Renamed embedding `source` → `embedding_provider`');
         const { saveSettings } = await import('../../../../script.js');
         await saveSettings();
     }
@@ -659,13 +659,13 @@ jQuery(async () => {
     // (the 0.0x workaround for issue #11). Qdrant hybrid now returns cosine, so a
     // 0.0x gate would flip from "makes Qdrant work" to "inject everything".
     // Run-once via stamp — see Migration/mg_world_info_threshold_rrf_workaround.js.
-    const _thresholdReset = migration_world_info_threshold_rrf_workaround(extension_settings.vectfox);
+    const _thresholdReset = migration_world_info_threshold_rrf_workaround(extension_settings.vecttauri);
     if (_thresholdReset.migrated) {
-        log.lifecycle(`VectFox: Reset world_info_threshold ${_thresholdReset.from} → ${WORLD_INFO_THRESHOLD_DEFAULT} (value was a workaround for the pre-cosine RRF score scale)`);
+        log.lifecycle(`VectTauri: Reset world_info_threshold ${_thresholdReset.from} → ${WORLD_INFO_THRESHOLD_DEFAULT} (value was a workaround for the pre-cosine RRF score scale)`);
         try {
             toastr.info(
                 `Your Lorebook similarity threshold (${_thresholdReset.from}) was a workaround for a scoring bug that is now fixed — scores are real 0-1 similarities on every backend. It has been reset to the default ${WORLD_INFO_THRESHOLD_DEFAULT}.`,
-                'VectFox — setting updated',
+                'VectTauri — setting updated',
                 { timeOut: 15000 },
             );
         } catch (_) { /* toastr unavailable (headless) — the log line stands alone */ }
@@ -683,32 +683,32 @@ jQuery(async () => {
     try {
         await migrateLegacyApiKeys();
     } catch (err) {
-        log.warn('[VectFox] migrateLegacyApiKeys failed:', err?.message || err);
+        log.warn('[VectTauri] migrateLegacyApiKeys failed:', err?.message || err);
         // Non-fatal — readers fall back to legacy plaintext slots if migration didn't complete.
     }
 
     // CRITICAL: re-sync the local `settings` from the now-cleaned
-    // extension_settings.vectfox. The spread at line 412 captured the PRE-
+    // extension_settings.vecttauri. The spread at line 412 captured the PRE-
     // migration state including any legacy *_api_key empty strings the user
-    // had on disk. Every UI handler does Object.assign(extension_settings.vectfox,
+    // had on disk. Every UI handler does Object.assign(extension_settings.vecttauri,
     // settings) — without this re-sync, the first UI interaction copies the
-    // legacy fields back into extension_settings.vectfox and they get saved
+    // legacy fields back into extension_settings.vecttauri and they get saved
     // again, defeating the migration. Tracked symptom: settings.json kept the
     // empty summarize_openrouter_api_key / summarize_vllm_api_key fields even
     // after migration logged success on every reload.
     settings = {
         ...defaultSettings,
-        ...extension_settings.vectfox,
+        ...extension_settings.vecttauri,
         collections: {
             ...defaultSettings.collections,
-            ...extension_settings.vectfox.collections,
+            ...extension_settings.vecttauri.collections,
         },
     };
 
     // Migrate empty rag_xml_tag to default value
     if (!settings.rag_xml_tag) {
-        settings.rag_xml_tag = 'VectFoxMemory';
-        extension_settings.vectfox.rag_xml_tag = 'VectFoxMemory';
+        settings.rag_xml_tag = 'VectTauriMemory';
+        extension_settings.vecttauri.rag_xml_tag = 'VectTauriMemory';
     }
 
     // Initialize CJK tokenizer mode before any extraction happens.
@@ -716,18 +716,18 @@ jQuery(async () => {
     if (settings.cjk_tokenizer_mode === CJK_TOKENIZER_MODES.jieba) {
         ensureJiebaTokenizerLoaded().then((ok) => {
             if (ok) {
-                log.lifecycle('VectFox CJK: Jieba tokenizer initialized');
+                log.lifecycle('VectTauri CJK: Jieba tokenizer initialized');
             } else {
-                log.warn('VectFox CJK: Jieba tokenizer unavailable, using Intl.Segmenter fallback');
+                log.warn('VectTauri CJK: Jieba tokenizer unavailable, using Intl.Segmenter fallback');
             }
         });
     }
     if (settings.cjk_tokenizer_mode === CJK_TOKENIZER_MODES.jieba_tw) {
         ensureJiebaTwLoaded().then((ok) => {
             if (ok) {
-                log.lifecycle('VectFox CJK: Jieba TW tokenizer initialized');
+                log.lifecycle('VectTauri CJK: Jieba TW tokenizer initialized');
             } else {
-                log.warn('VectFox CJK: Jieba TW tokenizer unavailable, using Intl.Segmenter fallback');
+                log.warn('VectTauri CJK: Jieba TW tokenizer unavailable, using Intl.Segmenter fallback');
             }
         });
     }
@@ -755,10 +755,10 @@ jQuery(async () => {
     // Off-box startup work (discovery, EventBase index backfill, plugin version check).
     // Master switch OFF → skip it entirely; the switch re-runs this when turned back ON,
     // so no page reload is needed. Fire-and-forget, as it was when inlined here.
-    if (isVectFoxEnabled(settings)) {
+    if (isVectTauriEnabled(settings)) {
         runNetworkStartup(settings);
     } else {
-        log.lifecycle('VectFox: master switch OFF — skipping backend/network startup');
+        log.lifecycle('VectTauri: master switch OFF — skipping backend/network startup');
     }
 
     // Register event handlers. Each wrapper stamps _lastChatTriggerEvent so that
@@ -767,7 +767,7 @@ jQuery(async () => {
     // Master switch OFF → nothing is scheduled. synchronizeChat checks the switch
     // again when the debounce fires, covering a switch-off inside that window.
     const trigger = (name) => () => {
-        if (!isVectFoxEnabled(settings)) return;
+        if (!isVectTauriEnabled(settings)) return;
         _lastChatTriggerEvent = name;
         onChatEvent();
     };
@@ -780,7 +780,7 @@ jQuery(async () => {
     // When WebLLM extension is loaded, refresh the model list
     eventSource.on(event_types.EXTENSION_SETTINGS_LOADED, async (manifest) => {
         if (settings.embedding_provider === 'webllm' && manifest?.display_name === 'WebLLM') {
-            log.lifecycle('VectFox: WebLLM extension loaded, refreshing models...');
+            log.lifecycle('VectTauri: WebLLM extension loaded, refreshing models...');
             updateWebLlmStatus();
             await loadWebLlmModels(settings);
         }
@@ -790,8 +790,8 @@ jQuery(async () => {
     // switch is OFF so the panel shows the current chat; refreshAutoSyncCheckbox then
     // reads cached state only and never calls the backend.
     eventSource.on(event_types.CHAT_CHANGED, () => {
-        if (isVectFoxEnabled(settings)) {
-            log.lifecycle('VectFox: Chat changed, refreshing UI state');
+        if (isVectTauriEnabled(settings)) {
+            log.lifecycle('VectTauri: Chat changed, refreshing UI state');
         }
         refreshAutoSyncCheckbox(settings);
     });
@@ -809,7 +809,7 @@ jQuery(async () => {
     eventSource.on(event_types.WORLDINFO_UPDATED, refreshWiDepthDebounced);
     eventSource.on(event_types.WORLDINFO_SETTINGS_UPDATED, refreshWiDepthDebounced);
 
-    log.lifecycle('VectFox: ✅ Initialized successfully');
+    log.lifecycle('VectTauri: ✅ Initialized successfully');
 });
 
 /**
@@ -818,6 +818,6 @@ jQuery(async () => {
  * instead of serving stale cached versions.
  */
 export async function onUpdate() {
-    log.lifecycle('VectFox: Update detected — reloading page to clear module cache');
+    log.lifecycle('VectTauri: Update detected — reloading page to clear module cache');
     location.reload();
 }

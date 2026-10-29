@@ -5,9 +5,9 @@
     "optional": [
         "embeddings"
     ],
-    "generate_interceptor": "vectfox_rearrangeChat",
+    "generate_interceptor": "vecttauri_rearrangeChat",
     "js": "index.js",
-    "css": "vectfox.css",
+    "css": "vecttauri.css",
     "author": "Lunarcade Digital",
     "version": "1.0.0",
     "homePage": "https://github.com/KritBlade/VectFox",

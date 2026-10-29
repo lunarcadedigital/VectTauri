@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox DIAGNOSTICS - INDEX
+ * VectTauri DIAGNOSTICS - INDEX
  * ============================================================================
  * Main entry point for diagnostics system
  * Every potential failure point needs a check and fix here
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -67,12 +67,12 @@ import { getPluginUrl } from '../utils/similharity-url.js';
 
 /**
  * Runs all diagnostic checks
- * @param {object} settings VectFox settings
+ * @param {object} settings VectTauri settings
  * @param {boolean} includeProductionTests Include integration/production tests
  * @returns {Promise<object>} Diagnostics results
  */
 export async function runDiagnostics(settings, includeProductionTests = false) {
-    console.log('VectFox Diagnostics: Running health checks...');
+    console.log('VectTauri Diagnostics: Running health checks...');
 
     // Get version information
     let extensionVersion = 'Unknown';
@@ -81,21 +81,21 @@ export async function runDiagnostics(settings, includeProductionTests = false) {
     // Try to get extension version from manifest.json
     try {
         // Derive manifest URL from this module's location so it works regardless of
-        // the folder name the user installs the extension under (e.g. VectFox vs VectFox).
+        // the folder name the user installs the extension under (e.g. VectTauri vs VectTauri).
         const manifestUrl = new URL('../manifest.json', import.meta.url).href + `?_=${Date.now()}`;
-        console.log('VectFox Diagnostics: Fetching manifest from:', manifestUrl);
+        console.log('VectTauri Diagnostics: Fetching manifest from:', manifestUrl);
         const manifestResponse = await fetch(manifestUrl);
-        console.log('VectFox Diagnostics: Manifest response status:', manifestResponse.status);
+        console.log('VectTauri Diagnostics: Manifest response status:', manifestResponse.status);
         if (manifestResponse.ok) {
             const manifest = await manifestResponse.json();
-            console.log('VectFox Diagnostics: Manifest data:', manifest);
+            console.log('VectTauri Diagnostics: Manifest data:', manifest);
             extensionVersion = manifest.version || 'Unknown';
-            console.log('VectFox Diagnostics: Extension version:', extensionVersion);
+            console.log('VectTauri Diagnostics: Extension version:', extensionVersion);
         } else {
-            console.warn('VectFox Diagnostics: Manifest fetch failed with status:', manifestResponse.status);
+            console.warn('VectTauri Diagnostics: Manifest fetch failed with status:', manifestResponse.status);
         }
     } catch (error) {
-        console.error('VectFox Diagnostics: Could not fetch manifest.json', error);
+        console.error('VectTauri Diagnostics: Could not fetch manifest.json', error);
     }
 
     // Try to get plugin version from health endpoint
@@ -115,7 +115,7 @@ export async function runDiagnostics(settings, includeProductionTests = false) {
     // Auto-clean any ghost test collections from the registry
     const testCollectionsCleaned = cleanupTestCollections();
     if (testCollectionsCleaned > 0) {
-        console.log(`VectFox Diagnostics: Cleaned ${testCollectionsCleaned} ghost test collections from registry`);
+        console.log(`VectTauri Diagnostics: Cleaned ${testCollectionsCleaned} ghost test collections from registry`);
     }
 
     const categories = {
@@ -220,7 +220,7 @@ export async function runDiagnostics(settings, includeProductionTests = false) {
     }
 
     // Always run last: drop any diagnostic probe collections (`vf_test_*`,
-    // `VectFox_diag*`, `test`) created during this run by the infrastructure
+    // `VectTauri_diag*`, `test`) created during this run by the infrastructure
     // checks or by tests that bailed without cleanup. Listed under infrastructure
     // so users see it whether or not production tests were enabled.
     categories.infrastructure.push(await sweepLeftoverTestCollections(settings));
@@ -250,10 +250,10 @@ export async function runDiagnostics(settings, includeProductionTests = false) {
         timestamp: new Date().toISOString()
     };
 
-    console.log('VectFox Diagnostics: Complete', results);
-    console.log('VectFox Diagnostics: Version object:', results.version);
-    console.log('VectFox Diagnostics: Extension version in results:', results.version.extension);
-    console.log('VectFox Diagnostics: Plugin version in results:', results.version.plugin);
+    console.log('VectTauri Diagnostics: Complete', results);
+    console.log('VectTauri Diagnostics: Version object:', results.version);
+    console.log('VectTauri Diagnostics: Extension version in results:', results.version.extension);
+    console.log('VectTauri Diagnostics: Plugin version in results:', results.version.plugin);
 
     return results;
 }
@@ -266,7 +266,7 @@ export async function runDiagnostics(settings, includeProductionTests = false) {
 export function getFixSuggestion(check) {
     switch (check.name) {
         case 'Embedding Provider':
-            return 'Go to VectFox settings and select an embedding provider. For local setup, choose "Transformers" or "Ollama".';
+            return 'Go to VectTauri settings and select an embedding provider. For local setup, choose "Transformers" or "Ollama".';
 
         case 'API Key':
             return 'Go to SillyTavern Settings > API Connections and add your API key for the selected provider.';
@@ -275,13 +275,13 @@ export function getFixSuggestion(check) {
             return 'Go to SillyTavern Settings > API Connections and configure the server URL for your local embedding provider.';
 
         case 'Chat Vectors':
-            return 'Click the "Vectorize All" button in VectFox settings to vectorize this chat.';
+            return 'Click the "Vectorize All" button in VectTauri settings to vectorize this chat.';
 
         case 'Settings Validation':
-            return 'Review your VectFox settings and adjust the values within recommended ranges.';
+            return 'Review your VectTauri settings and adjust the values within recommended ranges.';
 
         case 'Qdrant Backend':
-            return 'Configure Qdrant settings in VectFox panel. For local: set host/port (default 127.0.0.1:6333). Start Qdrant: docker run -p 6333:6333 qdrant/qdrant. Note: Qdrant Cloud may have connectivity issues - local instance recommended.';
+            return 'Configure Qdrant settings in VectTauri panel. For local: set host/port (default 127.0.0.1:6333). Start Qdrant: docker run -p 6333:6333 qdrant/qdrant. Note: Qdrant Cloud may have connectivity issues - local instance recommended.';
 
         case '[PROD] Chunk-Server Sync':
             return 'Click "Fix Now" to clean orphaned local metadata entries that no longer have corresponding vectors on the server.';
@@ -322,9 +322,9 @@ export async function executeFixAction(check) {
 
         case 'removeDuplicateHashes':
             if (check.data?.duplicates && check.data?.collectionId) {
-                // Need settings for the fix function - get from VectFox
-                const { getVectFoxSettings } = await import('../ui/ui-settings.js');
-                const settings = getVectFoxSettings();
+                // Need settings for the fix function - get from VectTauri
+                const { getVectTauriSettings } = await import('../ui/ui-settings.js');
+                const settings = getVectTauriSettings();
                 return await fixDuplicateHashes(check.data.duplicates, check.data.collectionId, settings);
             }
             return { success: false, message: 'No duplicate data found in check' };

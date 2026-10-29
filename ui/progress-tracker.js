@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox PROGRESS TRACKER
+ * VectTauri PROGRESS TRACKER
  * ============================================================================
  * Real-time progress panel for vectorization operations
  * Shows detailed status, progress bars, and live updates
  *
- * @author VectFox
- * @version 2.2.0-alpha
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -306,63 +306,63 @@ export class ProgressTracker {
         this.isModal = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
         const headerHTML = `
-            <div class="vectfox-progress-header">
-                <h3 id="VectFox_progress_title">VectFox Progress</h3>
-                <div class="vectfox-progress-actions">
-                    <button id="VectFox_progress_stop" class="vectfox-progress-stop" style="display: none;">
+            <div class="vecttauri-progress-header">
+                <h3 id="VectTauri_progress_title">VectTauri Progress</h3>
+                <div class="vecttauri-progress-actions">
+                    <button id="VectTauri_progress_stop" class="vecttauri-progress-stop" style="display: none;">
                         <i class="fa-solid fa-stop"></i> Stop
                     </button>
-                    <button id="VectFox_progress_close" class="vectfox-progress-close">
+                    <button id="VectTauri_progress_close" class="vecttauri-progress-close">
                         <i class="fa-solid fa-times"></i>
                     </button>
                 </div>
             </div>`;
 
         const bodyHTML = `
-            <div class="vectfox-progress-body">
+            <div class="vecttauri-progress-body">
                 <!-- Main Progress Bar -->
-                <div class="vectfox-progress-section">
-                    <div class="vectfox-progress-label">
-                        <span id="VectFox_progress_status">Initializing...</span>
-                        <span id="VectFox_progress_percent">0%</span>
+                <div class="vecttauri-progress-section">
+                    <div class="vecttauri-progress-label">
+                        <span id="VectTauri_progress_status">Initializing...</span>
+                        <span id="VectTauri_progress_percent">0%</span>
                     </div>
-                    <div class="vectfox-progress-bar-container">
-                        <div id="VectFox_progress_bar" class="vectfox-progress-bar" style="width: 0%"></div>
+                    <div class="vecttauri-progress-bar-container">
+                        <div id="VectTauri_progress_bar" class="vecttauri-progress-bar" style="width: 0%"></div>
                     </div>
                 </div>
 
                 <!-- Current Item Progress -->
-                <div id="VectFox_progress_current" class="vectfox-progress-current" style="display: none;">
-                    <span id="VectFox_progress_current_text">Processing...</span>
+                <div id="VectTauri_progress_current" class="vecttauri-progress-current" style="display: none;">
+                    <span id="VectTauri_progress_current_text">Processing...</span>
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="vectfox-progress-stats">
-                    <div class="vectfox-progress-stat">
-                        <div id="VectFox_progress_stat_label" class="vectfox-progress-stat-label">Progress</div>
-                        <div id="VectFox_progress_processed" class="vectfox-progress-stat-value">0 / 0</div>
+                <div class="vecttauri-progress-stats">
+                    <div class="vecttauri-progress-stat">
+                        <div id="VectTauri_progress_stat_label" class="vecttauri-progress-stat-label">Progress</div>
+                        <div id="VectTauri_progress_processed" class="vecttauri-progress-stat-value">0 / 0</div>
                     </div>
-                    <div class="vectfox-progress-stat">
-                        <div class="vectfox-progress-stat-label">Chunks</div>
-                        <div id="VectFox_progress_chunks" class="vectfox-progress-stat-value">0</div>
+                    <div class="vecttauri-progress-stat">
+                        <div class="vecttauri-progress-stat-label">Chunks</div>
+                        <div id="VectTauri_progress_chunks" class="vecttauri-progress-stat-value">0</div>
                     </div>
-                    <div class="vectfox-progress-stat">
-                        <div class="vectfox-progress-stat-label">Time</div>
-                        <div id="VectFox_progress_time" class="vectfox-progress-stat-value">0.0s</div>
+                    <div class="vecttauri-progress-stat">
+                        <div class="vecttauri-progress-stat-label">Time</div>
+                        <div id="VectTauri_progress_time" class="vecttauri-progress-stat-value">0.0s</div>
                     </div>
-                    <div class="vectfox-progress-stat">
-                        <div class="vectfox-progress-stat-label">Speed</div>
-                        <div id="VectFox_progress_speed" class="vectfox-progress-stat-value">0/s</div>
+                    <div class="vecttauri-progress-stat">
+                        <div class="vecttauri-progress-stat-label">Speed</div>
+                        <div id="VectTauri_progress_speed" class="vecttauri-progress-stat-value">0/s</div>
                     </div>
                 </div>
 
                 <!-- Errors (hidden by default) -->
-                <div id="VectFox_progress_errors" class="vectfox-progress-errors" style="display: none;">
-                    <div class="vectfox-progress-errors-header">
+                <div id="VectTauri_progress_errors" class="vecttauri-progress-errors" style="display: none;">
+                    <div class="vecttauri-progress-errors-header">
                         <i class="fa-solid fa-exclamation-triangle"></i>
                         <span>Errors</span>
                     </div>
-                    <div id="VectFox_progress_errors_list" class="vectfox-progress-errors-list"></div>
+                    <div id="VectTauri_progress_errors_list" class="vecttauri-progress-errors-list"></div>
                 </div>
             </div>`;
 
@@ -371,46 +371,46 @@ export class ProgressTracker {
         // the stale-element cleanup, this.panel lookup, and reopen() all stay generic.
         const panelHTML = this.isModal
             ? `
-            <div id="VectFox_progress_panel" class="vectfox-modal vectfox-progress-modal" style="display: none;">
-                <div class="vectfox-modal-overlay"></div>
-                <div class="vectfox-modal-content vectfox-progress-modal-content">
+            <div id="VectTauri_progress_panel" class="vecttauri-modal vecttauri-progress-modal" style="display: none;">
+                <div class="vecttauri-modal-overlay"></div>
+                <div class="vecttauri-modal-content vecttauri-progress-modal-content">
                     ${headerHTML}
                     ${bodyHTML}
                 </div>
             </div>`
             : `
-            <div id="VectFox_progress_panel" class="vectfox-progress-panel">
+            <div id="VectTauri_progress_panel" class="vecttauri-progress-panel">
                 ${headerHTML}
                 ${bodyHTML}
             </div>`;
 
         // Remove any stale element left over from a previous session/hot-reload
-        document.getElementById('VectFox_progress_panel')?.remove();
+        document.getElementById('VectTauri_progress_panel')?.remove();
 
         // Insert panel into DOM
         const container = document.createElement('div');
         container.innerHTML = panelHTML.trim();
         document.body.appendChild(container.firstElementChild);
 
-        this.panel = document.getElementById('VectFox_progress_panel');
+        this.panel = document.getElementById('VectTauri_progress_panel');
 
         // PERF: Cache all DOM element references to avoid repeated getElementById calls
         this.elements = {
-            title: document.getElementById('VectFox_progress_title'),
-            status: document.getElementById('VectFox_progress_status'),
-            percent: document.getElementById('VectFox_progress_percent'),
-            bar: document.getElementById('VectFox_progress_bar'),
-            processed: document.getElementById('VectFox_progress_processed'),
-            chunks: document.getElementById('VectFox_progress_chunks'),
-            time: document.getElementById('VectFox_progress_time'),
-            speed: document.getElementById('VectFox_progress_speed'),
-            current: document.getElementById('VectFox_progress_current'),
-            currentText: document.getElementById('VectFox_progress_current_text'),
-            statLabel: document.getElementById('VectFox_progress_stat_label'),
-            errors: document.getElementById('VectFox_progress_errors'),
-            errorsList: document.getElementById('VectFox_progress_errors_list'),
-            stopBtn: document.getElementById('VectFox_progress_stop'),
-            closeBtn: document.getElementById('VectFox_progress_close'),
+            title: document.getElementById('VectTauri_progress_title'),
+            status: document.getElementById('VectTauri_progress_status'),
+            percent: document.getElementById('VectTauri_progress_percent'),
+            bar: document.getElementById('VectTauri_progress_bar'),
+            processed: document.getElementById('VectTauri_progress_processed'),
+            chunks: document.getElementById('VectTauri_progress_chunks'),
+            time: document.getElementById('VectTauri_progress_time'),
+            speed: document.getElementById('VectTauri_progress_speed'),
+            current: document.getElementById('VectTauri_progress_current'),
+            currentText: document.getElementById('VectTauri_progress_current_text'),
+            statLabel: document.getElementById('VectTauri_progress_stat_label'),
+            errors: document.getElementById('VectTauri_progress_errors'),
+            errorsList: document.getElementById('VectTauri_progress_errors_list'),
+            stopBtn: document.getElementById('VectTauri_progress_stop'),
+            closeBtn: document.getElementById('VectTauri_progress_close'),
         };
 
         if (this.elements.stopBtn) {
@@ -449,7 +449,7 @@ export class ProgressTracker {
         const els = this.elements;
 
         // Update title
-        if (els.title) els.title.textContent = this.currentOperation || 'VectFox Progress';
+        if (els.title) els.title.textContent = this.currentOperation || 'VectTauri Progress';
 
         // Update status
         const status = statusOverride || this.generateStatusMessage();
@@ -543,7 +543,7 @@ export class ProgressTracker {
         const errorsList = this.elements?.errorsList;
         if (errorsList) {
             errorsList.innerHTML = this.stats.errors
-                .map(err => `<div class="vectfox-progress-error-item">${err.message}</div>`)
+                .map(err => `<div class="vecttauri-progress-error-item">${err.message}</div>`)
                 .join('');
         }
     }

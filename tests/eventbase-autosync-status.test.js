@@ -4,8 +4,8 @@
  * The auto-sync status feeds the Chat Auto-Sync checkbox + LED. Its one backend
  * call is the vectorization-tip probe (ensureVectorizationTip), which runs on a cold
  * tip cache; resolving the write target logs `[EventBase][resolve]` diagnostics. The
- * panel refreshes this status on every chat change, including while VectFox is
- * disabled — and a disabled VectFox must neither call the backend nor log. These
+ * panel refreshes this status on every chat change, including while VectTauri is
+ * disabled — and a disabled VectTauri must neither call the backend nor log. These
  * tests lock in that `shouldProbeBackend: false` reads only the cached tip and
  * `shouldLogResolution: false` reaches the resolver, while the defaults keep both.
  *
@@ -24,13 +24,13 @@ vi.mock('../../../../../script.js', () => ({
     setExtensionPrompt: vi.fn(), extension_prompts: {}, getCurrentChatId: vi.fn(() => 'chat-1'), substituteParams: vi.fn(),
 }));
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     getContext: vi.fn(() => ({ chat: [{ mes: 'm0' }, { mes: 'm1' }, { mes: 'm2' }, { mes: 'm3' }] })),
 }));
 vi.mock('../core/collection-ids.js', () => ({ getChatUUID: vi.fn(() => 'uuid-1'), parseRegistryKey: vi.fn(), COLLECTION_PREFIXES: {}, buildRegistryKey: vi.fn() }));
 vi.mock('../core/collection-loader.js', () => ({ getCollectionRegistry: vi.fn() }));
 vi.mock('../core/core-vector-api.js', () => ({ queryCollection: vi.fn(), getSavedHashes: vi.fn() }));
-vi.mock('../core/constants.js', () => ({ EVENTBASE_PROMPT_TAG: '3_vectfox_eventbase' }));
+vi.mock('../core/constants.js', () => ({ EVENTBASE_PROMPT_TAG: '3_vecttauri_eventbase' }));
 vi.mock('../core/eventbase-schema.js', () => ({ EventBaseFatalError: class {}, EventBaseExtractionError: class {} }));
 vi.mock('../core/eventbase-extractor.js', () => ({ extractEvents: vi.fn() }));
 vi.mock('../core/generation-rate-limiter.js', () => ({ generationRateLimiter: {}, generationRateLimitSettings: {} }));

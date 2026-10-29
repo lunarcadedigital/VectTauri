@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from 'vitest';
 // sparse-vector-encoder.js → bm25-scorer.js → core/log.js → ../../../../extensions.js
 // (a SillyTavern host path that doesn't resolve under vitest). Mock it.
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     getContext: vi.fn(() => ({ chat: [], characterId: null })),
 }));
 

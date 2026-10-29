@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox TEXT CLEANING
+ * VectTauri TEXT CLEANING
  * ============================================================================
  * Pre-vectorization text cleaning with regex patterns.
  * Strips HTML, metadata blocks, and custom tags before chunking.
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -211,20 +211,20 @@ export const CLEANING_PRESETS = {
  * @returns {object} Cleaning settings
  */
 export function getCleaningSettings() {
-    if (!extension_settings.vectfox) {
-        extension_settings.vectfox = {};
+    if (!extension_settings.vecttauri) {
+        extension_settings.vecttauri = {};
     }
-    if (!extension_settings.vectfox.cleaning) {
+    if (!extension_settings.vecttauri.cleaning) {
         // Default: Custom preset with all MVU + standard patterns pre-checked
         // (equivalent to MVU Game Maker preset, but lets users toggle individual patterns)
         const defaultEnabled = Object.keys(BUILTIN_PATTERNS).filter(id => id !== 'strip_all_html');
-        extension_settings.vectfox.cleaning = {
+        extension_settings.vecttauri.cleaning = {
             selectedPreset: 'custom',
             customPatterns: [],
             enabledBuiltins: defaultEnabled,
         };
     }
-    return extension_settings.vectfox.cleaning;
+    return extension_settings.vecttauri.cleaning;
 }
 
 /**
@@ -232,10 +232,10 @@ export function getCleaningSettings() {
  * @param {object} settings - Settings to save
  */
 export function saveCleaningSettings(settings) {
-    if (!extension_settings.vectfox) {
-        extension_settings.vectfox = {};
+    if (!extension_settings.vecttauri) {
+        extension_settings.vecttauri = {};
     }
-    extension_settings.vectfox.cleaning = settings;
+    extension_settings.vecttauri.cleaning = settings;
 }
 
 /**
@@ -288,7 +288,7 @@ function applyPattern(text, pattern) {
         const regex = new RegExp(pattern.pattern, pattern.flags || 'g');
         return text.replace(regex, pattern.replacement || '');
     } catch (e) {
-        log.warn(`VectFox: Invalid regex pattern "${pattern.name || pattern.pattern}":`, e.message);
+        log.warn(`VectTauri: Invalid regex pattern "${pattern.name || pattern.pattern}":`, e.message);
         return text;
     }
 }

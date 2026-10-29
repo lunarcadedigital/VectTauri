@@ -51,7 +51,7 @@ import { resolveRetrievalTimeoutMs } from './retrieval-budget.js';
  * (GitHub issue #16) — a user who raised the budget to 60s would still have been
  * warned at 10s. Hence: a function of settings, resolved per call.
  *
- * @param {object} [settings] - VectFox settings
+ * @param {object} [settings] - VectTauri settings
  * @returns {number} milliseconds
  */
 export function slowEmbeddingWarnMs(settings) {
@@ -63,7 +63,7 @@ export function slowEmbeddingWarnMs(settings) {
  * `openrouter (qwen/qwen3-embedding-8b)`. Falls back to the provider alone when
  * the provider has no model field (transformers) or the lookup throws.
  *
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {string}
  */
 export function embeddingProviderLabel(settings) {
@@ -85,7 +85,7 @@ export function embeddingProviderLabel(settings) {
  * the same evidence as the module header: the vector DB answers in ~20ms, so
  * everything else in the budget is the embedding call.
  *
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {string} sentence naming the likely culprit and the fix
  */
 export function describeEmbeddingTimeoutCause(settings) {
@@ -104,7 +104,7 @@ export function describeEmbeddingTimeoutCause(settings) {
  *
  * @param {number|null|undefined} embedMs - server-reported embed duration, or null
  *   when the caller supplied its own queryVector (nothing was embedded)
- * @param {object} settings - VectFox settings (for provider + model names)
+ * @param {object} settings - VectTauri settings (for provider + model names)
  * @param {string} [label] - call site, e.g. 'hybrid-query'
  * @returns {boolean} true when the call was slow enough to log
  */
@@ -117,7 +117,7 @@ export function warnIfEmbeddingSlow(embedMs, settings, label = 'query') {
     const budgetSeconds = (resolveRetrievalTimeoutMs(settings) / 1000).toFixed(1);
 
     log.warn(
-        `[VectFox] Slow embedding: ${modelLabel} took ${seconds}s to embed the ${label} text. ` +
+        `[VectTauri] Slow embedding: ${modelLabel} took ${seconds}s to embed the ${label} text. ` +
         `The vector database is NOT the bottleneck — it answers in ~20ms. Semantic retrieval is ` +
         `dropped when embedding exceeds ${budgetSeconds}s, so a provider this slow makes retrieval intermittent. ` +
         `Consider a faster embedding model or a locally hosted one, or raise "Retrieval Timeout" in the Core tab.`,

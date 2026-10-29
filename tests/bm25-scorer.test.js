@@ -15,7 +15,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // (a SillyTavern host path that doesn't resolve under vitest). Mock it so the
 // module graph loads. See tests/hybrid-search.test.js for the same pattern.
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     getContext: vi.fn(() => ({ chat: [], characterId: null })),
 }));
 

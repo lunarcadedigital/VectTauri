@@ -12,7 +12,7 @@
  *
  * Based on research showing BM25+ outperforms standard BM25 for long documents.
  *
- * @version 2.0.0
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -58,7 +58,7 @@ let tinySegmenterInstance = null;
  */
 function setCjkTokenizerMode(mode) {
     if (!Object.values(CJK_TOKENIZER_MODES).includes(mode)) {
-        log.warn(`[VectFox CJK] Unknown tokenizer mode "${mode}", falling back to ${DEFAULT_CJK_TOKENIZER_MODE}`);
+        log.warn(`[VectTauri CJK] Unknown tokenizer mode "${mode}", falling back to ${DEFAULT_CJK_TOKENIZER_MODE}`);
         cjkTokenizerMode = DEFAULT_CJK_TOKENIZER_MODE;
         return;
     }
@@ -90,13 +90,13 @@ async function ensureJiebaTokenizerLoaded() {
                 await mod.default();
             }
             if (typeof mod.cut !== 'function') {
-                log.warn('[VectFox CJK] Jieba module loaded but cut() is unavailable');
+                log.warn('[VectTauri CJK] Jieba module loaded but cut() is unavailable');
                 return false;
             }
             jiebaCutFunction = mod.cut;
             return true;
         } catch (error) {
-            log.warn('[VectFox CJK] Failed to load Jieba WASM tokenizer:', error?.message || error);
+            log.warn('[VectTauri CJK] Failed to load Jieba WASM tokenizer:', error?.message || error);
             return false;
         }
     })();
@@ -132,10 +132,10 @@ async function ensureJiebaTwLoaded() {
             stage = `WASM module import (${JIEBA_TW_WASM_MODULE_URL})`;
             const tModStart = _now();
             const mod = await import(JIEBA_TW_WASM_MODULE_URL);
-            log.lifecycle(`[VectFox CJK] Jieba TW: WASM module imported in ${_ms(tModStart)}ms`);
+            log.lifecycle(`[VectTauri CJK] Jieba TW: WASM module imported in ${_ms(tModStart)}ms`);
 
             if (typeof mod.default !== 'function') {
-                log.warn('[VectFox CJK] Jieba TW module loaded but init() is unavailable');
+                log.warn('[VectTauri CJK] Jieba TW module loaded but init() is unavailable');
                 return false;
             }
 
@@ -143,10 +143,10 @@ async function ensureJiebaTwLoaded() {
             stage = `WASM binary init (${JIEBA_TW_WASM_BINARY_URL})`;
             const tWasmStart = _now();
             await mod.default({ module_or_path: JIEBA_TW_WASM_BINARY_URL });
-            log.lifecycle(`[VectFox CJK] Jieba TW: WASM binary initialized in ${_ms(tWasmStart)}ms`);
+            log.lifecycle(`[VectTauri CJK] Jieba TW: WASM binary initialized in ${_ms(tWasmStart)}ms`);
 
             if (typeof mod.with_dict !== 'function' || typeof mod.cut !== 'function') {
-                log.warn('[VectFox CJK] Jieba TW module missing with_dict() or cut()');
+                log.warn('[VectTauri CJK] Jieba TW module missing with_dict() or cut()');
                 return false;
             }
 
@@ -155,10 +155,10 @@ async function ensureJiebaTwLoaded() {
             // CDN is obvious from the log alone.
             stage = `dict fetch (${JIEBA_TW_DICT_URL})`;
             const tFetchStart = _now();
-            log.lifecycle(`[VectFox CJK] Jieba TW: fetching TW dictionary from ${JIEBA_TW_DICT_URL} (30s timeout)…`);
+            log.lifecycle(`[VectTauri CJK] Jieba TW: fetching TW dictionary from ${JIEBA_TW_DICT_URL} (30s timeout)…`);
             const resp = await fetch(JIEBA_TW_DICT_URL, { signal: AbortSignal.timeout(30000) });
             if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
-            log.lifecycle(`[VectFox CJK] Jieba TW: dict HTTP response in ${_ms(tFetchStart)}ms (status=${resp.status})`);
+            log.lifecycle(`[VectTauri CJK] Jieba TW: dict HTTP response in ${_ms(tFetchStart)}ms (status=${resp.status})`);
 
             // Stage 4 — read the response body (streaming download time goes
             // here on slow networks; the HTTP status above can return quickly
@@ -166,16 +166,16 @@ async function ensureJiebaTwLoaded() {
             stage = 'dict body read';
             const tBodyStart = _now();
             const dictText = await resp.text();
-            log.lifecycle(`[VectFox CJK] Jieba TW: dict body read in ${_ms(tBodyStart)}ms (${dictText.length.toLocaleString()} chars)`);
+            log.lifecycle(`[VectTauri CJK] Jieba TW: dict body read in ${_ms(tBodyStart)}ms (${dictText.length.toLocaleString()} chars)`);
 
             // Stage 5 — apply dict to the loaded WASM tokenizer
             stage = 'with_dict() apply';
             const tApplyStart = _now();
             mod.with_dict(dictText);
-            log.lifecycle(`[VectFox CJK] Jieba TW: with_dict() applied in ${_ms(tApplyStart)}ms`);
+            log.lifecycle(`[VectTauri CJK] Jieba TW: with_dict() applied in ${_ms(tApplyStart)}ms`);
 
             jiebaTwCutFunction = mod.cut;
-            log.lifecycle(`[VectFox CJK] Jieba TW tokenizer ready (total ${_ms(tStart)}ms)`);
+            log.lifecycle(`[VectTauri CJK] Jieba TW tokenizer ready (total ${_ms(tStart)}ms)`);
             return true;
         } catch (error) {
             const msg = error?.message || String(error);
@@ -185,9 +185,9 @@ async function ensureJiebaTwLoaded() {
                 // All Jieba TW assets are vendored under core/vendor/jieba/ — the
                 // loader never hits a CDN. A timeout here means the SillyTavern
                 // static file server stalled the request, not a network issue.
-                log.warn(`[VectFox CJK] Jieba TW: TIMED OUT during stage "${stage}" after ${elapsed}ms total. Falling back to Intl.Segmenter. All TW assets are served locally from core/vendor/jieba/ — a timeout here means the SillyTavern server stalled. Likely causes: (1) the Node event loop is choked by a long-running plugin request (e.g. a large chunk import or corpus-stats scan); (2) browser cache / Service Worker interference — try a hard reload (Ctrl+Shift+R); (3) endpoint security software intercepting the file read.`);
+                log.warn(`[VectTauri CJK] Jieba TW: TIMED OUT during stage "${stage}" after ${elapsed}ms total. Falling back to Intl.Segmenter. All TW assets are served locally from core/vendor/jieba/ — a timeout here means the SillyTavern server stalled. Likely causes: (1) the Node event loop is choked by a long-running plugin request (e.g. a large chunk import or corpus-stats scan); (2) browser cache / Service Worker interference — try a hard reload (Ctrl+Shift+R); (3) endpoint security software intercepting the file read.`);
             } else {
-                log.warn(`[VectFox CJK] Jieba TW: failed during stage "${stage}" after ${elapsed}ms total: ${msg}`);
+                log.warn(`[VectTauri CJK] Jieba TW: failed during stage "${stage}" after ${elapsed}ms total: ${msg}`);
             }
             return false;
         }
@@ -854,7 +854,7 @@ function _segmentWithJieba(span) {
             .filter(t => t.length > 0);
         return tokens.length > 0 ? tokens : null;
     } catch (error) {
-        log.warn('[VectFox CJK] Jieba tokenization failed, falling back:', error?.message || error);
+        log.warn('[VectTauri CJK] Jieba tokenization failed, falling back:', error?.message || error);
         return null;
     }
 }
@@ -869,7 +869,7 @@ function _segmentWithJiebaTw(span) {
             .filter(t => t.length > 0);
         return tokens.length > 0 ? tokens : null;
     } catch (error) {
-        log.warn('[VectFox CJK] Jieba TW tokenization failed, falling back:', error?.message || error);
+        log.warn('[VectTauri CJK] Jieba TW tokenization failed, falling back:', error?.message || error);
         return null;
     }
 }
@@ -883,7 +883,7 @@ function _segmentWithTinySegmenter(span) {
             .filter(t => t.length > 0);
         return tokens.length > 0 ? tokens : null;
     } catch (error) {
-        log.warn('[VectFox CJK] TinySegmenter failed, falling back:', error?.message || error);
+        log.warn('[VectTauri CJK] TinySegmenter failed, falling back:', error?.message || error);
         return null;
     }
 }

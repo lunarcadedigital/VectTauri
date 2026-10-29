@@ -1,7 +1,7 @@
 /**
  * Generation interceptor (rearrangeChat) — prompt clearing and the master switch.
  *
- * ST keeps every extension prompt until it is overwritten, so any VectFox block the
+ * ST keeps every extension prompt until it is overwritten, so any VectTauri block the
  * interceptor does not clear keeps reaching the model on later generations. These
  * tests lock in that each live generation first empties every block the interceptor
  * owns (chunks, its per-position variants, EventBase, Summarizer), and that with the
@@ -41,7 +41,7 @@ vi.mock('../../../../../script.js', () => ({
     extension_prompts: mocks.extensionPrompts,
     getRequestHeaders: vi.fn(() => ({})),
 }));
-vi.mock('../../../../extensions.js', () => ({ getContext: vi.fn(() => ({ chat: [] })), extension_settings: { vectfox: {} } }));
+vi.mock('../../../../extensions.js', () => ({ getContext: vi.fn(() => ({ chat: [] })), extension_settings: { vecttauri: {} } }));
 vi.mock('../../../../utils.js', () => ({ getStringHash: vi.fn(() => 1) }));
 vi.mock('../core/chunking.js', () => ({ isUnitStrategy: vi.fn() }));
 vi.mock('../core/keyword-boost.js', () => ({ extractChatKeywords: vi.fn(), extractBM25Keywords: vi.fn() }));
@@ -73,17 +73,17 @@ import { clearInterceptorPrompts, rearrangeChat } from '../core/chat-vectorizati
 /** Blocks left over from a previous generation, plus two the interceptor must not touch. */
 function seedPreviousGeneration() {
     Object.assign(mocks.extensionPrompts, {
-        '3_vectfox': { value: 'chunks' },
-        '3_vectfox_pos0': { value: 'chunks at position 0' },
-        '3_vectfox_pos12': { value: 'chunks at position 12' },
-        '3_vectfox_eventbase': { value: '<VectFoxMemory>events</VectFoxMemory>' },
-        '3_vectfox_summarizer': { value: '<VectFoxSummarizer>recent</VectFoxSummarizer>' },
-        '3_vectfox_lorebook': { value: '<VectFoxLorebook>lore</VectFoxLorebook>' },
+        '3_vecttauri': { value: 'chunks' },
+        '3_vecttauri_pos0': { value: 'chunks at position 0' },
+        '3_vecttauri_pos12': { value: 'chunks at position 12' },
+        '3_vecttauri_eventbase': { value: '<VectTauriMemory>events</VectTauriMemory>' },
+        '3_vecttauri_summarizer': { value: '<VectTauriSummarizer>recent</VectTauriSummarizer>' },
+        '3_vecttauri_lorebook': { value: '<VectTauriLorebook>lore</VectTauriLorebook>' },
         '1_memory': { value: 'another extension' },
     });
 }
 
-const INTERCEPTOR_TAGS = ['3_vectfox', '3_vectfox_pos0', '3_vectfox_pos12', '3_vectfox_eventbase', '3_vectfox_summarizer'];
+const INTERCEPTOR_TAGS = ['3_vecttauri', '3_vecttauri_pos0', '3_vecttauri_pos12', '3_vecttauri_eventbase', '3_vecttauri_summarizer'];
 const valueOf = (tag) => mocks.extensionPrompts[tag].value;
 const CHAT = [{ mes: 'Where did we leave the map?', is_user: true }];
 
@@ -101,7 +101,7 @@ describe('clearInterceptorPrompts', () => {
 
     it('leaves the lorebook block and other extensions alone', () => {
         clearInterceptorPrompts({ position: 1, depth: 2 });
-        expect(valueOf('3_vectfox_lorebook')).toBe('<VectFoxLorebook>lore</VectFoxLorebook>');
+        expect(valueOf('3_vecttauri_lorebook')).toBe('<VectTauriLorebook>lore</VectTauriLorebook>');
         expect(valueOf('1_memory')).toBe('another extension');
     });
 });

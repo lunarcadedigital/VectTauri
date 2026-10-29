@@ -1,7 +1,7 @@
 /**
  * eventbase-write-target.test.js — resolver split: read honors a foreign lock,
  * ingestion does not. Plus the resolver's `[EventBase][resolve]` diagnostics,
- * which a passive UI refresh while VectFox is disabled switches off.
+ * which a passive UI refresh while VectTauri is disabled switches off.
  *
  * A per-chat lock is the supported way to share an OLDER chat's EventBase with
  * the current chat so its events are retrieved here. Ingestion must not follow
@@ -32,7 +32,7 @@ vi.mock('../../../../../script.js', () => ({
     getCurrentChatId: vi.fn(() => 'chat-b.jsonl'),
 }));
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     getContext: vi.fn(() => ({ name1: 'Rabbit', name2: 'Kagami', chat: [] })),
 }));
 vi.mock('../core/core-vector-api.js', () => ({
@@ -43,7 +43,7 @@ vi.mock('../core/collection-ids.js', () => ({
     getChatUUID: vi.fn(() => CHAT_B_UUID),
     buildEventBaseCollectionId: vi.fn(),
     getRegistryBackend: vi.fn(() => 'qdrant'),
-    COLLECTION_PREFIXES: { VECTFOX_EVENTBASE: 'vf_eventbase_' },
+    COLLECTION_PREFIXES: { VECTTAURI_EVENTBASE: 'vf_eventbase_' },
     parseRegistryKey: vi.fn(),
     buildChatSearchPatterns: vi.fn((_chatId, uuid) => [String(uuid).toLowerCase()]),
     matchesPatterns: vi.fn((id, patterns) =>

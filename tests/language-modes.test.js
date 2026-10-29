@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from 'vitest';
 // bm25-scorer.js (transitively imported by some helpers) pulls in log.js which
 // references the SillyTavern host path. Mock it so the module graph loads.
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     getContext: vi.fn(() => ({ chat: [], characterId: null })),
 }));
 
@@ -137,7 +137,7 @@ describe('Back-compat: extractQueryKeywords without mode', () => {
 describe('English stop-word baseline in tokenize()', () => {
     it('world and within are still filtered in default (intl) mode', async () => {
         vi.mock('../../../../extensions.js', () => ({
-            extension_settings: { vectfox: {} },
+            extension_settings: { vecttauri: {} },
             getContext: vi.fn(() => ({ chat: [], characterId: null })),
         }));
         const { tokenize } = await import('../core/bm25-scorer.js');
@@ -181,7 +181,7 @@ describe('W2 — Indic combining-mark fix (LATIN_TOKEN_RE / NON_WORD_RE)', () =>
 // PURPOSE: verify that a language NOT (yet) defined in the Core-tab "CJK Tokenizer
 // Mode" dropdown still routes to a correct, safe setting — it must keep working,
 // just without the optional stop-word polish. No expected values are hardcoded; we
-// hand VectFox 8 strings and print back exactly what its real, shipped functions
+// hand VectTauri 8 strings and print back exactly what its real, shipped functions
 // return, so you can read off what it does with each.
 //
 // WHY MOST OF THESE REPORT locale === 'und' — AND WHY THAT'S CORRECT, NOT A BUG:
@@ -196,11 +196,11 @@ describe('W2 — Indic combining-mark fix (LATIN_TOKEN_RE / NON_WORD_RE)', () =>
 //     the W2 Indic fix), and the DENSE/semantic vector still captures meaning (it never
 //     used stop-words at all). Stop-word lists are a PURELY ADDITIVE enhancement that
 //     filters junk function words; their absence is mild keyword noise, never breakage.
-//     So VectFox is already effective on every one of these languages today.
+//     So VectTauri is already effective on every one of these languages today.
 //   • A language only "lights up" its own locale + stop list once someone adds its
 //     dropdown mode + list (plan "add a language" recipe). Until then: 'und'/en baseline.
 //
-// What VectFox derives FROM THE TEXT (the only auto-detection):
+// What VectTauri derives FROM THE TEXT (the only auto-detection):
 //   • localeForSpan(text) → script→locale (ja, zh, ko, th, …, or 'und' for Latin/Indic)
 //   • getSegmenter(text)  → the Intl.Segmenter it resolves for a segmented span
 //   • CJK_CHAR_RE.test()  → is this a segmented (no inter-word space) script?
@@ -217,7 +217,7 @@ const SAMPLES = [
     ['Indian (Hindi)',      'बहादुर योद्धा ने ड्रैगन से युद्ध किया'],
     ['Traditional Chinese', '勇敢的戰士與惡龍戰鬥'],
     ['Japanese',            '勇敢な戦士がドラゴンと戦った'],
-    // Thai: a NO-SPACE (segmented) script that VectFox's script detection DOES recognize
+    // Thai: a NO-SPACE (segmented) script that VectTauri's script detection DOES recognize
     // (→ locale 'th' + an Intl.Segmenter('th')), yet has NO stop-word list defined. This is
     // the distinct "segmented + segmenter resolves + no stoplist" quadrant — proof that even
     // a no-space, undefined-in-dropdown language still tokenizes (real segmenter) and searches
@@ -228,9 +228,9 @@ const SAMPLES = [
 describe('Language probe — undefined-in-dropdown languages fall back to a safe setting', () => {
     for (const [label, text] of SAMPLES) {
         it(label, () => {
-            // Everything below comes straight from VectFox's own functions.
+            // Everything below comes straight from VectTauri's own functions.
             const segmented = CJK_CHAR_RE.test(text);                  // segmented (no-space) script?
-            const locale = localeForSpan(text);                        // VectFox text→locale detection
+            const locale = localeForSpan(text);                        // VectTauri text→locale detection
             // getSegmenter is only used on segmented spans in the real pipeline; Latin/Indic
             // text never reaches it (it goes through the \p{L}\p{M} regex), so only probe it
             // for segmented scripts to mirror real usage.
@@ -251,7 +251,7 @@ describe('Language probe — undefined-in-dropdown languages fall back to a safe
                 `\n[${label}]  "${text}"\n` +
                 `   • segmented (no-space) script : ${segmented}\n` +
                 `   • locale detected             : ${locale}${segmented ? '' : "   ('und' = undefined-in-dropdown → intentional, valid, en-baseline fallback)"}\n` +
-                `   • tokenizer VectFox would use : ${tokenizer}\n` +
+                `   • tokenizer VectTauri would use : ${tokenizer}\n` +
                 `   • stop-word list for locale   : ${stopForLocale}`
             );
 

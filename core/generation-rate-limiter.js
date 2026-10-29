@@ -23,9 +23,9 @@ import { DynamicRateLimiter } from './core-vector-api.js';
 export const generationRateLimiter = new DynamicRateLimiter();
 
 /**
- * Map VectFox's `generation_*` keys onto the generic keys `DynamicRateLimiter`
+ * Map VectTauri's `generation_*` keys onto the generic keys `DynamicRateLimiter`
  * reads, so the limiter class stays unaware of our setting names.
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {{rate_limit_calls: number, rate_limit_interval: number}}
  */
 export function generationRateLimitSettings(settings) {

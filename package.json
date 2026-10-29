@@ -1,7 +1,7 @@
 {
-  "name": "vectfox-tests",
+  "name": "vecttauri-tests",
   "version": "1.0.0",
-  "description": "Automated tests for VectFox RAG extension",
+  "description": "Automated tests for VectTauri RAG extension",
   "type": "module",
   "scripts": {
     "test": "vitest run",

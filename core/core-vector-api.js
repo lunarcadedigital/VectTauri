@@ -18,7 +18,7 @@
  * - purgeAllVectorIndexes() - DELETE all collections
  * - purgeFileVectorIndex() - DELETE file-specific collection
  *
- * @author Base: Cohee#1207 | VectFox: Backend abstraction
+ * @author Base: Cohee#1207 | VectTauri: Backend abstraction (ported by Lunarcade Digital)
  * ============================================================================
  */
 
@@ -141,7 +141,7 @@ export class DynamicRateLimiter {
             const waitTime = (oldest + intervalMs) - now;
 
             if (waitTime > 0) {
-                log.verbose(`VectFox: Rate limit reached${label ? ` [${label}]` : ''}. Waiting ${Math.round(waitTime / 1000)}s...`);
+                log.verbose(`VectTauri: Rate limit reached${label ? ` [${label}]` : ''}. Waiting ${Math.round(waitTime / 1000)}s...`);
                 await AsyncUtils.sleep(waitTime + 100); // Add small buffer
             }
 
@@ -267,8 +267,8 @@ export async function callWithHedge(fn, thresholdMs, maxHedges, ctx) {
             }
             if (debugOn) {
                 log.warn(isEarly
-                    ? `VectFox: hedge ${i}/${maxHedges} firing early — batch ${batchIdx}/${totalBatches} via ${provider} (previous attempt FAILED; not waiting for t=${(i * thresholdMs) / 1000}s)`
-                    : `VectFox: hedge ${i}/${maxHedges} firing at t=${(i * thresholdMs) / 1000}s — batch ${batchIdx}/${totalBatches} via ${provider} (previous attempt still running)`);
+                    ? `VectTauri: hedge ${i}/${maxHedges} firing early — batch ${batchIdx}/${totalBatches} via ${provider} (previous attempt FAILED; not waiting for t=${(i * thresholdMs) / 1000}s)`
+                    : `VectTauri: hedge ${i}/${maxHedges} firing at t=${(i * thresholdMs) / 1000}s — batch ${batchIdx}/${totalBatches} via ${provider} (previous attempt still running)`);
             }
             fire(i);
         };
@@ -283,10 +283,10 @@ export async function callWithHedge(fn, thresholdMs, maxHedges, ctx) {
                     if (attemptIdx > 0) {
                         // A hedge (not the primary) won — recovered-from anomaly.
                         const elapsed = ((performance.now() - start) / 1000).toFixed(1);
-                        log.warn(`VectFox: hedge — ${label(attemptIdx)} WON for batch ${batchIdx}/${totalBatches} via ${provider} after ${elapsed}s (${describeHedgeCause(attemptIdx)})`);
+                        log.warn(`VectTauri: hedge — ${label(attemptIdx)} WON for batch ${batchIdx}/${totalBatches} via ${provider} after ${elapsed}s (${describeHedgeCause(attemptIdx)})`);
                     } else {
                         const elapsed = ((performance.now() - start) / 1000).toFixed(1);
-                        log.lifecycle(`VectFox: hedge — primary WON for batch ${batchIdx}/${totalBatches} via ${provider} after ${elapsed}s`);
+                        log.lifecycle(`VectTauri: hedge — primary WON for batch ${batchIdx}/${totalBatches} via ${provider} after ${elapsed}s`);
                     }
                     settle('ok', r);
                 },
@@ -296,7 +296,7 @@ export async function callWithHedge(fn, thresholdMs, maxHedges, ctx) {
                     errors.push({ attemptIdx, error: e, elapsed });
                     if (debugOn && !settled) {
                         log.warn(
-                            `VectFox: hedge — ${label(attemptIdx)} FAILED after ${elapsed}s for batch ${batchIdx}/${totalBatches} — ${e?.name || 'Error'}: ${e?.message || e}`,
+                            `VectTauri: hedge — ${label(attemptIdx)} FAILED after ${elapsed}s for batch ${batchIdx}/${totalBatches} — ${e?.name || 'Error'}: ${e?.message || e}`,
                         );
                     }
                     // Abort short-circuit: user pressed Stop, every future hedge would
@@ -412,7 +412,7 @@ function stripFormatting(text) {
 /**
  * Gets common body parameters for vector requests.
  * @param {object} args Additional arguments
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @returns {object} Request body
  */
 export function getVectorsRequestBody(args = {}, settings) {
@@ -457,7 +457,7 @@ export function getVectorsRequestBody(args = {}, settings) {
  * Gets additional arguments for embeddings.
  * For client-side providers (webllm, koboldcpp), this generates embeddings.
  * @param {string[]} items Items to embed
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @param {Function} onProgress - Optional callback (embedded, total) => void for progress updates
  * @returns {Promise<object>} Additional arguments
  */
@@ -474,7 +474,7 @@ export async function getAdditionalArgs(items, settings, onProgress = null) {
  * Creates WebLLM embeddings for a list of items.
  * Wrapped with retry and timeout for robustness.
  * @param {string[]} items Items to embed
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @returns {Promise<Record<string, number[]>>} Calculated embeddings
  */
 async function createWebLlmEmbeddings(items, settings) {
@@ -483,7 +483,7 @@ async function createWebLlmEmbeddings(items, settings) {
     }
 
     if (!isWebLlmSupported()) {
-        throw new Error('VectFox: WebLLM is not supported', { cause: 'webllm_not_supported' });
+        throw new Error('VectTauri: WebLLM is not supported', { cause: 'webllm_not_supported' });
     }
 
     // Clean text before embedding
@@ -502,7 +502,7 @@ async function createWebLlmEmbeddings(items, settings) {
     }, {
         ...RETRY_CONFIG,
         onRetry: (attempt, error) => {
-            log.warn(`VectFox: WebLLM embedding retry ${attempt} - ${error.message}`);
+            log.warn(`VectTauri: WebLLM embedding retry ${attempt} - ${error.message}`);
         }
     });
 }
@@ -511,7 +511,7 @@ async function createWebLlmEmbeddings(items, settings) {
  * Creates KoboldCpp embeddings for a list of items.
  * Wrapped with retry and rate limiting for robustness.
  * @param {string[]} items Items to embed
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @param {Function} onProgress - Optional callback (embedded, total) => void for progress updates
  * @returns {Promise<{embeddings: Record<string, number[]>, model: string}>} Calculated embeddings
  */
@@ -551,7 +551,7 @@ async function createKoboldCppEmbeddings(items, settings, onProgress = null) {
                 if (!response.ok) {
                     // Try legacy endpoint if v1 fails (fallback)
                     if (response.status === 404) {
-                        log.warn('VectFox: KoboldCpp /v1/embeddings not found, trying legacy endpoint...');
+                        log.warn('VectTauri: KoboldCpp /v1/embeddings not found, trying legacy endpoint...');
                         // Fallthrough to retry or handle legacy?
                         // Better to throw specific error so we can potentially retry with legacy logic if we wanted,
                         // but for now let's stick to the directive of using OpenAI compatible endpoint.
@@ -586,7 +586,7 @@ async function createKoboldCppEmbeddings(items, settings, onProgress = null) {
             }, {
                 ...RETRY_CONFIG,
                 onRetry: (attempt, error) => {
-                    log.warn(`VectFox: KoboldCpp embedding retry ${attempt} - ${error.message}`);
+                    log.warn(`VectTauri: KoboldCpp embedding retry ${attempt} - ${error.message}`);
                 }
             });
         }, settings);
@@ -611,14 +611,14 @@ async function createKoboldCppEmbeddings(items, settings, onProgress = null) {
 
 /**
  * Throws an error if the source is invalid (missing API key or URL, or missing module)
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  */
 export function throwIfSourceInvalid(settings) {
     const source = settings.embedding_provider;
     const config = getProviderConfig(source);
 
     if (!config) {
-        throw new Error(`VectFox: Unknown provider ${source}`, { cause: 'unknown_provider' });
+        throw new Error(`VectTauri: Unknown provider ${source}`, { cause: 'unknown_provider' });
     }
 
     // Check API key requirement
@@ -629,7 +629,7 @@ export function throwIfSourceInvalid(settings) {
             if (source === 'vertexai' && secret_state['VERTEXAI_SERVICE_ACCOUNT']) {
                 // Service account auth is available, continue
             } else {
-                throw new Error('VectFox: API key missing', { cause: 'api_key_missing' });
+                throw new Error('VectTauri: API key missing', { cause: 'api_key_missing' });
             }
         }
     }
@@ -639,7 +639,7 @@ export function throwIfSourceInvalid(settings) {
     // so an empty result means nothing is configured for this provider.
     if (requiresUrl(source)) {
         if (!resolveProviderApiUrl(settings, source)) {
-            throw new Error('VectFox: API URL missing', { cause: 'api_url_missing' });
+            throw new Error('VectTauri: API URL missing', { cause: 'api_url_missing' });
         }
     }
 
@@ -647,25 +647,25 @@ export function throwIfSourceInvalid(settings) {
     if (config.requiresModel) {
         const modelField = getModelField(source);
         if (modelField && !settings[modelField]) {
-            throw new Error('VectFox: API model missing', { cause: 'api_model_missing' });
+            throw new Error('VectTauri: API model missing', { cause: 'api_model_missing' });
         }
     }
 
     // Special case: extras requires embeddings module
     if (source === 'extras' && !modules.includes('embeddings')) {
-        throw new Error('VectFox: Embeddings module missing', { cause: 'extras_module_missing' });
+        throw new Error('VectTauri: Embeddings module missing', { cause: 'extras_module_missing' });
     }
 
     // Special case: WebLLM requires browser support
     if (source === 'webllm' && !isWebLlmSupported()) {
-        throw new Error('VectFox: WebLLM is not supported', { cause: 'webllm_not_supported' });
+        throw new Error('VectTauri: WebLLM is not supported', { cause: 'webllm_not_supported' });
     }
 }
 
 /**
  * Gets the saved hashes for a collection
  * @param {string} collectionId Collection ID
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @param {boolean} includeMetadata If true, returns {hashes: [], metadata: []} instead of just hashes
  * @returns {Promise<number[]|{hashes: number[], metadata: object[]}>} Saved hashes or full data
  */
@@ -702,7 +702,7 @@ export async function getSavedHashes(collectionId, settings, includeMetadata = f
             }
         }
     } catch (error) {
-        log.warn('VectFox: Failed to get full metadata from chunks API, returning hashes only', error);
+        log.warn('VectTauri: Failed to get full metadata from chunks API, returning hashes only', error);
     }
 
     // Fallback: return hashes as array (old format)
@@ -715,7 +715,7 @@ export async function getSavedHashes(collectionId, settings, includeMetadata = f
  * For client-side embedding sources (webllm, koboldcpp), generates embeddings first.
  * @param {string} collectionId - The collection to insert into
  * @param {{ hash: number, text: string }[]} items - The items to insert
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @param {Function} onProgress - Optional callback (embedded, total) => void for progress updates
  * @returns {Promise<void>}
  */
@@ -728,7 +728,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
     try {
         // If source requires client-side embeddings, use streaming approach
         if (clientSideEmbeddingSources.includes(settings.embedding_provider)) {
-            log.lifecycle(`VectFox: Streaming embeddings and writing for ${settings.embedding_provider}...`);
+            log.lifecycle(`VectTauri: Streaming embeddings and writing for ${settings.embedding_provider}...`);
 
             // Extract text strings - getAdditionalArgs expects string[], not objects
             const textStrings = items.map(item => {
@@ -776,7 +776,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
             const BATCH_SIZE = (isLocalGpuSource || shouldParallelSplit) ? 1 : configuredBatchSize;
             const batches = chunkArray(items, BATCH_SIZE);
 
-            log.verbose(`VectFox: Processing ${items.length} items in ${batches.length} batch(es) of up to ${BATCH_SIZE}${hasRateLimit ? ` with rate limit (Max ${settings.rate_limit_calls} calls / ${settings.rate_limit_interval}s)` : ''}${shouldParallelSplit ? ` [parallel-split: ${batches.length} concurrent POSTs in waves of up to 16]` : ''}`);
+            log.verbose(`VectTauri: Processing ${items.length} items in ${batches.length} batch(es) of up to ${BATCH_SIZE}${hasRateLimit ? ` with rate limit (Max ${settings.rate_limit_calls} calls / ${settings.rate_limit_interval}s)` : ''}${shouldParallelSplit ? ` [parallel-split: ${batches.length} concurrent POSTs in waves of up to 16]` : ''}`);
 
             if (abortSignal?.aborted) throw Object.assign(new Error('Vectorization stopped by user'), { name: 'AbortError' });
 
@@ -794,7 +794,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
             const hedgeAfterMs = hedgeEnabled ? rawHedgeAfterMs : 0;
 
             if (hedgeEnabled) {
-                log.lifecycle(`VectFox: hedge enabled — threshold ${hedgeAfterMs}ms, max ${HEDGE_MAX_COUNT} hedges, total budget ${((HEDGE_MAX_COUNT + 1) * hedgeAfterMs) / 1000}s per insert call`);
+                log.lifecycle(`VectTauri: hedge enabled — threshold ${hedgeAfterMs}ms, max ${HEDGE_MAX_COUNT} hedges, total budget ${((HEDGE_MAX_COUNT + 1) * hedgeAfterMs) / 1000}s per insert call`);
             }
 
             // Factored-out per-batch retry+log closure shared by serial and parallel paths.
@@ -808,7 +808,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
                     const attemptStart = performance.now();
                     const debugOn = log.enabled('verbose');
                     log.verbose(
-                        `VectFox: insert batch ${batchIdx}/${batches.length} attempt ${attemptCount}/${RETRY_CONFIG.maxAttempts} — POST ${batchItemCount} item(s) via ${settings.embedding_provider}${hedgeEnabled ? ' [hedge armed]' : ''}`,
+                        `VectTauri: insert batch ${batchIdx}/${batches.length} attempt ${attemptCount}/${RETRY_CONFIG.maxAttempts} — POST ${batchItemCount} item(s) via ${settings.embedding_provider}${hedgeEnabled ? ' [hedge armed]' : ''}`,
                     );
                     try {
                         if (abortSignal?.aborted) throw Object.assign(new Error('Vectorization stopped by user'), { name: 'AbortError' });
@@ -826,7 +826,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
                         if (attemptCount > 1) {
                             const elapsed = ((performance.now() - attemptStart) / 1000).toFixed(1);
                             log.verbose(
-                                `VectFox: insert batch ${batchIdx}/${batches.length} attempt ${attemptCount} succeeded after ${elapsed}s`,
+                                `VectTauri: insert batch ${batchIdx}/${batches.length} attempt ${attemptCount} succeeded after ${elapsed}s`,
                             );
                         }
                     } catch (err) {
@@ -841,7 +841,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
                         if (debugOn) {
                             const elapsed = ((performance.now() - attemptStart) / 1000).toFixed(1);
                             log.warn(
-                                `VectFox: insert batch ${batchIdx}/${batches.length} attempt ${attemptCount}/${RETRY_CONFIG.maxAttempts} FAILED after ${elapsed}s — ${err?.name || 'Error'}: ${err?.message || err} (provider=${settings.embedding_provider}, items=${batchItemCount})`,
+                                `VectTauri: insert batch ${batchIdx}/${batches.length} attempt ${attemptCount}/${RETRY_CONFIG.maxAttempts} FAILED after ${elapsed}s — ${err?.name || 'Error'}: ${err?.message || err} (provider=${settings.embedding_provider}, items=${batchItemCount})`,
                             );
                         }
                         throw err;
@@ -879,7 +879,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
                         // truncated-JSON 500s under parallel-split + hedge concurrent load.
                         const anyHedgeFatal = failed.some(f => f.reason?.isHedgeFatal === true);
                         const composite = new Error(
-                            `VectFox: ${failed.length}/${slice.length} parallel inserts in wave failed — first failure: ${sample?.name || 'Error'}: ${sample?.message || sample}`,
+                            `VectTauri: ${failed.length}/${slice.length} parallel inserts in wave failed — first failure: ${sample?.name || 'Error'}: ${sample?.message || sample}`,
                         );
                         if (anyHedgeFatal) {
                             composite.name = 'HedgeFatalError';
@@ -936,7 +936,7 @@ async function streamEmbeddingsAndWrite(backend, collectionId, items, textString
     let totalProcessed = 0;
     const totalBatches = Math.ceil(textStrings.length / EMBEDDING_BATCH_SIZE);
 
-    log.lifecycle(`VectFox: Streaming ${items.length} items in ${totalBatches} batch(es) of up to ${EMBEDDING_BATCH_SIZE}`);
+    log.lifecycle(`VectTauri: Streaming ${items.length} items in ${totalBatches} batch(es) of up to ${EMBEDDING_BATCH_SIZE}`);
 
     // Process embeddings in batches
     for (let i = 0; i < textStrings.length; i += EMBEDDING_BATCH_SIZE) {
@@ -945,7 +945,7 @@ async function streamEmbeddingsAndWrite(backend, collectionId, items, textString
         const batchItems = items.slice(i, batchEnd);
         const batchNum = Math.floor(i / EMBEDDING_BATCH_SIZE) + 1;
 
-        log.verbose(`VectFox: Embedding batch ${batchNum}/${totalBatches} (items ${i + 1}-${batchEnd})`);
+        log.verbose(`VectTauri: Embedding batch ${batchNum}/${totalBatches} (items ${i + 1}-${batchEnd})`);
 
         // VEC-6: Retry logic per batch instead of per chunk
         let additionalArgs;
@@ -964,13 +964,13 @@ async function streamEmbeddingsAndWrite(backend, collectionId, items, textString
                 notifyConnectionError('Embedding', embedUrl, error.message);
             }
             throw Object.assign(
-                new Error(`VectFox: Failed to generate embeddings for batch ${batchNum} after retries: ${error.message}`),
+                new Error(`VectTauri: Failed to generate embeddings for batch ${batchNum} after retries: ${error.message}`),
                 { code: 'embedding_generation_failed' },
             );
         }
 
         if (!additionalArgs.embeddings) {
-            throw new Error(`VectFox: No embeddings returned from ${settings.embedding_provider} for batch ${batchNum}`);
+            throw new Error(`VectTauri: No embeddings returned from ${settings.embedding_provider} for batch ${batchNum}`);
         }
 
         // Attach embeddings to items and validate
@@ -985,7 +985,7 @@ async function streamEmbeddingsAndWrite(backend, collectionId, items, textString
                 // Validate embedding values
                 const isValidEmbedding = embedding.every(val => typeof val === 'number' && !isNaN(val));
                 if (!isValidEmbedding) {
-                    log.error(`VectFox: Invalid embedding values for item ${i + j}:`, embedding.slice(0, 5));
+                    log.error(`VectTauri: Invalid embedding values for item ${i + j}:`, embedding.slice(0, 5));
                     missingEmbeddings++;
                     continue;
                 }
@@ -993,23 +993,23 @@ async function streamEmbeddingsAndWrite(backend, collectionId, items, textString
                 itemsToWrite.push(batchItems[j]);
             } else {
                 missingEmbeddings++;
-                log.warn(`VectFox: No embedding found for item ${i + j}, text: "${text.substring(0, 50)}..."`);
+                log.warn(`VectTauri: No embedding found for item ${i + j}, text: "${text.substring(0, 50)}..."`);
             }
         }
 
         if (missingEmbeddings > 0) {
-            throw new Error(`VectFox: Failed to generate embeddings for ${settings.embedding_provider} - ${missingEmbeddings} items missing in batch`);
+            throw new Error(`VectTauri: Failed to generate embeddings for ${settings.embedding_provider} - ${missingEmbeddings} items missing in batch`);
         }
 
         // VEC-6: Write batch to database with retry logic
-        log.verbose(`VectFox: Writing batch ${batchNum} to database (${itemsToWrite.length} items)`);
+        log.verbose(`VectTauri: Writing batch ${batchNum} to database (${itemsToWrite.length} items)`);
         try {
             await AsyncUtils.retry(async () => {
                 if (abortSignal?.aborted) throw Object.assign(new Error('Vectorization stopped by user'), { name: 'AbortError' });
                 await backend.insertVectorItems(collectionId, itemsToWrite, settings, abortSignal);
             }, RETRY_CONFIG);
         } catch (error) {
-            throw new Error(`VectFox: Failed to write batch ${batchNum} to database after retries: ${error.message}`);
+            throw new Error(`VectTauri: Failed to write batch ${batchNum} to database after retries: ${error.message}`);
         }
 
         totalProcessed += itemsToWrite.length;
@@ -1021,14 +1021,14 @@ async function streamEmbeddingsAndWrite(backend, collectionId, items, textString
         }
     }
 
-    log.lifecycle(`VectFox: Completed streaming ${totalProcessed} items to database`);
+    log.lifecycle(`VectTauri: Completed streaming ${totalProcessed} items to database`);
 }
 
 /**
  * Deletes vector items from a collection
  * @param {string} collectionId - The collection to delete from
  * @param {number[]} hashes - The hashes of the items to delete
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @returns {Promise<void>}
  */
 export async function deleteVectorItems(collectionId, hashes, settings) {
@@ -1065,7 +1065,7 @@ export async function deleteVectorItems(collectionId, hashes, settings) {
  *
  * @param {object} backend - VectorBackend instance (see embedQuery)
  * @param {string} searchText - Text to embed
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {Promise<number[]|null>} The vector, or null when the backend can only
  *   embed per request (Standard without the Similharity plugin)
  */
@@ -1074,7 +1074,7 @@ export async function getQueryVector(backend, searchText, settings) {
         return await backend.embedQuery(searchText, settings);
     } catch (error) {
         if (error?.code === 'invalid_model_config') throw error;
-        log.warn(`VectFox: query embedding failed, retrying once — ${error?.message || error}`);
+        log.warn(`VectTauri: query embedding failed, retrying once — ${error?.message || error}`);
         return await backend.embedQuery(searchText, settings);
     }
 }
@@ -1086,7 +1086,7 @@ export async function getQueryVector(backend, searchText, settings) {
  * @param {string} collectionId - The collection to query
  * @param {string} searchText - The text to query
  * @param {number} topK - The number of results to return
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @param {object} [filters] - Payload filters (concepts_any also extends the keyword query)
  * @param {number[]|null} [queryVector] - The query's embedding when the caller already has
  *   it (e.g. one vector shared by several collections); otherwise embedded here
@@ -1097,7 +1097,7 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
     //   (registry-key "backend:id" or bare ID) and returns the backend label
     //   plus the BARE collectionId for downstream calls. Falls back to
     //   getBackend(settings) only when BOTH resolution paths fail, which
-    //   should never happen for a well-formed VectFox collection ID.
+    //   should never happen for a well-formed VectTauri collection ID.
     const resolved = resolveBackendForCollection(collectionId);
     const bareCollectionId = resolved.collectionId;
     const backend = resolved.backend
@@ -1118,11 +1118,11 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
                 log.verbose(`[EventBase] Embedding model (${settings.embedding_provider}) returned vector: dim=${queryVector.length}, first5=[${queryVector.slice(0, 5).map(v => v.toFixed(4)).join(', ')}], last5=[${queryVector.slice(-5).map(v => v.toFixed(4)).join(', ')}], model=${additionalArgs.model || 'n/a'}`);
             } else {
                 // VEC-35: Fallback to server-side embedding instead of failing completely
-                log.warn(`[VectFox] Client-side embedding generation returned empty result for ${settings.embedding_provider}, falling back to server-side embedding`);
+                log.warn(`[VectTauri] Client-side embedding generation returned empty result for ${settings.embedding_provider}, falling back to server-side embedding`);
             }
         } catch (clientEmbedError) {
             // VEC-35: Fallback to server-side embedding when client-side fails
-            log.warn(`[VectFox] Client-side embedding failed for ${settings.embedding_provider}: ${clientEmbedError.message}. Falling back to server-side embedding.`);
+            log.warn(`[VectTauri] Client-side embedding failed for ${settings.embedding_provider}: ${clientEmbedError.message}. Falling back to server-side embedding.`);
         }
     }
 
@@ -1134,7 +1134,7 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
     if (Array.isArray(filters.concepts_any) && filters.concepts_any.length > 0) {
         effectiveQuery = `${searchText} ${filters.concepts_any.join(' ')}`;
         if (log.enabled('lifecycle')) {
-            log.verbose(`[VectFox] concepts_any appended to query text: [${filters.concepts_any.join(', ')}]`);
+            log.verbose(`[VectTauri] concepts_any appended to query text: [${filters.concepts_any.join(', ')}]`);
         }
     }
 
@@ -1166,7 +1166,7 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
     if (useHybridPath) {
         if (log.enabled('lifecycle')) {
             const reason = nativeHybridAvailable && preferNative ? 'native' : 'client-side';
-            log.verbose(`[VectFox] Hybrid search (${reason}), dispatching to hybrid search module`);
+            log.verbose(`[VectTauri] Hybrid search (${reason}), dispatching to hybrid search module`);
         }
         const queryStart = Date.now();
         try {
@@ -1176,7 +1176,7 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
             if (log.enabled('lifecycle')) {
                 const scores = (result.metadata || []).map(m => (m.score ?? 0).toFixed(4));
                 const fusionMethod = (settings.hybrid_fusion_method || 'rrf').toUpperCase();
-                log.verbose(`[VectFox] Hybrid search (${fusionMethod}) response: ${result.hashes?.length ?? 0} result(s) in ${queryLatency}ms, scores=[${scores.join(', ')}]`);
+                log.verbose(`[VectTauri] Hybrid search (${fusionMethod}) response: ${result.hashes?.length ?? 0} result(s) in ${queryLatency}ms, scores=[${scores.join(', ')}]`);
             }
             return result;
         } catch (error) {
@@ -1187,7 +1187,7 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
 
     // Standard vector search flow (A1/A2). Filters are not supported here.
     if (Object.keys(filters).length > 0 && log.enabled('lifecycle')) {
-        log.warn('[VectFox] queryCollection: filters ignored on A1/A2 Standard backend path');
+        log.warn('[VectTauri] queryCollection: filters ignored on A1/A2 Standard backend path');
     }
     // Overfetch to allow keyword-boosted chunks to surface
     const overfetchAmount = getOverfetchAmount(topK);
@@ -1221,7 +1221,7 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
     if (log.enabled('trace')) {
         const idfMode = settings.bm25_use_corpus_idf ? 'corpus-IDF' : 'local-IDF';
         finalResults.forEach((r, i) => {
-            log.trace(`[VectFox] #${i + 1} final=${r.score?.toFixed(4)} vector=${r.vectorScore?.toFixed(4) ?? 'n/a'} bm25=${r.bm25Score?.toFixed(4) ?? 'n/a'} (A1 BM25 re-rank, ${idfMode})`);
+            log.trace(`[VectTauri] #${i + 1} final=${r.score?.toFixed(4)} vector=${r.vectorScore?.toFixed(4) ?? 'n/a'} bm25=${r.bm25Score?.toFixed(4) ?? 'n/a'} (A1 BM25 re-rank, ${idfMode})`);
         });
     }
 
@@ -1272,10 +1272,10 @@ async function scoreResults(resultsForBoost, searchText, topK, settings, collect
             const mod = await import('./corpus-stats.js');
             corpusStats = await mod.getCorpusStats(collectionId, settings);
             if (!corpusStats && log.enabled('lifecycle')) {
-                log.warn(`[VectFox] Corpus-IDF disabled for ${collectionId}: getCorpusStats returned null (plugin unavailable or /chunks/list failed). Falling back to local-IDF BM25.`);
+                log.warn(`[VectTauri] Corpus-IDF disabled for ${collectionId}: getCorpusStats returned null (plugin unavailable or /chunks/list failed). Falling back to local-IDF BM25.`);
             }
         } catch (err) {
-            log.warn(`[VectFox] Corpus-IDF unavailable for ${collectionId}, falling back to local-IDF BM25. Reason: ${err?.message || err}`);
+            log.warn(`[VectTauri] Corpus-IDF unavailable for ${collectionId}, falling back to local-IDF BM25. Reason: ${err?.message || err}`);
             corpusStats = null;
         }
     }
@@ -1298,7 +1298,7 @@ async function scoreResults(resultsForBoost, searchText, topK, settings, collect
  * @param {string} searchText - Text to query
  * @param {number} topK - Number of results to return
  * @param {number} threshold - Score threshold
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @returns {Promise<Record<string, { hashes: number[], metadata: object[] }>>} - Results mapped to collection IDs
  */
 export async function queryMultipleCollections(collectionIds, searchText, topK, threshold, settings) {
@@ -1318,11 +1318,11 @@ export async function queryMultipleCollections(collectionIds, searchText, topK, 
                 queryVector = additionalArgs.embeddings[searchText];
             } else {
                 // VEC-35: Fallback to server-side embedding instead of failing completely
-                log.warn(`[VectFox] Client-side embedding generation returned empty result for ${settings.embedding_provider}, falling back to server-side embedding`);
+                log.warn(`[VectTauri] Client-side embedding generation returned empty result for ${settings.embedding_provider}, falling back to server-side embedding`);
             }
         } catch (clientEmbedError) {
             // VEC-35: Fallback to server-side embedding when client-side fails
-            log.warn(`[VectFox] Client-side embedding failed for ${settings.embedding_provider}: ${clientEmbedError.message}. Falling back to server-side embedding.`);
+            log.warn(`[VectTauri] Client-side embedding failed for ${settings.embedding_provider}: ${clientEmbedError.message}. Falling back to server-side embedding.`);
         }
     }
 
@@ -1336,7 +1336,7 @@ export async function queryMultipleCollections(collectionIds, searchText, topK, 
     if (useHybridPath) {
         if (log.enabled('lifecycle')) {
             const reason = nativeHybridAvailable && preferNative ? 'native' : 'client-side';
-            log.verbose(`[VectFox] Hybrid search (${reason}) for multi-collection query`);
+            log.verbose(`[VectTauri] Hybrid search (${reason}) for multi-collection query`);
         }
         const processedResults = {};
         for (const collectionId of collectionIds) {
@@ -1346,7 +1346,7 @@ export async function queryMultipleCollections(collectionIds, searchText, topK, 
                 const queryLatency = Date.now() - queryStart;
                 recordQuery(settings?.vector_backend || 'standard', queryLatency);
             } catch (error) {
-                log.warn(`[VectFox] Hybrid search failed for ${collectionId}:`, error.message);
+                log.warn(`[VectTauri] Hybrid search failed for ${collectionId}:`, error.message);
                 recordError(settings?.vector_backend || 'standard', error);
                 processedResults[collectionId] = { hashes: [], metadata: [] };
             }
@@ -1418,7 +1418,7 @@ export async function queryMultipleCollections(collectionIds, searchText, topK, 
  * @param {string} searchText - Text to query
  * @param {number} topK - Number of results to return
  * @param {number} threshold - Score threshold
- * @param {object} settings - VectFox settings object
+ * @param {object} settings - VectTauri settings object
  * @param {object} context - Search context (from buildSearchContext)
  * @returns {Promise<Record<string, { hashes: number[], metadata: object[] }>>} - Results mapped to collection IDs
  */
@@ -1430,7 +1430,7 @@ export async function queryActiveCollections(collectionIds, searchText, topK, th
     const activeCollectionIds = await filterActiveCollections(collectionIds, context);
 
     if (activeCollectionIds.length === 0) {
-        log.lifecycle('VectFox: No collections passed activation conditions');
+        log.lifecycle('VectTauri: No collections passed activation conditions');
         return {};
     }
 
@@ -1442,21 +1442,21 @@ export async function queryActiveCollections(collectionIds, searchText, topK, th
 /**
  * Purges the vector index for a collection.
  * @param {string} collectionId Collection ID to purge
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @returns {Promise<boolean>} True if deleted, false if not
  */
 export async function purgeVectorIndex(collectionId, settings) {
     try {
         const backend = await getBackend(settings);
         await backend.purgeVectorIndex(collectionId, settings);
-        log.lifecycle(`VectFox: Purged vector index for collection ${collectionId}`);
+        log.lifecycle(`VectTauri: Purged vector index for collection ${collectionId}`);
         // Stale-stats fix: entire collection is gone.
         _invalidateCorpusStats(collectionId, 'purge');
         return true;
     } catch (error) {
         // VEC-33: Invalidate health cache on operation error
         invalidateBackendHealth(settings?.vector_backend || 'standard', error);
-        log.error('VectFox: Failed to purge', error);
+        log.error('VectTauri: Failed to purge', error);
         return false;
     }
 }
@@ -1464,37 +1464,37 @@ export async function purgeVectorIndex(collectionId, settings) {
 /**
  * Purges the vector index for a file.
  * @param {string} collectionId File collection ID to purge
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @returns {Promise<void>}
  */
 export async function purgeFileVectorIndex(collectionId, settings) {
     try {
-        log.lifecycle(`VectFox: Purging file vector index for collection ${collectionId}`);
+        log.lifecycle(`VectTauri: Purging file vector index for collection ${collectionId}`);
         const backend = await getBackend(settings);
         await backend.purgeFileVectorIndex(collectionId, settings);
-        log.lifecycle(`VectFox: Purged vector index for collection ${collectionId}`);
+        log.lifecycle(`VectTauri: Purged vector index for collection ${collectionId}`);
     } catch (error) {
         // VEC-33: Invalidate health cache on operation error
         invalidateBackendHealth(settings?.vector_backend || 'standard', error);
-        log.error('VectFox: Failed to purge file', error);
+        log.error('VectTauri: Failed to purge file', error);
     }
 }
 
 /**
  * Purges all vector indexes.
- * @param {object} settings VectFox settings object
+ * @param {object} settings VectTauri settings object
  * @returns {Promise<void>}
  */
 export async function purgeAllVectorIndexes(settings) {
     try {
         const backend = await getBackend(settings);
         await backend.purgeAllVectorIndexes(settings);
-        log.lifecycle('VectFox: Purged all vector indexes');
+        log.lifecycle('VectTauri: Purged all vector indexes');
         toastr.success('All vector indexes purged', 'Purge successful');
     } catch (error) {
         // VEC-33: Invalidate health cache on operation error
         invalidateBackendHealth(settings?.vector_backend || 'standard', error);
-        log.error('VectFox: Failed to purge all', error);
+        log.error('VectTauri: Failed to purge all', error);
         toastr.error('Failed to purge all vector indexes', 'Purge failed');
     }
 }
@@ -1504,7 +1504,7 @@ export async function purgeAllVectorIndexes(settings) {
  * Routes through the active backend so model is resolved via getModelFromSettings,
  * not from a stale collection.model field.
  * @param {string} collectionId - Collection ID
- * @param {object} settings - VectFox settings (must include vector_backend + source)
+ * @param {object} settings - VectTauri settings (must include vector_backend + source)
  * @param {object} options - {offset, limit, includeVectors}
  * @returns {Promise<{items: Array<{hash, text, metadata}>, total: number}>}
  */
@@ -1518,7 +1518,7 @@ export async function listChunks(collectionId, settings, options = {}) {
  * @param {string} collectionId - Collection ID
  * @param {number} hash - Chunk hash
  * @param {string} newText - New text content
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  */
 export async function updateChunkText(collectionId, hash, newText, settings) {
     const backend = await getBackend(settings);
@@ -1530,7 +1530,7 @@ export async function updateChunkText(collectionId, hash, newText, settings) {
  * @param {string} collectionId - Collection ID
  * @param {number} hash - Chunk hash
  * @param {object} metadata - Metadata to update (keywords, enabled, etc.)
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  */
 export async function updateChunkMetadata(collectionId, hash, metadata, settings) {
     const backend = await getBackend(settings);

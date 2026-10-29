@@ -8,29 +8,29 @@ EventBase is the **exclusive** retrieval path for chat content. The legacy `even
 
 | Pipeline                      | Content scope                                                                                        | Owned collections                                  | Code entry point                                     |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------- |
-| **EventBase pipeline**        | Chat history only (live chat + archive`.jsonl`)                                                      | `vectfox_eventbase_*`, `vectfox_archiveevent_*`    | `eventbase-workflow.js` → `eventbase-retrieval.js`   |
+| **EventBase pipeline**        | Chat history only (live chat + archive`.jsonl`)                                                      | `vecttauri_eventbase_*`, `vecttauri_archiveevent_*`    | `eventbase-workflow.js` → `eventbase-retrieval.js`   |
 | **Standard (Chunk) pipeline** | Non-chat content only — Lorebook / World Info, Character Cards, URLs / web pages, custom documents, wiki pages, YouTube transcripts | `vf_lorebook_*`, `vf_document_*`, user collections | `chat-vectorization.js` → `queryAndMergeCollections` |
 
 The two paths never see each other's content. There is no overlap in collection prefixes or content types.
 
 ### Key isolation rule (`core/chat-vectorization.js` → `gatherCollectionsToQuery`)
 
-- `vectfox_eventbase_*` → **always** skipped by the standard pipeline (EventBase pipeline owns them exclusively)
-- `vectfox_archiveevent_*` → **always** skipped by the standard pipeline (EventBase pipeline owns them exclusively)
-- `vectfox_chat_*` — **no longer minted.** The `VECTFOX_CHAT` prefix constant was removed by the 2026-04 cleanup (`plans/executed/delete-dead-chunk-chat-and-temporal-decay.md`), so no code path creates these. The 2026-05 cleanup (`plans/remove-chunk-chat.md`) deleted the last preview-only consumer (`prepareChatContent`). No production user has `vf_chat_*` data — the product shipped EventBase-only for chat. `gatherCollectionsToQuery` has no explicit `vf_chat_*` exclusion (the prefix constant doesn't exist to check against), but the absence is moot.
+- `vecttauri_eventbase_*` → **always** skipped by the standard pipeline (EventBase pipeline owns them exclusively)
+- `vecttauri_archiveevent_*` → **always** skipped by the standard pipeline (EventBase pipeline owns them exclusively)
+- `vecttauri_chat_*` — **no longer minted.** The `VECTTAURI_CHAT` prefix constant was removed by the 2026-04 cleanup (`plans/executed/delete-dead-chunk-chat-and-temporal-decay.md`), so no code path creates these. The 2026-05 cleanup (`plans/remove-chunk-chat.md`) deleted the last preview-only consumer (`prepareChatContent`). No production user has `vf_chat_*` data — the product shipped EventBase-only for chat. `gatherCollectionsToQuery` has no explicit `vf_chat_*` exclusion (the prefix constant doesn't exist to check against), but the absence is moot.
 
 ### Archive Chat History — Two content paths
 
 | Path              | Content Type in UI      | Collection prefix        | Storage format                               | Retrieval                     |
 | ----------------- | ----------------------- | ------------------------ | -------------------------------------------- | ----------------------------- |
-| **A — EventBase** | `Chat → Upload` tab     | `vectfox_archiveevent_*` | Event-shaped (same schema as live EventBase) | Phase A (EventBase re-ranker) |
-| **B — Chunk**     | `Document` content type | `vectfox_document_*`     | Chunk-shaped                                 | Phase B (standard pipeline)   |
+| **A — EventBase** | `Chat → Upload` tab     | `vecttauri_archiveevent_*` | Event-shaped (same schema as live EventBase) | Phase A (EventBase re-ranker) |
+| **B — Chunk**     | `Document` content type | `vecttauri_document_*`     | Chunk-shaped                                 | Phase B (standard pipeline)   |
 
 Archive event collections are **not** auto-locked to any chat after ingestion. Users must manually check "Active for current chat" on the collection card to activate retrieval for a given chat.
 
 ### Why this matters
 
-Before the toggle removal, `vectfox_eventbase_*` collections could be included in the standard pipeline when EventBase was OFF, causing them to be queried twice per generation: once by the EventBase pipeline (structured event retrieval with dedup-depth) and once by the standard pipeline (raw chunk retrieval). The standard pipeline query was always redundant and could inject duplicate content. With the toggle gone, this class of bug is structurally impossible.
+Before the toggle removal, `vecttauri_eventbase_*` collections could be included in the standard pipeline when EventBase was OFF, causing them to be queried twice per generation: once by the EventBase pipeline (structured event retrieval with dedup-depth) and once by the standard pipeline (raw chunk retrieval). The standard pipeline query was always redundant and could inject duplicate content. With the toggle gone, this class of bug is structurally impossible.
 
 ---
 
@@ -101,7 +101,7 @@ Two-tier storage:
 
 | Tier          | Where                                                              | Shape                          | When built                                                                                  |
 | ------------- | ------------------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------- |
-| **Persisted** | `extension_settings.vectfox.eventbase_extracted_windows[chatUUID]` | Flat`string[]` of fingerprints | Written each time a window is marked;`saveSettingsDebounced()` flushes to disk              |
+| **Persisted** | `extension_settings.vecttauri.eventbase_extracted_windows[chatUUID]` | Flat`string[]` of fingerprints | Written each time a window is marked;`saveSettingsDebounced()` flushes to disk              |
 | **In-memory** | `_windowCacheSet` (module-scope `Map<chatUUID, Set<fingerprint>>`) | `Set<string>` per chat         | Lazily built on first access from the persisted array; mutated in-place on subsequent marks |
 
 The persisted array is what survives a reload. The `Set` is what makes the lookup actually O(1) — `array.includes` would be O(N) and chats with thousands of windows would degrade.
@@ -147,7 +147,7 @@ Plugin: `../similharity/index.js`, `getVectorsForSource(...)`. One insert reques
 | `nomicai`, `cohere` | N single-text calls in parallel (`Promise.all`) | about T, but N calls against the provider's limits |
 | every other source, including `vllm` and the local `transformers` / `ollama` / `llamacpp` | one after another | about N × T |
 
-VectFox side (`insertVectorItems` in `core/core-vector-api.js`):
+VectTauri side (`insertVectorItems` in `core/core-vector-api.js`):
 
 - Local GPU sources (`transformers`, `ollama`, `llamacpp`) always send 1 item per insert request, so the 120s request timeout bounds one embedding and an item that fails to embed fails only its own request. `insert_batch_size` and the embedding API rate limit (`rate_limit_calls` / `rate_limit_interval`) do not apply to them.
 - API sources send up to `insert_batch_size` items per request while `vector_group_embedding_call` is on (default) or a rate limit is set; otherwise each item is its own request, fired in parallel waves (parallel-split).
@@ -289,7 +289,7 @@ Note that **auto-sync is not a separate path** — it's the same `runEventBaseIn
 3. **A stalled search fails soft; a stalled ingest fails expensive.** If a retrieval embed genuinely hangs, the cost is one turn with degraded/no memory injection — annoying but self-correcting on the next message. A hung ingest wastes minutes of a long batch run and can leave the user staring at a frozen progress bar. Hedge's value is highest exactly where the blast radius is largest.
 4. **Idempotency only holds for writes.** Hedge's "fire a duplicate, race-first-wins, discard the loser" trick is safe because a duplicate **write** is a no-op (hash-deterministic Qdrant upsert overwrites the same point with identical data). A duplicate **query** isn't harmful, but it also buys nothing — you'd just pay for two embeds to shave time off a path that's already fast (see #2). Agent Mode compounds this: it already fans out 1–4 parallel queries, so adding per-query hedging would multiply planner-stage API cost for no latency win on an already-parallel, already-fast stage.
 
-**Read-path timeout (shipped 2026-05-31).** The read path is hardened with a plain per-turn timeout rather than the hedge race — the hedge machinery (4 attempts over 60s, hedge-fatal escape, Continue-to-resume) is tuned for long write batches and would be overkill for a one-shot read. `rearrangeChat()` (the generation interceptor in [`core/chat-vectorization.js`](core/chat-vectorization.js), wired to ST via `window.vectfox_rearrangeChat`) wraps BOTH per-turn retrieval calls — `runEventBaseRetrieval` (EventBase / chat memory) and `queryAndMergeCollections` → `queryActiveCollections` (chunk / lorebook / docs) — in `AsyncUtils.timeout(promise, RETRIEVAL_TIMEOUT_MS, …)`. `RETRIEVAL_TIMEOUT_MS = 15000` ([core/constants.js](core/constants.js)) matches the write-side hedge threshold for one consistent "too slow" number.
+**Read-path timeout (shipped 2026-05-31).** The read path is hardened with a plain per-turn timeout rather than the hedge race — the hedge machinery (4 attempts over 60s, hedge-fatal escape, Continue-to-resume) is tuned for long write batches and would be overkill for a one-shot read. `rearrangeChat()` (the generation interceptor in [`core/chat-vectorization.js`](core/chat-vectorization.js), wired to ST via `window.vecttauri_rearrangeChat`) wraps BOTH per-turn retrieval calls — `runEventBaseRetrieval` (EventBase / chat memory) and `queryAndMergeCollections` → `queryActiveCollections` (chunk / lorebook / docs) — in `AsyncUtils.timeout(promise, RETRIEVAL_TIMEOUT_MS, …)`. `RETRIEVAL_TIMEOUT_MS = 15000` ([core/constants.js](core/constants.js)) matches the write-side hedge threshold for one consistent "too slow" number.
 
 It's a **soft** timeout (Promise.race): on expiry the turn proceeds and the message sends WITHOUT that memory source — both call sites wrap the await in try/catch (EventBase logs and continues; the chunk path sets `chunks = []` so downstream injects nothing). The orphaned `fetch` keeps running until ST's server-side timeout reaps it — there is no client `AbortSignal` on the read fetches (see the timeout table above), so this is a "stop waiting", not a "cancel the request". A stall is not retried: a stalled retrieval fails soft (one turn without memory, self-corrects next message), so a single bounded attempt is the right tradeoff. A query embedding that FAILS (e.g. a provider 429 "The engine is currently overloaded") is different — it fails fast, so `getQueryVector` ([core/core-vector-api.js](core/core-vector-api.js)) retries it once, then fails the query. That is the only retry on the read path: the query is embedded once and every route and fallback reuses the vector, so a fallback never re-embeds (each fallback used to, which stacked up to four embedding calls per failed query).
 
@@ -416,7 +416,7 @@ What `vectorScore` looks like on standard backend depends on whether the **Simil
 | Path                     | When                                                                                                 | What `vectorScore` looks like                                                                        |
 | ------------------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | **Plugin-enhanced**      | `StandardBackend.pluginAvailable === true` (the common case once the plugin is installed)            | Real cosine values come back via `/api/plugins/similharity/chunks/query`. Scores are usable for A2's fusion math. |
-| **Degraded (no plugin)** | Fresh ST install without the optional plugin, or `pluginAvailable` forced `false` (TEST 009 scenario) | ST's native `/api/vector/query` computes cosine internally but **strips the scores from the response before returning**. VectFox receives only hashes and text — every `vectorScore` is `0.0000`. Hard ST-upstream limitation. |
+| **Degraded (no plugin)** | Fresh ST install without the optional plugin, or `pluginAvailable` forced `false` (TEST 009 scenario) | ST's native `/api/vector/query` computes cosine internally but **strips the scores from the response before returning**. VectTauri receives only hashes and text — every `vectorScore` is `0.0000`. Hard ST-upstream limitation. |
 
 The path is picked inside `StandardBackend.queryCollection` based on the runtime `pluginAvailable` flag; A1/A2 path selection itself is unchanged.
 
@@ -487,7 +487,7 @@ Implemented in [core/corpus-stats.js](../core/corpus-stats.js). When the toggle 
 | Build cost (measured, 1394 chunks Traditional Chinese on Intl.Segmenter) | 674 ms total: fetch=407 ms, parse=57 ms, tokenize+df=210 ms. Logged as`[CorpusStats] Built for ...` with full breakdown. |
 | Sustained memory                                                         | ~400 KB per collection:`{ totalDocs, documentFrequencies: Map<term, df>, avgDocLength, builtAt }`. Chunk texts are **not** retained — only the derived statistics. |
 | Auto-invalidation                                                        | Fires on`insertVectorItems` / `deleteVectorItems` / `purgeVectorIndex` (core-vector-api.js) and `insertChunksWithVectors` (collection-export.js import path). Lazy rebuild on next query. |
-| Manual clear (force-rebuild for testing)                                 | `(await import('/scripts/extensions/third-party/VectFox/core/corpus-stats.js')).clearCorpusStatsCache()` |
+| Manual clear (force-rebuild for testing)                                 | `(await import('/scripts/extensions/third-party/VectTauri/core/corpus-stats.js')).clearCorpusStatsCache()` |
 | Failure mode                                                             | Best-effort. Module-load or fetch failure logs a warning and falls back to local-IDF BM25 for that query — never discards the underlying vector results. See [feedback memory: optional enhancements must degrade]. |
 
 #### Why default ON
@@ -511,7 +511,7 @@ EventBase overrides `keyword_scoring_method` with `eventbase_keyword_scoring_met
 | Setting                                                                     | Default                   | Affects                                                        | Notes                                                                                                |
 | --------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `keyword_scoring_method` (`bm25` \                                          | `hybrid`)                 | `hybrid`                                                       | ChunkBase A1/A2 selector on Standard backend                                                         |
-| `eventbase_keyword_scoring_method`                                          | `bm25`                    | EventBase A1/A2 selector on Standard backend                   | Internal key, not exposed in UI. Override via`extension_settings.vectfox` in console.                |
+| `eventbase_keyword_scoring_method`                                          | `bm25`                    | EventBase A1/A2 selector on Standard backend                   | Internal key, not exposed in UI. Override via`extension_settings.vecttauri` in console.                |
 | `hybrid_native_prefer`                                                      | `true`                    | A3 vs A1/A2 on Qdrant                                          | Hidden — not in UI. JSON-only. Flip to`false` to force client-side path on Qdrant for A/B testing.   |
 | `bm25_k1`, `bm25_b`                                                         | 1.5 / 0.75                | A1 and A2 (client-side BM25 internals)                         | BM25+ TF saturation and length normalization. A3 uses Qdrant's internal defaults (these knobs don't reach the server). |
 | `bm25_use_corpus_idf`                                                       | **`true`**                | A1 and A2 IDF source                                           | See "Corpus-wide IDF ≠ Corpus-wide search" above. Lazily fetches and caches`{N, df}` map for the entire collection. ~700 ms cold build, ~400 KB sustained. Auto-invalidates on writes. |
@@ -553,7 +553,7 @@ issues a single Qdrant `/points/query` with the four-weight formula baked in:
       ]
     }
   },
-  "filter": { "must_not": [{ "key": "type", "match": { "value": "_vectfox_meta" } }] },
+  "filter": { "must_not": [{ "key": "type", "match": { "value": "_vecttauri_meta" } }] },
   "limit": "<topK>"
 }
 ```
@@ -580,7 +580,7 @@ request fails with a Qdrant error, check the server version and set
 
 ## 9) Retrieval Tokenization — Language-Neutral (since 2026-05-29)
 
-VectFox's **retrieval** path (BM25 sparse vectors + query keyword extraction) is now language-neutral. Two scripts share one set of primitives so the ingest path and the query path can never drift:
+VectTauri's **retrieval** path (BM25 sparse vectors + query keyword extraction) is now language-neutral. Two scripts share one set of primitives so the ingest path and the query path can never drift:
 
 | Item              | Value                                                                                                |
 | ----------------- | ---------------------------------------------------------------------------------------------------- |
@@ -727,7 +727,7 @@ Activation Triggers and Advanced Conditions (Collection Settings → Activation 
 
 ### One caveat: user-supplied regex
 
-A trigger or `pattern` value wrapped in `/.../` is run as a real `RegExp`. If *you* type an ASCII word-boundary (`\b`) in that regex, it will not fire between CJK characters — that is a property of the regex you wrote, not of VectFox. For CJK, prefer plain substrings, or use Unicode word boundaries with the `u` flag (e.g. `/\p{L}+/u`).
+A trigger or `pattern` value wrapped in `/.../` is run as a real `RegExp`. If *you* type an ASCII word-boundary (`\b`) in that regex, it will not fire between CJK characters — that is a property of the regex you wrote, not of VectTauri. For CJK, prefer plain substrings, or use Unicode word boundaries with the `u` flag (e.g. `/\p{L}+/u`).
 
 ### Removed: the Emotion condition (2026-06-02)
 
@@ -788,7 +788,7 @@ Inheritance is centralized in `_resolveAgenticLLMConfig(settings)` — read it o
 
 ### Debug log shape (when `agentic_retrieval_debug_logging` is true)
 
-All lines prefixed `[vectfoxPlus-Agentic]` so they're greppable and distinct from `[EventBase]` / `[Qdrant]`.
+All lines prefixed `[vecttauriPlus-Agentic]` so they're greppable and distinct from `[EventBase]` / `[Qdrant]`.
 
 Per retrieval round emits, in order:
 
@@ -872,7 +872,7 @@ The Similharity plugin (`/api/plugins/similharity/*`) was built for Qdrant. Its 
 
 ### Cross-repo version check (where to hunt)
 
-VectFox warns when the installed similharity server plugin doesn't match the version VectFox expects. Code lives in **`index.js`** inside the `jQuery(async () => …)` init block, marked **`// D5: Cross-repo version check`**:
+VectTauri warns when the installed similharity server plugin doesn't match the version VectTauri expects. Code lives in **`index.js`** inside the `jQuery(async () => …)` init block, marked **`// D5: Cross-repo version check`**:
 
 - Constant `SIMILHARITY_EXPECTED_VERSION` (keep in sync with `manifest.json` `version`).
 - Fetches `/api/plugins/similharity/version`, compares `pluginVersion` with **exact `!==`** (not semver `<`).
@@ -883,7 +883,7 @@ Search hint: grep `SIMILHARITY_EXPECTED_VERSION` or `D5:`.
 
 ### Deployment scope — local / LAN only
 
-**VectFox + Similharity is designed for a single-user SillyTavern install on the user's own machine (or private LAN).** It is NOT designed for:
+**VectTauri + Similharity is designed for a single-user SillyTavern install on the user's own machine (or private LAN).** It is NOT designed for:
 
 - Public-internet exposure
 - Multi-tenant deployments (untrusted users sharing one ST instance)
@@ -894,7 +894,7 @@ This is a deliberate scope, not an oversight. Two consequences a reviewer might 
 1. **No SSRF defense on plugin embedding-relay routes.** Routes like `getVectorsForSource` accept user-configured URLs (`apiUrl`, `ollama_url`, `vllm_url`) and `fetch()` them server-side without host allowlisting. This is intentional — those URLs are legitimately set to `127.0.0.1` / RFC1918 addresses for self-hosted embedding servers. Adding allowlisting would either break legitimate localhost use OR be cosmetic-only at the plugin layer: anyone on the same LAN who can reach the qdrant port directly already has the same write/query access regardless of what the plugin does. The bigger picture is that **this whole project is designed for personal use, not multi-user**. Even Qdrant's open-source build ships without per-user authentication by default — the multi-user story requires Role-Based Access Control, which is way overkill for someone just trying to get a SillyTavern RAG running on their PC or closed LAN. Requiring it would defeat the "personal use, runs out of the box" point of this project. If your deployment context can't trust everyone on the network boundary, you need RBAC AND plugin-level allowlisting; neither alone is enough, and we're targeting the simpler scope on purpose.
 2. **API keys stored plaintext in `settings.json`.** Same threat model: the user owns the machine, the keys are theirs, sharing the file means the user already failed key hygiene. ST itself uses the same pattern for most extension settings.
 
-If you deploy ST in a context where untrusted users share the same instance — be aware of VectFox's limits. ST itself **does** support per-user data isolation via `enableUserAccounts = true` (per-user directories including `vectors/`, password auth, SSO). However, Qdrant ships without per-user authentication — a shared Qdrant instance has no concept of per-user collection ownership, so two ST users on the same Qdrant server can read and write each other's VectFox collections. Use a separate Qdrant instance per user, or container-per-user, if that matters for your deployment.
+If you deploy ST in a context where untrusted users share the same instance — be aware of VectTauri's limits. ST itself **does** support per-user data isolation via `enableUserAccounts = true` (per-user directories including `vectors/`, password auth, SSO). However, Qdrant ships without per-user authentication — a shared Qdrant instance has no concept of per-user collection ownership, so two ST users on the same Qdrant server can read and write each other's VectTauri collections. Use a separate Qdrant instance per user, or container-per-user, if that matters for your deployment.
 
 Documented 2026-05-24 in response to external code review (jotbird audit, item H-4). Full threat-model reasoning in `plans/review-fix.md §H-4`. The plugin's own header in `h:\Github\Dev\similharity\index.js` carries an identical scope statement.
 
@@ -932,7 +932,7 @@ The `tests/Eventbase-test.spec.js` suite runs against a live ST instance. Each t
 
 Three environment requirements to consider:
 
-VectFox runs in **three distinct deployment environments**. Each unlocks a different subset of features and exercises a different code path. The test suite soft-skips tests that aren't applicable to the current environment so users on any of the three setups get a clean `npm run test:e2e` run.
+VectTauri runs in **three distinct deployment environments**. Each unlocks a different subset of features and exercises a different code path. The test suite soft-skips tests that aren't applicable to the current environment so users on any of the three setups get a clean `npm run test:e2e` run.
 
 ### The 3 environments
 
@@ -976,13 +976,13 @@ Marker key: ✅ runs, ⏭️ soft-skips, — n/a.
 
 | Helper                      | Used by                    | Skip condition                                                                                       |
 | --------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `skipIfQdrantUnavailable()` | TEST 001-004, 010-013, 020 | (a) Plugin probe fails, **or** (b) `qdrant_url`/`qdrant_host` not set in `extension_settings.vectfox`, **or** (c) qdrant config is set but qdrant is unreachable (emits a **WARNING** in the skip reason). |
+| `skipIfQdrantUnavailable()` | TEST 001-004, 010-013, 020 | (a) Plugin probe fails, **or** (b) `qdrant_url`/`qdrant_host` not set in `extension_settings.vecttauri`, **or** (c) qdrant config is set but qdrant is unreachable (emits a **WARNING** in the skip reason). |
 | `skipIfNoPlugin()`          | TEST 008, 021, 022         | Plugin probe fails.                                                                                  |
-| (none)                      | TEST 005-007, 009, 014-019 | These run in every environment. Split by what they exercise: **005-007** = real backend round-trips (standard backend embedding + chat retrieval); **009** = forces `pluginAvailable=false` to exercise no-plugin native path; **014-016** = pure-function auto-sync contracts (fingerprint cache, start marker, `stampAutoSyncMarker`); **017-019** = pure in-memory collection-metadata contracts (pause button overrides lock, priority chain, refresh-path purity). 014-019 don't need the plugin nor any backend — they operate directly on `extension_settings.vectfox` state and the registry. See [collection_helper.md → Chat Auto-Sync](collection_helper.md) for the 014/015/016 contract, and the same doc's "Pause/Resume" + "Manual vs auto-sync paths" sections for the 017/019 contract. |
+| (none)                      | TEST 005-007, 009, 014-019 | These run in every environment. Split by what they exercise: **005-007** = real backend round-trips (standard backend embedding + chat retrieval); **009** = forces `pluginAvailable=false` to exercise no-plugin native path; **014-016** = pure-function auto-sync contracts (fingerprint cache, start marker, `stampAutoSyncMarker`); **017-019** = pure in-memory collection-metadata contracts (pause button overrides lock, priority chain, refresh-path purity). 014-019 don't need the plugin nor any backend — they operate directly on `extension_settings.vecttauri` state and the registry. See [collection_helper.md → Chat Auto-Sync](collection_helper.md) for the 014/015/016 contract, and the same doc's "Pause/Resume" + "Manual vs auto-sync paths" sections for the 017/019 contract. |
 
 **The unreachable-qdrant case** (config present but server down) is a soft skip with a WARNING-flavored reason, NOT a hard failure. The reasoning:
 
-- A common case-2 user installed qdrant once, took it down, kept the VectFox settings. They're now a pure standard-backend user.
+- A common case-2 user installed qdrant once, took it down, kept the VectTauri settings. They're now a pure standard-backend user.
 - Hard-failing qdrant tests for these users would be confusing — nothing is "wrong" with their environment, they just don't use qdrant.
 - Serial mode means one hard failure halts the rest of the suite — exactly what we don't want for a user who'd benefit from TEST 005/006/007/008/009 all passing.
 
@@ -1025,18 +1025,18 @@ Fix landed 2026-05-24: default changed to `null`, with a defensive `!== 'unknown
 
 **Status**: Deferred — investigated 2026-05-17, no code change yet. Line refs refreshed 2026-10-11.
 
-`rearrangeChat` ([core/chat-vectorization.js:1299](../core/chat-vectorization.js#L1299)) runs **EventBase Phase A** then unconditionally falls through to **ChunkBase Phase B**. (It also early-returns above Phase A entirely when `isVectFoxEnabled(settings)` is false — that master-switch gate is orthogonal to the Phase B early-gate discussed here.) Phase B has two existing gates:
+`rearrangeChat` ([core/chat-vectorization.js:1299](../core/chat-vectorization.js#L1299)) runs **EventBase Phase A** then unconditionally falls through to **ChunkBase Phase B**. (It also early-returns above Phase A entirely when `isVectTauriEnabled(settings)` is false — that master-switch gate is orthogonal to the Phase B early-gate discussed here.) Phase B has two existing gates:
 
 1. **Early (cheap)** at [line 1394-1401](../core/chat-vectorization.js#L1394): `hasCollections = gatherCollectionsToQuery(settings).length > 0` — passes if *any* non-EventBase collection has `enabled=true`. No lock/scope/activation check.
 2. **Post-activation (expensive)** at [line 1435](../core/chat-vectorization.js#L1435): `filterActiveCollections` runs the full [`shouldCollectionActivate`](../core/collection-metadata.js#L1133) priority chain (triggers → conditions → chat lock → character lock).
 
-EventBase-only users (the typical case) hit gate 1 and short-circuit — debug log `[VECTFOX ChunkBase] No enabled ChunkBase collections ...` fires once per generation to confirm.
+EventBase-only users (the typical case) hit gate 1 and short-circuit — debug log `[VECTTAURI ChunkBase] No enabled ChunkBase collections ...` fires once per generation to confirm.
 
 **What was considered**: tightening the early gate so it requires not just "enabled" but "enabled AND has some activation mechanism that could match the current context" — would avoid the keyword-extraction work at [line 1415-1422](../core/chat-vectorization.js#L1415-L1422) when a user has enabled lorebooks that aren't locked/triggered for the current chat.
 
 **Why deferred**: A naïve `isLocked`-only gate would break users who rely on **Activation Triggers** or **Advanced Conditions** for activation without ever locking a collection (priorities 2-3 of `shouldCollectionActivate`). The safe shape is `enabled AND (chat-locked OR character-locked OR has triggers OR has conditions)` — a cheap pre-check that matches every activation path. Not worth doing in isolation; revisit if/when we touch Phase B for another reason.
 
-**Caller count**: 1 — `rearrangeChat` is the only place running the EventBase→ChunkBase ordered workflow ([index.js:458](../index.js#L458) — `vectfox_rearrangeChat` is its sole caller via ST's `generate_interceptor`). No util-extraction is needed if/when we change the gate.
+**Caller count**: 1 — `rearrangeChat` is the only place running the EventBase→ChunkBase ordered workflow ([index.js:458](../index.js#L458) — `vecttauri_rearrangeChat` is its sole caller via ST's `generate_interceptor`). No util-extraction is needed if/when we change the gate.
 
 **Search tag in code**: none yet. When acted on, target [core/chat-vectorization.js:1398](../core/chat-vectorization.js#L1398) (the `if (!hasCollections && !canQueryWI)` block).
 
@@ -1092,16 +1092,16 @@ Two distinct buckets of failure:
 
 #### **2 real source bugs uncovered and fixed**
 
-The restoration surfaced two pre-existing latent bugs in `core/world-info-integration.js` that would crash any caller of `window.VectFox_WorldInfo.*` helpers from the browser console:
+The restoration surfaced two pre-existing latent bugs in `core/world-info-integration.js` that would crash any caller of `window.VectTauri_WorldInfo.*` helpers from the browser console:
 
 1. **[core/world-info-integration.js:16](../core/world-info-integration.js#L16)** — `getCollectionRegistry` was called at line 275 but was not imported. Anyone calling `isLorebookVectorized()` or `getLorebookVectorStats()` would have hit `ReferenceError: getCollectionRegistry is not defined`. Fixed by adding to the import.
 2. **[core/world-info-integration.js:17](../core/world-info-integration.js#L17)** — `isCollectionEnabled` was called at line 337 in `getLorebookVectorStats` but was not imported. Same `ReferenceError` failure mode. Fixed by adding to the import.
 
-Both bugs were invisible in production because the affected helpers are exposed on `window.VectFox_WorldInfo` for debugging — they're never called from VectFox's own code paths. The tests were the only callers that exercised them. **Without test restoration, these stayed latent indefinitely.**
+Both bugs were invisible in production because the affected helpers are exposed on `window.VectTauri_WorldInfo` for debugging — they're never called from VectTauri's own code paths. The tests were the only callers that exercised them. **Without test restoration, these stayed latent indefinitely.**
 
 #### **1 dead-code refactor** (test surfaced it)
 
-- **[core/world-info-integration.js:277](../core/world-info-integration.js#L277)** — `_findLorebookRegistryEntry`'s `settings` parameter was effectively dead (function read from module-global `getCollectionRegistry()`, ignored the argument). Updated to honor `settings.vectfox_collection_registry` when caller supplies it; falls back to the global otherwise. Removes hidden dead code and aligns with test expectations.
+- **[core/world-info-integration.js:277](../core/world-info-integration.js#L277)** — `_findLorebookRegistryEntry`'s `settings` parameter was effectively dead (function read from module-global `getCollectionRegistry()`, ignored the argument). Updated to honor `settings.vecttauri_collection_registry` when caller supplies it; falls back to the global otherwise. Removes hidden dead code and aligns with test expectations.
 
 #### Lesson
 
@@ -1119,14 +1119,14 @@ If a future contributor sees broken-looking tests in the suite, the playbook is:
 
 **Reranking note**: this removed only the unreachable BananaBread cross-encoder rerank. The EventBase native weighted re-ranker (`eventbase_native_rerank` / `hybridQueryWithRerank`) is unrelated and remains fully intact.
 
-### 16.4 Purge redundant `vectfox_chunk_meta_*` keys from `extension_settings` — deferred to ~2026-09
+### 16.4 Purge redundant `vecttauri_chunk_meta_*` keys from `extension_settings` — deferred to ~2026-09
 
 **Status**: Deferred. Do **not** implement before ~2026-09 (≈3 months after 2026-06-01).
 **Depends on**: `plans/chunk-metadata-read-source-fix.md` Phase B having shipped and run in the wild for a while.
 
-**Background**: Per-chunk metadata (`name`, `context`, `xmlTag`, `position`, `depth`, `keywords`, `conditions`, `links`, `enabled`) was dual-written to both the vector backend (Vectra-via-plugin / Qdrant) **and** `extension_settings['vectfox_chunk_meta_*']` since day one. That was the wrong design for the plugin/Qdrant paths — the backend is the durable, portable source of truth and `extension_settings` was only ever the *required* store for the long-gone Standard-no-plugin browser path. The read-source fix flips every reader to backend-first and (Phase B) stops the dual write. See `plans/chunk-metadata-read-source-fix.md`.
+**Background**: Per-chunk metadata (`name`, `context`, `xmlTag`, `position`, `depth`, `keywords`, `conditions`, `links`, `enabled`) was dual-written to both the vector backend (Vectra-via-plugin / Qdrant) **and** `extension_settings['vecttauri_chunk_meta_*']` since day one. That was the wrong design for the plugin/Qdrant paths — the backend is the durable, portable source of truth and `extension_settings` was only ever the *required* store for the long-gone Standard-no-plugin browser path. The read-source fix flips every reader to backend-first and (Phase B) stops the dual write. See `plans/chunk-metadata-read-source-fix.md`.
 
-**What this cleanup is**: once Phase B has been live long enough that we're confident no reader still falls back to `extension_settings` for the targeted fields, write a one-shot purge that removes the now-orphaned `vectfox_chunk_meta_*` keys from `settings.json`.
+**What this cleanup is**: once Phase B has been live long enough that we're confident no reader still falls back to `extension_settings` for the targeted fields, write a one-shot purge that removes the now-orphaned `vecttauri_chunk_meta_*` keys from `settings.json`.
 
 **Why deferred, not now**:
 
@@ -1137,7 +1137,7 @@ If a future contributor sees broken-looking tests in the suite, the playbook is:
 
 **When implementing (≈2026-09)**:
 
-- Iterate `extension_settings.vectfox`, match the `vectfox_chunk_meta_` prefix (see `getAllChunkMetadata()` in [core/collection-metadata.js:396](../core/collection-metadata.js#L396)), delete those keys, `saveSettingsDebounced()`.
+- Iterate `extension_settings.vecttauri`, match the `vecttauri_chunk_meta_` prefix (see `getAllChunkMetadata()` in [core/collection-metadata.js:396](../core/collection-metadata.js#L396)), delete those keys, `saveSettingsDebounced()`.
 - Gate it: only purge fields that Phase B confirmed are backend-authoritative. If any field is still client-only (e.g. `summaries`, or some genuinely local UI state), preserve those keys/sub-fields.
 - Per `CLAUDE.md`, this is migration logic — **confirm with the user before adding it**, and consider a one-time guarded run (versioned flag) rather than something that fires on every load.
 - Tripwire: a user who downgrades to a pre-Phase-B build after the purge would lose their per-chunk overrides from the UI's perspective *only if* that old build read ext_settings-first — which it did. The backend still has the data; the old build just wouldn't show/use it. Acceptable, but note it in the purge's release notes.

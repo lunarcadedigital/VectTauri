@@ -1,22 +1,22 @@
 /**
  * ============================================================================
- * VectFox OFF-BOX STARTUP WORK
+ * VectTauri OFF-BOX STARTUP WORK
  * ============================================================================
- * Everything VectFox does at load time that reaches off the page — collection
+ * Everything VectTauri does at load time that reaches off the page — collection
  * discovery, the EventBase payload-index backfill, and the Similharity version
  * check. All of it talks to either Qdrant or the Similharity plugin.
  *
  * WHY THIS IS A MODULE AND NOT INLINE IN index.js
  *
  * The master switch (core/feature-gate.js) used to gate only the generation-time
- * paths, so a switched-off VectFox still probed the plugin, initialized Qdrant,
+ * paths, so a switched-off VectTauri still probed the plugin, initialized Qdrant,
  * pushed config to Similharity and discovered collections on every page load —
  * plenty of console noise and network traffic for an extension the user had
  * turned off. Pulling this work into one named function lets index.js skip it
  * wholesale when disabled.
  *
  * It has to be RE-RUNNABLE, not merely skippable, because flipping the switch
- * back ON must give a working VectFox without a page reload. Two of these steps
+ * back ON must give a working VectTauri without a page reload. Two of these steps
  * do not self-heal on demand:
  *
  *   - ensureEventBaseIndexes() is one-shot-per-install, guarded by the persisted
@@ -25,7 +25,7 @@
  *   - Collection discovery refreshes the registry that the Database Browser and
  *     cross-chat retrieval read. (The registry itself is persisted in
  *     settings.json, so it is stale rather than empty — but collections created
- *     while VectFox was off would be invisible.)
+ *     while VectTauri was off would be invisible.)
  *
  * Everything else is lazily initialized on first use and needs no help here:
  * Qdrant backend init and the Similharity config push both happen inside
@@ -50,10 +50,10 @@ import { log } from './log.js';
 
 /**
  * D5: Cross-repo version floor — warn ONLY when the installed similharity is OLDER
- * than the minimum VectFox needs. This is a floor (>=) check, not an exact match:
- * VectFox stays forward-compatible with newer plugin builds, so a plugin-only bugfix
+ * than the minimum VectTauri needs. This is a floor (>=) check, not an exact match:
+ * VectTauri stays forward-compatible with newer plugin builds, so a plugin-only bugfix
  * bump (e.g. 3.3.1 -> 3.3.2) must not nag users who are, in fact, up to date. Only
- * bump this when VectFox genuinely requires a newer plugin feature.
+ * bump this when VectTauri genuinely requires a newer plugin feature.
  */
 const SIMILHARITY_MIN_VERSION = '3.3.1';
 
@@ -75,7 +75,7 @@ function isSimilharityVersionBehind(version, minimum) {
 /** Shared tail for both outdated-plugin messages — how the user actually fixes it. */
 const PLUGIN_UPDATE_INSTRUCTIONS = 'Restart SillyTavern so it can auto-update the server plugin. '
     + 'If that does not help, the plugin was installed from a ZIP and cannot auto-update: delete '
-    + 'SillyTavern/plugins/similharity and reinstall it with git clone (see the VectFox README).';
+    + 'SillyTavern/plugins/similharity and reinstall it with git clone (see the VectTauri README).';
 
 /**
  * Warn (toast + console) when the installed Similharity plugin is below the floor.
@@ -102,20 +102,20 @@ export async function checkSimilharityVersion() {
         // released build, so say something rather than assume it is fine — silence
         // here is the exact failure this function was rewritten to remove.
         if (!installedVersion) {
-            log.warn(`[VectFox] similharity plugin responded without a version field — cannot verify it meets the v${SIMILHARITY_MIN_VERSION}+ floor. ${PLUGIN_UPDATE_INSTRUCTIONS}`);
+            log.warn(`[VectTauri] similharity plugin responded without a version field — cannot verify it meets the v${SIMILHARITY_MIN_VERSION}+ floor. ${PLUGIN_UPDATE_INSTRUCTIONS}`);
             toastr.warning(
-                `Could not determine your similharity plugin version, so VectFox cannot confirm it is current. ${PLUGIN_UPDATE_INSTRUCTIONS}`,
-                'VectFox — plugin version unknown',
+                `Could not determine your similharity plugin version, so VectTauri cannot confirm it is current. ${PLUGIN_UPDATE_INSTRUCTIONS}`,
+                'VectTauri — plugin version unknown',
                 { timeOut: 15000 },
             );
             return;
         }
 
         if (isSimilharityVersionBehind(installedVersion, SIMILHARITY_MIN_VERSION)) {
-            log.warn(`[VectFox] similharity plugin outdated: need v${SIMILHARITY_MIN_VERSION}+, got v${installedVersion}. ${PLUGIN_UPDATE_INSTRUCTIONS}`);
+            log.warn(`[VectTauri] similharity plugin outdated: need v${SIMILHARITY_MIN_VERSION}+, got v${installedVersion}. ${PLUGIN_UPDATE_INSTRUCTIONS}`);
             toastr.warning(
                 `similharity plugin is outdated (need v${SIMILHARITY_MIN_VERSION}+, got v${installedVersion}). ${PLUGIN_UPDATE_INSTRUCTIONS}`,
-                'VectFox',
+                'VectTauri',
                 { timeOut: 15000 },
             );
         }
@@ -132,12 +132,12 @@ export async function checkSimilharityVersion() {
 let networkStartupInFlight = null;
 
 /**
- * Run (or join) VectFox's off-box startup work.
+ * Run (or join) VectTauri's off-box startup work.
  *
  * Callers: index.js on load when the master switch is ON, and ui/ui-manager.js when
  * the user turns the switch back ON.
  *
- * @param {object} startupSettings the live VectFox settings object
+ * @param {object} startupSettings the live VectTauri settings object
  * @returns {Promise<void>} resolves once discovery has settled. The index backfill and
  *   version check are deliberately fire-and-forget — same as when this was inlined in
  *   index.js, so a slow plugin cannot delay the rest of extension init.
@@ -158,12 +158,12 @@ export function runNetworkStartup(startupSettings) {
                         maxDelay: 10000,
                         backoffFactor: 2,
                         onRetry: (attempt, error) => {
-                            log.warn(`VectFox: Collection discovery attempt ${attempt} failed: ${error.message}. Retrying...`);
+                            log.warn(`VectTauri: Collection discovery attempt ${attempt} failed: ${error.message}. Retrying...`);
                         },
                     }
                 );
                 if (collections.length > 0) {
-                    log.lifecycle(`VectFox: Discovered ${collections.length} existing collections`);
+                    log.lifecycle(`VectTauri: Discovered ${collections.length} existing collections`);
                 }
                 // Discovery succeeded → registry reflects reality. Sweep stale per-chat
                 // EventBase settings (marker / last-window-size / tip) for chats whose
@@ -171,13 +171,13 @@ export function runNetworkStartup(startupSettings) {
                 try {
                     await pruneOrphanedEventBaseChatMaps();
                 } catch (pruneError) {
-                    log.warn('VectFox: Orphan-sweep of per-chat EventBase settings failed (non-fatal):', pruneError?.message || pruneError);
+                    log.warn('VectTauri: Orphan-sweep of per-chat EventBase settings failed (non-fatal):', pruneError?.message || pruneError);
                 }
             } catch (error) {
-                log.error('VectFox: Collection discovery failed after retries:', error.message);
+                log.error('VectTauri: Collection discovery failed after retries:', error.message);
                 toastr.warning(
                     'Could not discover existing collections. Open Database Browser to refresh manually.',
-                    'VectFox: Collection Discovery Failed',
+                    'VectTauri: Collection Discovery Failed',
                     { timeOut: 10000 }
                 );
             }
@@ -186,7 +186,7 @@ export function runNetworkStartup(startupSettings) {
             if (startupSettings.vector_backend === 'qdrant') {
                 import('./eventbase-store.js').then(({ ensureEventBaseIndexes }) => {
                     ensureEventBaseIndexes(startupSettings).catch(error => {
-                        log.warn('[VectFox] EventBase index backfill failed:', error);
+                        log.warn('[VectTauri] EventBase index backfill failed:', error);
                     });
                 }).catch(() => {});
             }

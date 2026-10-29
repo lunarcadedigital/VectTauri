@@ -1,17 +1,17 @@
 /* ============================================================================
- * VECTFOX FORM STYLES
+ * VECTTAURI FORM STYLES
  * ============================================================================
  * Form elements, inputs, selects, range sliders, provider settings
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================ */
 
 /* ============================================================================
  * FORM ELEMENTS WITH POLISH
  * ============================================================================ */
 
-#VectFox_settings label:not(.checkbox_label) {
+#VectTauri_settings label:not(.checkbox_label) {
     display: block;
     margin-top: 18px;
     margin-bottom: 8px;
@@ -20,39 +20,39 @@
     font-size: 0.95em;
 }
 
-#VectFox_settings label:not(.checkbox_label):first-child {
+#VectTauri_settings label:not(.checkbox_label):first-child {
     margin-top: 0;
 }
 
-#VectFox_settings .text_pole,
-#VectFox_settings input[type="number"],
-#VectFox_settings select {
+#VectTauri_settings .text_pole,
+#VectTauri_settings input[type="number"],
+#VectTauri_settings select {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 8px;
 }
 
-#VectFox_settings .text_pole:hover,
-#VectFox_settings input[type="number"]:hover,
-#VectFox_settings select:hover {
-    border-color: color-mix(in srgb, var(--vectfox-primary) 50%, var(--SmartThemeBorderColor));
+#VectTauri_settings .text_pole:hover,
+#VectTauri_settings input[type="number"]:hover,
+#VectTauri_settings select:hover {
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 50%, var(--SmartThemeBorderColor));
 }
 
-#VectFox_settings .text_pole:focus,
-#VectFox_settings input[type="number"]:focus,
-#VectFox_settings select:focus {
-    border-color: var(--vectfox-primary);
+#VectTauri_settings .text_pole:focus,
+#VectTauri_settings input[type="number"]:focus,
+#VectTauri_settings select:focus {
+    border-color: var(--vecttauri-primary);
     box-shadow:
-        0 0 0 3px color-mix(in srgb, var(--vectfox-primary) 15%, transparent),
-        0 2px 8px color-mix(in srgb, var(--vectfox-primary) 10%, transparent);
+        0 0 0 3px color-mix(in srgb, var(--vecttauri-primary) 15%, transparent),
+        0 2px 8px color-mix(in srgb, var(--vecttauri-primary) 10%, transparent);
 }
 
-#VectFox_settings .checkbox_label {
+#VectTauri_settings .checkbox_label {
     margin: 14px 0;
     padding: 14px 16px;
     background: linear-gradient(135deg,
         color-mix(in srgb, var(--SmartThemeBlurTintColor) 60%, transparent) 0%,
         color-mix(in srgb, var(--SmartThemeBlurTintColor) 40%, transparent) 100%);
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 10%, var(--SmartThemeBorderColor));
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 10%, var(--SmartThemeBorderColor));
     border-radius: 10px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
@@ -63,32 +63,32 @@
     overflow: hidden;
 }
 
-#VectFox_settings .checkbox_label::before {
+#VectTauri_settings .checkbox_label::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 4px;
     height: 100%;
-    background: var(--vectfox-primary);
+    background: var(--vecttauri-primary);
     transform: scaleY(0);
     transition: transform 0.2s ease;
 }
 
-#VectFox_settings .checkbox_label:hover {
+#VectTauri_settings .checkbox_label:hover {
     background: linear-gradient(135deg,
         color-mix(in srgb, var(--SmartThemeBlurTintColor) 80%, transparent) 0%,
         color-mix(in srgb, var(--SmartThemeBlurTintColor) 60%, transparent) 100%);
-    border-color: var(--vectfox-primary);
+    border-color: var(--vecttauri-primary);
     transform: translateX(2px);
 }
 
-#VectFox_settings .checkbox_label:hover::before {
+#VectTauri_settings .checkbox_label:hover::before {
     transform: scaleY(1);
 }
 
-#VectFox_settings input[type="checkbox"]:checked + span {
-    color: var(--vectfox-primary-bright);
+#VectTauri_settings input[type="checkbox"]:checked + span {
+    color: var(--vecttauri-primary-bright);
     font-weight: 600;
 }
 
@@ -96,19 +96,19 @@
  * PROVIDER SETTINGS WITH DEPTH
  * ============================================================================ */
 
-#VectFox_provider_settings {
+#VectTauri_provider_settings {
     margin-top: 0;
     padding-top: 4px;
 }
 
-.vectfox_provider_setting {
+.vecttauri_provider_setting {
     margin-top: 16px;
     padding: 16px 18px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 8%, var(--SmartThemeBlurTintColor)) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 4%, var(--SmartThemeBlurTintColor)) 100%);
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
-    border-left: 4px solid var(--vectfox-primary);
+        color-mix(in srgb, var(--vecttauri-primary) 8%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 4%, var(--SmartThemeBlurTintColor)) 100%);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
+    border-left: 4px solid var(--vecttauri-primary);
     border-radius: 10px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 6px color-mix(in srgb, black 8%, transparent);
@@ -118,24 +118,24 @@
 
 /* Decorative glow removed for compatibility */
 
-.vectfox_provider_setting:hover {
+.vecttauri_provider_setting:hover {
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 12%, var(--SmartThemeBlurTintColor)) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 6%, var(--SmartThemeBlurTintColor)) 100%);
-    border-color: var(--vectfox-primary);
+        color-mix(in srgb, var(--vecttauri-primary) 12%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 6%, var(--SmartThemeBlurTintColor)) 100%);
+    border-color: var(--vecttauri-primary);
     transform: translateX(4px);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
 }
 
 /* ============================================================================
  * CUSTOM SELECT DROPDOWN
  * ============================================================================ */
 
-.vectfox-select {
+.vecttauri-select {
     width: 100%;
     padding: 12px 16px;
     padding-right: 40px;
-    border: 2px solid color-mix(in srgb, var(--vectfox-primary) 25%, var(--SmartThemeBorderColor));
+    border: 2px solid color-mix(in srgb, var(--vecttauri-primary) 25%, var(--SmartThemeBorderColor));
     border-radius: 10px;
     color: var(--SmartThemeBodyColor);
     font-size: 1em;
@@ -152,37 +152,37 @@
     background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath fill='%23A0A0A0' d='M7 10L0 0h14z'/%3E%3C/svg%3E") no-repeat calc(100% - 14px) center / 14px 10px,
         linear-gradient(135deg,
-            color-mix(in srgb, var(--vectfox-primary) 10%, var(--SmartThemeBlurTintColor)) 0%,
-            color-mix(in srgb, var(--vectfox-primary) 5%, var(--SmartThemeBlurTintColor)) 100%);
+            color-mix(in srgb, var(--vecttauri-primary) 10%, var(--SmartThemeBlurTintColor)) 0%,
+            color-mix(in srgb, var(--vecttauri-primary) 5%, var(--SmartThemeBlurTintColor)) 100%);
     margin-bottom: 16px;
 }
 
-.vectfox-select:hover {
+.vecttauri-select:hover {
     background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath fill='%23A0A0A0' d='M7 10L0 0h14z'/%3E%3C/svg%3E") no-repeat calc(100% - 14px) center / 14px 10px,
         linear-gradient(135deg,
-            color-mix(in srgb, var(--vectfox-primary) 15%, var(--SmartThemeBlurTintColor)) 0%,
-            color-mix(in srgb, var(--vectfox-primary) 8%, var(--SmartThemeBlurTintColor)) 100%);
-    border-color: color-mix(in srgb, var(--vectfox-primary) 40%, var(--SmartThemeBorderColor));
+            color-mix(in srgb, var(--vecttauri-primary) 15%, var(--SmartThemeBlurTintColor)) 0%,
+            color-mix(in srgb, var(--vecttauri-primary) 8%, var(--SmartThemeBlurTintColor)) 100%);
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 40%, var(--SmartThemeBorderColor));
     box-shadow:
-        0 4px 12px color-mix(in srgb, var(--vectfox-primary) 12%, transparent),
+        0 4px 12px color-mix(in srgb, var(--vecttauri-primary) 12%, transparent),
         inset 0 1px 2px color-mix(in srgb, white 8%, transparent);
 }
 
-.vectfox-select:focus {
+.vecttauri-select:focus {
     outline: none;
     background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath fill='%23A0A0A0' d='M7 10L0 0h14z'/%3E%3C/svg%3E") no-repeat calc(100% - 14px) center / 14px 10px,
         linear-gradient(135deg,
-            color-mix(in srgb, var(--vectfox-primary) 10%, var(--SmartThemeBlurTintColor)) 0%,
-            color-mix(in srgb, var(--vectfox-primary) 5%, var(--SmartThemeBlurTintColor)) 100%);
-    border-color: var(--vectfox-primary);
+            color-mix(in srgb, var(--vecttauri-primary) 10%, var(--SmartThemeBlurTintColor)) 0%,
+            color-mix(in srgb, var(--vecttauri-primary) 5%, var(--SmartThemeBlurTintColor)) 100%);
+    border-color: var(--vecttauri-primary);
     box-shadow:
-        0 4px 16px color-mix(in srgb, var(--vectfox-primary) 20%, transparent),
-        0 0 0 4px color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+        0 4px 16px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent),
+        0 0 0 4px color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
 }
 
-.vectfox-select option {
+.vecttauri-select option {
     background: var(--SmartThemeBlurTintColor);
     color: var(--SmartThemeBodyColor);
     padding: 10px;
@@ -192,13 +192,13 @@
  * CUSTOM TEXT INPUTS
  * ============================================================================ */
 
-.vectfox-input {
+.vecttauri-input {
     width: 100%;
     padding: 12px 16px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 10%, var(--SmartThemeBlurTintColor)) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 5%, var(--SmartThemeBlurTintColor)) 100%);
-    border: 2px solid color-mix(in srgb, var(--vectfox-primary) 25%, var(--SmartThemeBorderColor));
+        color-mix(in srgb, var(--vecttauri-primary) 10%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 5%, var(--SmartThemeBlurTintColor)) 100%);
+    border: 2px solid color-mix(in srgb, var(--vecttauri-primary) 25%, var(--SmartThemeBorderColor));
     border-radius: 10px;
     color: var(--SmartThemeBodyColor);
     font-size: 1em;
@@ -210,31 +210,31 @@
     margin-bottom: 16px;
 }
 
-.vectfox-input:hover {
+.vecttauri-input:hover {
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 15%, var(--SmartThemeBlurTintColor)) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 8%, var(--SmartThemeBlurTintColor)) 100%);
-    border-color: color-mix(in srgb, var(--vectfox-primary) 40%, var(--SmartThemeBorderColor));
+        color-mix(in srgb, var(--vecttauri-primary) 15%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 8%, var(--SmartThemeBlurTintColor)) 100%);
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 40%, var(--SmartThemeBorderColor));
     box-shadow:
-        0 4px 12px color-mix(in srgb, var(--vectfox-primary) 12%, transparent),
+        0 4px 12px color-mix(in srgb, var(--vecttauri-primary) 12%, transparent),
         inset 0 1px 2px color-mix(in srgb, white 8%, transparent);
 }
 
-.vectfox-input:focus {
+.vecttauri-input:focus {
     outline: none;
-    border-color: var(--vectfox-primary);
+    border-color: var(--vecttauri-primary);
     box-shadow:
-        0 4px 16px color-mix(in srgb, var(--vectfox-primary) 20%, transparent),
-        0 0 0 4px color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+        0 4px 16px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent),
+        0 0 0 4px color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
 }
 
-.vectfox-input::placeholder {
+.vecttauri-input::placeholder {
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 50%, transparent);
     font-weight: 400;
 }
 
 /* Small/compact input variant */
-.vectfox-input-sm {
+.vecttauri-input-sm {
     padding: 8px 12px;
     font-size: 0.9em;
     font-weight: 500;
@@ -242,7 +242,7 @@
 }
 
 /* Number input - compact for inline use */
-.vectfox-input-number {
+.vecttauri-input-number {
     width: auto;
     min-width: 70px;
     padding: 8px 12px;
@@ -257,130 +257,130 @@
     transition: all 0.2s ease;
 }
 
-.vectfox-input-number:hover {
-    border-color: color-mix(in srgb, var(--vectfox-primary) 50%, var(--SmartThemeBorderColor));
+.vecttauri-input-number:hover {
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 50%, var(--SmartThemeBorderColor));
 }
 
-.vectfox-input-number:focus {
+.vecttauri-input-number:focus {
     outline: none;
-    border-color: var(--vectfox-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+    border-color: var(--vecttauri-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
 }
 
 /* ============================================================================
  * RANGE SLIDERS
  * ============================================================================ */
 
-.vectfox-slider {
+.vecttauri-slider {
     width: 100%;
     height: 8px;
     -webkit-appearance: none;
     appearance: none;
     background: linear-gradient(90deg,
-        color-mix(in srgb, var(--vectfox-primary) 20%, var(--SmartThemeBlurTintColor)) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 40%, var(--SmartThemeBlurTintColor)) 100%);
+        color-mix(in srgb, var(--vecttauri-primary) 20%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 40%, var(--SmartThemeBlurTintColor)) 100%);
     border-radius: 6px;
     outline: none;
     margin: 12px 0;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow:
         inset 0 1px 3px rgba(0, 0, 0, 0.2),
-        0 1px 2px color-mix(in srgb, var(--vectfox-primary) 10%, transparent);
+        0 1px 2px color-mix(in srgb, var(--vecttauri-primary) 10%, transparent);
 }
 
-.vectfox-slider:hover {
+.vecttauri-slider:hover {
     background: linear-gradient(90deg,
-        color-mix(in srgb, var(--vectfox-primary) 30%, var(--SmartThemeBlurTintColor)) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 50%, var(--SmartThemeBlurTintColor)) 100%);
+        color-mix(in srgb, var(--vecttauri-primary) 30%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 50%, var(--SmartThemeBlurTintColor)) 100%);
 }
 
 /* Webkit/Blink (Chrome, Safari, Edge) */
-.vectfox-slider::-webkit-slider-thumb {
+.vecttauri-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 22px;
     height: 22px;
     background: linear-gradient(135deg,
-        var(--vectfox-primary-bright) 0%,
-        var(--vectfox-primary) 100%);
+        var(--vecttauri-primary-bright) 0%,
+        var(--vecttauri-primary) 100%);
     border: 2px solid var(--SmartThemeBorderColor);
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow:
         0 2px 6px rgba(0, 0, 0, 0.3),
-        0 0 0 0 color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
+        0 0 0 0 color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
 }
 
-.vectfox-slider::-webkit-slider-thumb:hover {
+.vecttauri-slider::-webkit-slider-thumb:hover {
     transform: scale(1.15);
     box-shadow:
         0 3px 10px rgba(0, 0, 0, 0.4),
-        0 0 0 4px color-mix(in srgb, var(--vectfox-primary) 25%, transparent);
+        0 0 0 4px color-mix(in srgb, var(--vecttauri-primary) 25%, transparent);
 }
 
-.vectfox-slider::-webkit-slider-thumb:active {
+.vecttauri-slider::-webkit-slider-thumb:active {
     transform: scale(1.05);
     box-shadow:
         0 2px 6px rgba(0, 0, 0, 0.3),
-        0 0 0 6px color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+        0 0 0 6px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
 }
 
 /* Firefox */
-.vectfox-slider::-moz-range-thumb {
+.vecttauri-slider::-moz-range-thumb {
     width: 22px;
     height: 22px;
     background: linear-gradient(135deg,
-        var(--vectfox-primary-bright) 0%,
-        var(--vectfox-primary) 100%);
+        var(--vecttauri-primary-bright) 0%,
+        var(--vecttauri-primary) 100%);
     border: 2px solid var(--SmartThemeBorderColor);
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow:
         0 2px 6px rgba(0, 0, 0, 0.3),
-        0 0 0 0 color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
+        0 0 0 0 color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
 }
 
-.vectfox-slider::-moz-range-thumb:hover {
+.vecttauri-slider::-moz-range-thumb:hover {
     transform: scale(1.15);
     box-shadow:
         0 3px 10px rgba(0, 0, 0, 0.4),
-        0 0 0 4px color-mix(in srgb, var(--vectfox-primary) 25%, transparent);
+        0 0 0 4px color-mix(in srgb, var(--vecttauri-primary) 25%, transparent);
 }
 
-.vectfox-slider::-moz-range-thumb:active {
+.vecttauri-slider::-moz-range-thumb:active {
     transform: scale(1.05);
     box-shadow:
         0 2px 6px rgba(0, 0, 0, 0.3),
-        0 0 0 6px color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+        0 0 0 6px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
 }
 
 /* Firefox track */
-.vectfox-slider::-moz-range-track {
+.vecttauri-slider::-moz-range-track {
     height: 8px;
     background: transparent;
     border-radius: 6px;
 }
 
-.vectfox_info {
+.vecttauri_info {
     display: flex;
     align-items: flex-start;
     gap: 12px;
     padding: 14px 16px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 10%, transparent) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 5%, transparent) 100%);
-    border-left: 4px solid var(--vectfox-primary);
+        color-mix(in srgb, var(--vecttauri-primary) 10%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 5%, transparent) 100%);
+    border-left: 4px solid var(--vecttauri-primary);
     border-radius: 8px;
     color: var(--SmartThemeBodyColor);
     font-size: 0.92em;
     line-height: 1.6;
-    box-shadow: 0 2px 6px color-mix(in srgb, var(--vectfox-primary) 10%, transparent);
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--vecttauri-primary) 10%, transparent);
 }
 
-.vectfox_info i {
-    color: var(--vectfox-primary-bright);
+.vecttauri_info i {
+    color: var(--vecttauri-primary-bright);
     font-size: 1.2em;
     margin-top: 2px;
     flex-shrink: 0;
@@ -405,7 +405,7 @@
  * rule existed. They are legitimate local adjustments now, not workarounds.
  * ============================================================================ */
 
-.VectFox_hint {
+.VectTauri_hint {
     display: block;
     margin-top: 4px;
     margin-bottom: 2px;
@@ -426,16 +426,16 @@
  * block instead of three floating lines.
  * ============================================================================ */
 
-.vectfox-form-group {
+.vecttauri-form-group {
     display: block;
     margin-bottom: 20px;
 }
 
-.vectfox-form-group:last-child {
+.vecttauri-form-group:last-child {
     margin-bottom: 0;
 }
 
-.vectfox-label {
+.vecttauri-label {
     display: block;
     margin-bottom: 6px;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 90%, transparent);
@@ -445,10 +445,10 @@
 
 /* Section heading inside a card ("Extraction", "LLM Call Timeouts"). Already a
    block <p>, so this is purely the rhythm around it. */
-.vectfox-section-label {
+.vecttauri-section-label {
     margin: 22px 0 10px;
 }
 
-.vectfox-section-label:first-child {
+.vecttauri-section-label:first-child {
     margin-top: 0;
 }

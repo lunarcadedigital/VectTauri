@@ -67,17 +67,17 @@ describe('ProgressTracker — mobile (touch) full-screen modal', () => {
 
         expect(tracker.isModal).toBe(true);
 
-        const panel = document.getElementById('VectFox_progress_panel');
+        const panel = document.getElementById('VectTauri_progress_panel');
         expect(panel).not.toBeNull();
         // Full-screen modal layout (mirrors the Text Cleaning modal), not the
         // floating corner panel.
-        expect(panel.classList.contains('vectfox-modal')).toBe(true);
-        expect(panel.classList.contains('vectfox-progress-modal')).toBe(true);
-        expect(panel.querySelector('.vectfox-modal-overlay')).not.toBeNull();
+        expect(panel.classList.contains('vecttauri-modal')).toBe(true);
+        expect(panel.classList.contains('vecttauri-progress-modal')).toBe(true);
+        expect(panel.querySelector('.vecttauri-modal-overlay')).not.toBeNull();
 
         // Self-contained dismissal — its own close button, no dependency on any
         // other modal being open.
-        expect(document.getElementById('VectFox_progress_close')).not.toBeNull();
+        expect(document.getElementById('VectTauri_progress_close')).not.toBeNull();
 
         expect(tracker.isVisible).toBe(true);
         expect(panel.style.display).toBe('block');
@@ -88,7 +88,7 @@ describe('ProgressTracker — mobile (touch) full-screen modal', () => {
         tracker.show('EventBase Catch-Up', 26, 'Windows');
         tracker.complete(true, 'extracted 75 events from 26 windows');
 
-        const panel = document.getElementById('VectFox_progress_panel');
+        const panel = document.getElementById('VectTauri_progress_panel');
         expect(tracker.isComplete).toBe(true);
         // Deliberately NOT auto-hidden — the headless catch-up relies on the user
         // dismissing the full-screen panel themselves.
@@ -100,9 +100,9 @@ describe('ProgressTracker — mobile (touch) full-screen modal', () => {
         tracker = new ProgressTracker();
         tracker.show('EventBase Catch-Up', 26, 'Windows');
 
-        document.getElementById('VectFox_progress_close').click();
+        document.getElementById('VectTauri_progress_close').click();
 
-        const panel = document.getElementById('VectFox_progress_panel');
+        const panel = document.getElementById('VectTauri_progress_panel');
         expect(panel.style.display).toBe('none');
         expect(tracker.isVisible).toBe(false);
     });
@@ -111,16 +111,16 @@ describe('ProgressTracker — mobile (touch) full-screen modal', () => {
         // Simulate the auto-sync enable flow: the vectorizer modal is NOT open.
         // A stray, hidden modal element shouldn't be revealed/removed by the tracker.
         const stray = document.createElement('div');
-        stray.id = 'vectfox_content_vectorizer_modal';
+        stray.id = 'vecttauri_content_vectorizer_modal';
         stray.style.display = 'none';
         document.body.appendChild(stray);
 
         tracker = new ProgressTracker();
         tracker.show('EventBase Catch-Up', 26, 'Windows');
         tracker.complete(true, 'done');
-        document.getElementById('VectFox_progress_close').click();
+        document.getElementById('VectTauri_progress_close').click();
 
-        const after = document.getElementById('vectfox_content_vectorizer_modal');
+        const after = document.getElementById('vecttauri_content_vectorizer_modal');
         expect(after).not.toBeNull();
         expect(after.style.display).toBe('none'); // untouched
     });
@@ -135,12 +135,12 @@ describe('ProgressTracker — desktop (non-touch) floating panel', () => {
 
         expect(tracker.isModal).toBe(false);
 
-        const panel = document.getElementById('VectFox_progress_panel');
+        const panel = document.getElementById('VectTauri_progress_panel');
         expect(panel).not.toBeNull();
-        expect(panel.classList.contains('vectfox-progress-panel')).toBe(true);
-        expect(panel.classList.contains('vectfox-modal')).toBe(false);
-        expect(panel.querySelector('.vectfox-modal-overlay')).toBeNull();
+        expect(panel.classList.contains('vecttauri-progress-panel')).toBe(true);
+        expect(panel.classList.contains('vecttauri-modal')).toBe(false);
+        expect(panel.querySelector('.vecttauri-modal-overlay')).toBeNull();
         // Close button exists on both layouts (shared header).
-        expect(document.getElementById('VectFox_progress_close')).not.toBeNull();
+        expect(document.getElementById('VectTauri_progress_close')).not.toBeNull();
     });
 });

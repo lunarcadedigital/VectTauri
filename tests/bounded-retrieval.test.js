@@ -1,7 +1,7 @@
 /**
  * runBoundedRetrieval — the shared retrieval contract.
  *
- * Every retrieval path in VectFox (Lorebook WI, EventBase, chunk retrieval,
+ * Every retrieval path in VectTauri (Lorebook WI, EventBase, chunk retrieval,
  * summarizer injection) runs through this one function so all four obey the same
  * three rules:
  *   1. bounded    — a hung embedding provider can never freeze a generation

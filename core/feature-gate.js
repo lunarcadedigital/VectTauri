@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox MASTER SWITCH
+ * VectTauri MASTER SWITCH
  * ============================================================================
- * Single source of truth for the global on/off toggle. VectFox does its
+ * Single source of truth for the global on/off toggle. VectTauri does its
  * automatic work only when this returns true: prompt injection (chunks,
  * EventBase, Summarizer, Lorebook WI), ghosting, EventBase auto-sync, the
  * backend/network startup, and background refreshes that call the backend or
- * load lorebooks. Switching OFF empties every VectFox prompt block at once;
+ * load lorebooks. Switching OFF empties every VectTauri prompt block at once;
  * switching ON re-runs the startup and refresh work that was skipped.
  *
  * Default ON: the flag is treated as enabled unless it is *explicitly* set to
@@ -16,7 +16,7 @@
  *
  * Not gated: explicit, user-initiated actions (manual vectorization, Database
  * Browser, the dry-run query tester, the settings panel) stay usable so the user
- * can still inspect and manage data while VectFox is switched off. Settings
+ * can still inspect and manage data while VectTauri is switched off. Settings
  * migrations and UI refreshes that read only local state keep running too.
  * ============================================================================
  */
@@ -24,10 +24,10 @@
 import { extension_settings } from '../../../../extensions.js';
 
 /**
- * @param {object} [settings] - extension_settings.vectfox (defaults to the live store)
- * @returns {boolean} true when VectFox's automatic runtime work is enabled
+ * @param {object} [settings] - extension_settings.vecttauri (defaults to the live store)
+ * @returns {boolean} true when VectTauri's automatic runtime work is enabled
  */
-export function isVectFoxEnabled(settings) {
-    const store = settings || extension_settings?.vectfox;
+export function isVectTauriEnabled(settings) {
+    const store = settings || extension_settings?.vecttauri;
     return store?.enabled !== false;
 }

@@ -36,7 +36,7 @@ import { log } from './log.js';
  * Auto-sync uses this instead of settings.eventbase_window_size so its cadence is
  * independent of the one-off Vectorize Content window. Single source of truth for
  * the conversion — used by the auto-sync caller AND the auto-sync status check.
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {number} window size in messages
  */
 export function getAutoSyncWindowSize(settings) {
@@ -62,7 +62,7 @@ export function getAutoSyncWindowSize(settings) {
  * turn done". See plans/executed/autosync-settle-lag.md.
  *
  * @param {object[]} messages - filtered chat messages
- * @param {object}   settings - VectFox settings
+ * @param {object}   settings - VectTauri settings
  * @returns {number} count of messages eligible for extraction
  */
 export function getCommitBoundary(messages, settings) {
@@ -93,7 +93,7 @@ export function getCommitBoundary(messages, settings) {
  * @param {object} params
  * @param {object[]} params.messages    - Chat messages to process (array of ST message objects)
  * @param {string}  [params.chatUUID]   - Override chat UUID
- * @param {object}   params.settings    - VectFox settings
+ * @param {object}   params.settings    - VectTauri settings
  * @param {AbortSignal|null} [params.abortSignal]
  * @param {{ strategy?: string, batchSize?: number, totalChunks?: number }|null} [params.progressPlan]
  * @returns {Promise<{ eventsExtracted: number, windowsProcessed: number, windowsSkipped: number, windowsTimedOut?: number, windowsFailed?: number }>}
@@ -150,7 +150,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
     // import path, loader, and cleanupOrphanedMeta. Bare-ID writes would land in
     // a different bucket and get nuked by the orphan-cleanup pass.
     const _startChatId = getCurrentChatId();
-    if (_startChatId && !collectionId.startsWith(COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT)) {
+    if (_startChatId && !collectionId.startsWith(COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT)) {
         const _startRegistryKey = buildRegistryKey(collectionId, settings);
         setCollectionLock(_startRegistryKey, _startChatId);
         setCollectionMeta(_startRegistryKey, { scope: 'chat' });
@@ -199,7 +199,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
 
     // If the fingerprint cache says windows were extracted but Qdrant has no data
     // (e.g. collection was deleted externally), reset the cache so we start fresh.
-    const cacheEntries = extension_settings?.vectfox?.eventbase_extracted_windows?.[uuid];
+    const cacheEntries = extension_settings?.vecttauri?.eventbase_extracted_windows?.[uuid];
     if (Array.isArray(cacheEntries) && cacheEntries.length > 0) {
         try {
             const existingHashes = collectionId ? await getSavedHashes(collectionId, settings) : [];
@@ -316,7 +316,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
         try {
             toastr.error(
                 `EventBase extraction timed out after ${secs}s. Raise "Extraction Timeout" in the EventBase settings, or check that your model/endpoint is responding. Events from timed-out windows were not stored.`,
-                'VectFox — EventBase timeout',
+                'VectTauri — EventBase timeout',
                 { timeOut: 0, extendedTimeOut: 0 },
             );
         } catch (_) { /* toastr unavailable (e.g. unit tests) */ }
@@ -387,11 +387,11 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
     const windowsToExtract = windows.length - fastForwardSkipped;
     const popupAllowed = isAutoSync && windowsToExtract > 0 && !suppressAutoSyncPopup && settings.eventbase_autosync_popup !== false;
     log.verbose(`[EventBase Popup] auto-sync gate: isAutoSync=${isAutoSync}, windowsToExtract=${windowsToExtract}, suppressAutoSyncPopup=${suppressAutoSyncPopup}, eventbase_autosync_popup=${settings.eventbase_autosync_popup} → fire=${popupAllowed}`);
-    if (popupAllowed) globalThis.toastr?.info('Auto-Sync: extracting events...', 'VectFox', { timeOut: 3000 });
+    if (popupAllowed) globalThis.toastr?.info('Auto-Sync: extracting events...', 'VectTauri', { timeOut: 3000 });
 
     // Lifecycle line so the user can confirm auto-sync ran. popupShown=false with
     // windowsToExtract > 0 means the popup was suppressed (e.g. MESSAGE_SENT).
-    if (isAutoSync) log.lifecycle(`[VectFox AutoSync] running — messages=${messages.length}, windowsToExtract=${windowsToExtract}, popupShown=${popupAllowed}`);
+    if (isAutoSync) log.lifecycle(`[VectTauri AutoSync] running — messages=${messages.length}, windowsToExtract=${windowsToExtract}, popupShown=${popupAllowed}`);
 
     // -----------------------------------------------------------------------
     // Pipelined extract/insert loop (see plans/eventbase-extract-insert-pipeline.md).
@@ -590,7 +590,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
                 // If we got here after a retry, signal recovery to the user so the
                 // earlier toast ("retrying...") gets a closing parenthesis.
                 if (attempt > 1) {
-                    try { toastr.success(`Insert recovered on attempt ${attempt}/3`, 'VectFox', { timeOut: 4000 }); } catch (_) {}
+                    try { toastr.success(`Insert recovered on attempt ${attempt}/3`, 'VectTauri', { timeOut: 4000 }); } catch (_) {}
                 }
                 return; // success
             } catch (err) {
@@ -619,7 +619,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
                     try {
                         toastr.warning(
                             `Insert failed (attempt ${attempt}/3), retrying in ${backoffMs/1000}s. Server said: ${(err?.message || '').slice(0, 120)}`,
-                            'VectFox — retrying',
+                            'VectTauri — retrying',
                             { timeOut: backoffMs + 500 },
                         );
                     } catch (_) {}
@@ -970,7 +970,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
     // Notify the UI so the Chat Auto-Sync LED can flip from yellow → green.
     // Cheap signal; listeners just re-evaluate state, they don't read this payload.
     if (typeof document !== 'undefined' && typeof CustomEvent === 'function') {
-        document.dispatchEvent(new CustomEvent('vectfox:eventbase-synced', {
+        document.dispatchEvent(new CustomEvent('vecttauri:eventbase-synced', {
             detail: { collectionId, eventsExtracted, windowsProcessed }
         }));
     }
@@ -983,7 +983,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings, abor
 // ---------------------------------------------------------------------------
 
 /**
- * Scan the registry for archive event collections (VectFox_archiveevent_*) that are
+ * Scan the registry for archive event collections (VectTauri_archiveevent_*) that are
  * enabled and locked to the current chat. These are included in Phase A retrieval.
  *
  * Uses direct enabled + lock checks (not shouldCollectionActivate) because archive
@@ -999,7 +999,7 @@ function _gatherArchiveEventCollections(currentChatId) {
     for (const registryKey of registry) {
         const parsed = parseRegistryKey(registryKey);
         const colId = parsed.collectionId;
-        if (!colId?.startsWith(COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT)) continue;
+        if (!colId?.startsWith(COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT)) continue;
 
         // Pause and lock metadata can live under either the registry key (backend:collectionId)
         // or the bare collectionId — the DB Browser pause toggle uses registry key while the
@@ -1024,7 +1024,7 @@ function _gatherArchiveEventCollections(currentChatId) {
 }
 
 /**
- * Scan the registry for live EventBase collections (VectFox_eventbase_*) that
+ * Scan the registry for live EventBase collections (VectTauri_eventbase_*) that
  * are enabled and locked to the current chat.
  *
  * The chat UUID embedded in the ID is only used for write-side collision
@@ -1043,7 +1043,7 @@ function _gatherLockedEventBaseCollections(currentChatId) {
     for (const registryKey of registry) {
         const parsed = parseRegistryKey(registryKey);
         const colId = parsed.collectionId;
-        if (!colId?.startsWith(COLLECTION_PREFIXES.VECTFOX_EVENTBASE)) continue;
+        if (!colId?.startsWith(COLLECTION_PREFIXES.VECTTAURI_EVENTBASE)) continue;
         if (seenIds.has(colId)) continue;
 
         const candidateKeys = [registryKey, colId].filter(Boolean);
@@ -1072,7 +1072,7 @@ function _gatherLockedEventBaseCollections(currentChatId) {
  * @param {object} params
  * @param {object[]} params.chat       - Full ST chat array
  * @param {string}   params.searchText - Query text (from buildSearchQuery)
- * @param {object}   params.settings   - VectFox settings
+ * @param {object}   params.settings   - VectTauri settings
  * @param {string}  [params.chatUUID]  - Override chat UUID
  * @returns {Promise<void>}
  */
@@ -1104,7 +1104,7 @@ export async function runEventBaseRetrieval({ chat, searchText, settings, chatUU
 
     log.verbose(`[EventBase Popup] on-start gate: retrieval_popup_on_start=${settings.retrieval_popup_on_start}, dryRun=${dryRun} → fire=${!!settings.retrieval_popup_on_start}`);
     if (settings.retrieval_popup_on_start) {
-        toastr.info('Retrieving context from EventBase...', 'VectFox Retrieval');
+        toastr.info('Retrieving context from EventBase...', 'VectTauri Retrieval');
     }
 
     // Extract the user's most recent message for focused keyword extraction.
@@ -1188,7 +1188,7 @@ export async function runEventBaseRetrieval({ chat, searchText, settings, chatUU
             const msg = rawCount > 0
                 ? `EventBase: ${rawCount} event(s) already in context`
                 : 'EventBase: no events matched';
-            toastr.info(msg, 'VectFox Retrieval');
+            toastr.info(msg, 'VectTauri Retrieval');
         }
         if (dryRun) return { injectionText: null, eventCount: 0, lockedCollectionsCount: lockedLiveCollections.length, archiveCollectionsCount: archiveCollections.length };
         setExtensionPrompt(EVENTBASE_PROMPT_TAG, '', settings.position, settings.depth, false);
@@ -1207,7 +1207,7 @@ export async function runEventBaseRetrieval({ chat, searchText, settings, chatUU
 
     log.verbose(`[EventBase Popup] success gate: retrieval_popup_on_result=${settings.retrieval_popup_on_result}, dryRun=${dryRun}, injectedCount=${injectedCount} → fire=${!!settings.retrieval_popup_on_result}`);
     if (settings.retrieval_popup_on_result) {
-        toastr.success(`EventBase: ${injectedCount} event(s) injected`, 'VectFox Retrieval');
+        toastr.success(`EventBase: ${injectedCount} event(s) injected`, 'VectTauri Retrieval');
     }
 
     // Apply global RAG context if configured (same as legacy chunk path)
@@ -1296,7 +1296,7 @@ function _estimateProcessedLegacyChunks({ coveredMessages, totalMessages, totalC
  * Returns false when messages.length < windowSize (nothing extractable yet).
  *
  * @param {object[]} messages  - Filtered chat messages (non-empty)
- * @param {object}   settings  - VectFox settings
+ * @param {object}   settings  - VectTauri settings
  * @param {string}   chatUUID  - Current chat UUID
  * @returns {boolean}
  */
@@ -1317,7 +1317,7 @@ export function isChatFullyVectorized(messages, settings, chatUUID, windowSizeOv
  *
  * Reads the registry, the eventbase window cache, and extension_settings. The one
  * backend call is the vectorization-tip probe (ensureVectorizationTip), which runs
- * only when the tip is not cached yet. Passive refreshes while VectFox is disabled
+ * only when the tip is not cached yet. Passive refreshes while VectTauri is disabled
  * pass `shouldProbeBackend: false` (report the cached tip alone, never call the
  * backend) and `shouldLogResolution: false` (no write-target diagnostics).
  *
@@ -1338,7 +1338,7 @@ export function isChatFullyVectorized(messages, settings, chatUUID, windowSizeOv
  *     chatMessageCount, commitBoundary,
  *     markerValue?, vectorizationTip? }                                — collection exists, last window already extracted
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @param {object} [options]
  * @param {boolean} [options.shouldProbeBackend=true] - false = never query the backend for the tip
  * @param {boolean} [options.shouldLogResolution=true] - false = skip the `[EventBase][resolve]` diagnostics
@@ -1374,7 +1374,7 @@ export async function getChatAutoSyncStatus(settings, { shouldProbeBackend = tru
     // The marker may be undefined when auto-sync was never enabled — in that
     // case we don't have enough info to detect the ahead-of-chat condition,
     // so fall through to the existing partial / fully-vectorized branch.
-    const markerValue = extension_settings?.vectfox?.eventbase_autosync_start_marker?.[uuid];
+    const markerValue = extension_settings?.vecttauri?.eventbase_autosync_start_marker?.[uuid];
     if (typeof markerValue === 'number' && markerValue > chatMessageCount) {
         return {
             state: 'vectorization-ahead',

@@ -4,9 +4,9 @@
  * cache lives in the same module).
  *
  * Locks in the part most prone to silent breakage: sort by source_window_end
- * desc → slice top N → render chronologically inside <VectFoxSummarizer> tags →
+ * desc → slice top N → render chronologically inside <VectTauriSummarizer> tags →
  * strip [EVENT_TYPE] prefixes, plus the self-clearing early-exits. The depth
- * refresh must not load lorebooks while VectFox is disabled, and must warn
+ * refresh must not load lorebooks while VectTauri is disabled, and must warn
  * instead of failing silently.
  *
  * All host/sibling modules are mocked (same pattern as backend-manager.test.js),
@@ -34,7 +34,7 @@ vi.mock('../../../../world-info.js', () => ({ getWorldInfoSettings: vi.fn(() => 
 vi.mock('../backends/backend-manager.js', () => ({ getBackend: vi.fn(async () => ({ listChunks: mocks.listChunks })) }));
 vi.mock('../core/collection-ids.js', () => ({ getChatUUID: mocks.getChatUUID }));
 vi.mock('../core/eventbase-store.js', () => ({ resolveActiveEventBaseCollection: mocks.resolveActive }));
-vi.mock('../core/constants.js', () => ({ SUMMARIZER_PROMPT_TAG: '3_vectfox_summarizer' }));
+vi.mock('../core/constants.js', () => ({ SUMMARIZER_PROMPT_TAG: '3_vecttauri_summarizer' }));
 vi.mock('../core/log.js', () => ({ log: { warn() {}, error() {}, domain() {}, trace() {}, verbose() {}, lifecycle() {}, enabled: () => false } }));
 
 import { runSummarizerInjection, buildSummarizerInjection, refreshWorldInfoEntryDepthCache } from '../core/summarizer-injection.js';
@@ -64,7 +64,7 @@ describe('runSummarizerInjection', () => {
     it('clears the slot and no-ops when disabled', async () => {
         const r = await runSummarizerInjection(SETTINGS({ summarizer_injection_enabled: false }));
         expect(r.injected).toBe(0);
-        expect(mocks.setExtensionPrompt).toHaveBeenCalledWith('3_vectfox_summarizer', '', 1, 4, false);
+        expect(mocks.setExtensionPrompt).toHaveBeenCalledWith('3_vecttauri_summarizer', '', 1, 4, false);
         expect(mocks.listChunks).not.toHaveBeenCalled();
     });
 
@@ -72,7 +72,7 @@ describe('runSummarizerInjection', () => {
         mocks.getChatUUID.mockReturnValue(null);
         const r = await runSummarizerInjection(SETTINGS());
         expect(r.injected).toBe(0);
-        expect(lastInjected()).toEqual(['3_vectfox_summarizer', '', 1, 4, false]);
+        expect(lastInjected()).toEqual(['3_vecttauri_summarizer', '', 1, 4, false]);
     });
 
     it('clears the slot when no active collection resolves', async () => {
@@ -89,16 +89,16 @@ describe('runSummarizerInjection', () => {
         expect(lastInjected()[1]).toBe('');
     });
 
-    it('injects top-N by source_window_end desc, chronological, in <VectFoxSummarizer>, prefixes stripped', async () => {
+    it('injects top-N by source_window_end desc, chronological, in <VectTauriSummarizer>, prefixes stripped', async () => {
         mocks.listChunks.mockResolvedValue({ items: [
             ev(2, '[MOVE] A'), ev(8, '[TALK] D'), ev(4, '[MOVE] B'), ev(6, 'C'),
         ] });
         const r = await runSummarizerInjection(SETTINGS({ summarizer_injection_count: 3 }));
         expect(r.injected).toBe(3);
         const [tag, text] = lastInjected();
-        expect(tag).toBe('3_vectfox_summarizer');
+        expect(tag).toBe('3_vecttauri_summarizer');
         // top-3 by swe desc = D(8), C(6), B(4); rendered chronological with recency tags
-        expect(text).toBe('<VectFoxSummarizer>\n(3 turns ago) B\n(2 turns ago) C\n(latest turn) D\n</VectFoxSummarizer>');
+        expect(text).toBe('<VectTauriSummarizer>\n(3 turns ago) B\n(2 turns ago) C\n(latest turn) D\n</VectTauriSummarizer>');
     });
 
     it('events sharing a source_window_end (multiple per turn) share one recency label', async () => {
@@ -106,14 +106,14 @@ describe('runSummarizerInjection', () => {
         mocks.listChunks.mockResolvedValue({ items: [ev(2119, 'A'), ev(2113, 'C'), ev(2119, 'B')] });
         const r = await runSummarizerInjection(SETTINGS({ summarizer_injection_count: 10 }));
         expect(r.injected).toBe(3);
-        expect(lastInjected()[1]).toBe('<VectFoxSummarizer>\n(2 turns ago) C\n(latest turn) B\n(latest turn) A\n</VectFoxSummarizer>');
+        expect(lastInjected()[1]).toBe('<VectTauriSummarizer>\n(2 turns ago) C\n(latest turn) B\n(latest turn) A\n</VectTauriSummarizer>');
     });
 
     it('injects all when fewer events than N exist (no padding)', async () => {
         mocks.listChunks.mockResolvedValue({ items: [ev(2, 'X'), ev(4, 'Y')] });
         const r = await runSummarizerInjection(SETTINGS({ summarizer_injection_count: 10 }));
         expect(r.injected).toBe(2);
-        expect(lastInjected()[1]).toBe('<VectFoxSummarizer>\n(2 turns ago) X\n(latest turn) Y\n</VectFoxSummarizer>');
+        expect(lastInjected()[1]).toBe('<VectTauriSummarizer>\n(2 turns ago) X\n(latest turn) Y\n</VectTauriSummarizer>');
     });
 
     it('clamps count to 50', async () => {
@@ -128,7 +128,7 @@ describe('runSummarizerInjection', () => {
         mocks.listChunks.mockResolvedValue({ items: [{ text: 'hash-only', metadata: {} }, ev(2, 'real')] });
         const r = await runSummarizerInjection(SETTINGS());
         expect(r.injected).toBe(1);
-        expect(lastInjected()[1]).toBe('<VectFoxSummarizer>\n(latest turn) real\n</VectFoxSummarizer>');
+        expect(lastInjected()[1]).toBe('<VectTauriSummarizer>\n(latest turn) real\n</VectTauriSummarizer>');
     });
 });
 
@@ -137,7 +137,7 @@ describe('buildSummarizerInjection (Debug Summarizer preview path)', () => {
         mocks.listChunks.mockResolvedValue({ items: [ev(4, 'Y'), ev(2, 'X')] });
         const out = await buildSummarizerInjection(SETTINGS({ summarizer_injection_enabled: false, summarizer_injection_count: 5 }));
         expect(out.count).toBe(2);
-        expect(out.text).toBe('<VectFoxSummarizer>\n(2 turns ago) X\n(latest turn) Y\n</VectFoxSummarizer>');
+        expect(out.text).toBe('<VectTauriSummarizer>\n(2 turns ago) X\n(latest turn) Y\n</VectTauriSummarizer>');
         // Preview must NOT touch the prompt slot.
         expect(mocks.setExtensionPrompt).not.toHaveBeenCalled();
     });
@@ -194,7 +194,7 @@ describe('buildSummarizerInjection (Debug Summarizer preview path)', () => {
         const out = await buildSummarizerInjection(SETTINGS({ summarizer_injection_full_detail: false, summarizer_injection_count: 3 }));
         expect(out.count).toBe(3);
         // top-3 by swe = 2119, 2113, 2111; rendered chronological
-        expect(out.text).toBe('<VectFoxSummarizer>\n(3 turns ago) third\n(2 turns ago) second\n(latest turn) newest\n</VectFoxSummarizer>');
+        expect(out.text).toBe('<VectTauriSummarizer>\n(3 turns ago) third\n(2 turns ago) second\n(latest turn) newest\n</VectTauriSummarizer>');
     });
 
     it('full-detail mode lists structured fields (content-only) under each summary', async () => {
@@ -210,7 +210,7 @@ describe('buildSummarizerInjection (Debug Summarizer preview path)', () => {
         const out = await buildSummarizerInjection(SETTINGS({ summarizer_injection_full_detail: true, summarizer_injection_count: 1 }));
         expect(out.count).toBe(1);
         expect(out.text).toBe([
-            '<VectFoxSummarizer>',
+            '<VectTauriSummarizer>',
             '(latest turn) Pact sealed',
             '  Cause: tension rose',
             '  Result: alliance formed',
@@ -222,7 +222,7 @@ describe('buildSummarizerInjection (Debug Summarizer preview path)', () => {
             '  Keywords: pact, accord',
             '  Open threads: who funds it?',
             '  Message index: 8',
-            '</VectFoxSummarizer>',
+            '</VectTauriSummarizer>',
         ].join('\n'));
     });
 
@@ -232,11 +232,11 @@ describe('buildSummarizerInjection (Debug Summarizer preview path)', () => {
         ] });
         const out = await buildSummarizerInjection(SETTINGS({ summarizer_injection_full_detail: true }));
         expect(out.text).toBe([
-            '<VectFoxSummarizer>',
+            '<VectTauriSummarizer>',
             '(latest turn) just a summary',
             '  Keywords: k1',
             '  Message index: 4',
-            '</VectFoxSummarizer>',
+            '</VectTauriSummarizer>',
         ].join('\n'));
     });
 });
@@ -251,7 +251,7 @@ describe('refreshWorldInfoEntryDepthCache', () => {
         expect(getSortedEntries).not.toHaveBeenCalled();
     });
 
-    it('loads the active lorebooks while VectFox is on', async () => {
+    it('loads the active lorebooks while VectTauri is on', async () => {
         await refreshWorldInfoEntryDepthCache({ enabled: true });
         expect(getSortedEntries).toHaveBeenCalledTimes(1);
     });

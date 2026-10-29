@@ -34,7 +34,7 @@ export function notifyInvalidModel(message) {
     if (!message || _notified.has(message)) return;
     _notified.add(message);
     try {
-        toastr.error(message, 'VectFox — model no longer valid', {
+        toastr.error(message, 'VectTauri — model no longer valid', {
             timeOut: 0,
             extendedTimeOut: 0,
         });
@@ -87,7 +87,7 @@ export function notifyConnectionError(contextLabel, url, detail) {
     try {
         toastr.error(
             `Couldn't connect to the ${contextLabel} endpoint${where}. Check the URL is correct and the server is running — we can't proceed until this is fixed.${why}`,
-            `VectFox — can't reach ${contextLabel}`,
+            `VectTauri — can't reach ${contextLabel}`,
             { timeOut: 0, extendedTimeOut: 0 },
         );
     } catch (_) { /* toastr unavailable (e.g. unit tests) */ }
@@ -108,7 +108,7 @@ export function resetConnectionNotifications() {
 // (src/endpoints/backends/chat-completions.js, the `else` branch after fetch).
 //
 // From the browser that is indistinguishable from a model that answered with
-// nothing: a 200 whose choices[0].message.content is absent. VectFox used to
+// nothing: a 200 whose choices[0].message.content is absent. VectTauri used to
 // classify it as kind:'empty' and log "returned empty response", so a wrong key,
 // an unsupported parameter, or a rejected prompt all produced the same content-
 // free per-window skip. That is the silent-model-failure class again (issue #11),
@@ -150,7 +150,7 @@ export function notifyUpstreamRejection(contextLabel, model, detail, isQuotaErro
             `The provider rejected the ${contextLabel} request for model "${model}" (${detail}). ${why} `
             + `SillyTavern only forwards the status text to the browser — the provider's full error is in the `
             + `SillyTavern SERVER console ("Chat completion request error").`,
-            `VectFox — ${contextLabel} request rejected`,
+            `VectTauri — ${contextLabel} request rejected`,
             { timeOut: 0, extendedTimeOut: 0 },
         );
     } catch (_) { /* toastr unavailable (e.g. unit tests) */ }
@@ -200,7 +200,7 @@ export function notifyRetrievalFailure(contextLabel, sourceName, detail) {
             // 320, not 200: a timeout now carries an explanation of the likely
             // cause (see core/bounded-retrieval.js) and 200 clipped it mid-sentence.
             + `The message still sent. Details: ${message.slice(0, 320)}`,
-            `VectFox — ${contextLabel} retrieval failed`,
+            `VectTauri — ${contextLabel} retrieval failed`,
             { timeOut: 12000, extendedTimeOut: 4000 },
         );
     } catch (_) { /* toastr unavailable (e.g. unit tests) */ }
@@ -245,7 +245,7 @@ export function notifyNoActiveCollections(contextLabel, scopeKey, reason) {
         toastr.warning(
             `${contextLabel} is ON but nothing was searched this turn. ${reason} `
             + `Open the Database Browser to lock the collection to this chat or character.`,
-            `VectFox — ${contextLabel} inactive`,
+            `VectTauri — ${contextLabel} inactive`,
             { timeOut: 15000, extendedTimeOut: 5000 },
         );
     } catch (_) { /* toastr unavailable (e.g. unit tests) */ }
@@ -259,7 +259,7 @@ export function resetNoActiveCollectionsNotifications() {
 /**
  * Turn OFF auto-sync for the current chat's EventBase collection(s) so a bad model
  * stops silently re-failing on every message. The user re-enables it after fixing
- * the model. Dispatches `vectfox:collections-updated` so the UI checkbox updates.
+ * the model. Dispatches `vecttauri:collections-updated` so the UI checkbox updates.
  *
  * @param {string} chatUUID
  * @param {string} backend - registry backend, i.e. getRegistryBackend(settings.vector_backend)
@@ -275,6 +275,6 @@ export async function pauseAutoSyncForChat(chatUUID, backend) {
         paused++;
     }
     if (paused > 0) {
-        try { document.dispatchEvent(new CustomEvent('vectfox:collections-updated')); } catch (_) {}
+        try { document.dispatchEvent(new CustomEvent('vecttauri:collections-updated')); } catch (_) {}
     }
 }

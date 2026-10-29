@@ -2,7 +2,7 @@
  * ============================================================================
  * BOUNDED RETRIEVAL
  * ============================================================================
- * One place for the rule every retrieval path in VectFox has to follow:
+ * One place for the rule every retrieval path in VectTauri has to follow:
  *
  *   A retrieval must not freeze generation, must not break it when it fails,
  *   and must not fail SILENTLY.
@@ -44,7 +44,7 @@ const TIMEOUT_PATTERN = /timed out|timeout|aborted/i;
  * @param {string} options.sourceName - what was being searched, in the user's words
  * @param {string} options.timeoutMessage - message for the timeout Error
  * @param {T} [options.fallback] - value returned when the retrieval fails (default undefined)
- * @param {object} [options.settings] - VectFox settings; supplies the budget
+ * @param {object} [options.settings] - VectTauri settings; supplies the budget
  *   (`retrieval_timeout_ms`) and names the embedding provider in the timeout
  *   explanation. Omitting it costs the "why" and falls back to the default
  *   budget, not the surfacing.
@@ -76,7 +76,7 @@ export async function runBoundedRetrieval(promise, { contextLabel, sourceName, t
             : rawMessage;
 
         log.error(
-            `VectFox ${contextLabel}: retrieval failed (non-fatal — the message still sends, without this memory):`,
+            `VectTauri ${contextLabel}: retrieval failed (non-fatal — the message still sends, without this memory):`,
             detail,
         );
         // De-duped per (context, source, message) inside the notifier, so a

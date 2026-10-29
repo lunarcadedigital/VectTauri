@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VectFox CENTRAL LOG HELPER
+ * VectTauri CENTRAL LOG HELPER
  * ============================================================================
  * One verbosity dimension + orthogonal per-domain deep-dives. Replaces the
  * old ad-hoc mix of `console.log` + scattered debug-flag checks
@@ -29,12 +29,12 @@ const VERBOSITY_LEVELS = { off: 0, lifecycle: 1, verbose: 2, trace: 3 };
 export const LOG_DOMAINS = ['raw_llm', 'qdrant', 'standard', 'injection', 'agent', 'rerank'];
 
 function getVerbosity() {
-    const setting = extension_settings?.vectfox?.debug_verbosity;
+    const setting = extension_settings?.vecttauri?.debug_verbosity;
     return VERBOSITY_LEVELS[setting] ?? VERBOSITY_LEVELS.off;
 }
 
 function getDomain(name) {
-    return extension_settings?.vectfox?.debug_domain?.[name] === true;
+    return extension_settings?.vecttauri?.debug_domain?.[name] === true;
 }
 
 export const log = {

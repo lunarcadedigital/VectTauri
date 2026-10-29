@@ -1,11 +1,11 @@
 /**
  * ============================================================================
- * VECTFOX SEARCH DEBUG MODAL STYLES
+ * VECTTAURI SEARCH DEBUG MODAL STYLES
  * ============================================================================
  * Styling for the RAG pipeline debug view
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -13,7 +13,7 @@
  * MODAL CONTAINER
  * ============================================================================ */
 
-.vectfox-search-debug-content {
+.vecttauri-search-debug-content {
     max-width: 900px;
     width: 95%;
     max-height: 85vh;
@@ -24,7 +24,7 @@
     overflow: hidden;
 }
 
-.vectfox-search-debug-body {
+.vecttauri-search-debug-body {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -38,33 +38,33 @@
  * DEBUG CARDS
  * ============================================================================ */
 
-.vectfox-debug-card {
+.vecttauri-debug-card {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
     border-radius: 12px;
     flex-shrink: 0;
 }
 
-.vectfox-debug-card-header {
+.vecttauri-debug-card-header {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    background: color-mix(in srgb, var(--vectfox-primary) 10%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+    background: color-mix(in srgb, var(--vecttauri-primary) 10%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
     font-weight: 600;
     font-size: 0.95em;
 }
 
-.vectfox-debug-card-header i {
-    color: var(--vectfox-primary);
+.vecttauri-debug-card-header i {
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-debug-card-body {
+.vecttauri-debug-card-body {
     padding: 16px;
 }
 
-.vectfox-debug-timestamp {
+.vecttauri-debug-timestamp {
     margin-left: auto;
     font-size: 0.8em;
     font-weight: 400;
@@ -75,7 +75,7 @@
  * QUERY DISPLAY
  * ============================================================================ */
 
-.vectfox-debug-query-text {
+.vecttauri-debug-query-text {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.9em;
     line-height: 1.5;
@@ -88,27 +88,27 @@
     overflow-y: auto;
 }
 
-.vectfox-debug-expand-btn {
+.vecttauri-debug-expand-btn {
     margin-top: 10px;
     padding: 8px 12px;
     background: transparent;
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
     border-radius: 6px;
-    color: var(--vectfox-primary);
+    color: var(--vecttauri-primary);
     font-size: 0.85em;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.vectfox-debug-expand-btn:hover {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+.vecttauri-debug-expand-btn:hover {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
 }
 
-.vectfox-debug-expanded {
+.vecttauri-debug-expanded {
     margin-top: 12px;
 }
 
-.vectfox-debug-expanded pre {
+.vecttauri-debug-expanded pre {
     margin: 0;
     padding: 12px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
@@ -124,29 +124,29 @@
  * PIPELINE VISUALIZATION
  * ============================================================================ */
 
-.vectfox-debug-pipeline {
+.vecttauri-debug-pipeline {
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 8%, transparent) 0%,
-        color-mix(in srgb, var(--vectfox-secondary) 5%, transparent) 100%);
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 25%, transparent);
+        color-mix(in srgb, var(--vecttauri-primary) 8%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-secondary) 5%, transparent) 100%);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 25%, transparent);
     border-radius: 12px;
     padding: 16px 16px 20px 16px;
     overflow: visible;
     flex-shrink: 0;
 }
 
-.vectfox-debug-pipeline-title {
+.vecttauri-debug-pipeline-title {
     display: flex;
     align-items: center;
     gap: 8px;
     font-weight: 600;
     margin-bottom: 14px;
     padding-top: 2px;
-    color: var(--vectfox-primary-bright);
+    color: var(--vecttauri-primary-bright);
     font-size: 0.95em;
 }
 
-.vectfox-debug-pipeline-stages {
+.vecttauri-debug-pipeline-stages {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -156,13 +156,13 @@
     padding: 10px 4px 4px 4px;
 }
 
-.vectfox-debug-pipeline-arrow {
+.vecttauri-debug-pipeline-arrow {
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 40%, transparent);
     font-size: 1.2em;
     flex-shrink: 0;
 }
 
-.vectfox-debug-pipeline-stage {
+.vecttauri-debug-pipeline-stage {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -174,7 +174,7 @@
     position: relative;
 }
 
-.vectfox-debug-stage-icon {
+.vecttauri-debug-stage-icon {
     width: 32px;
     height: 32px;
     display: flex;
@@ -184,37 +184,37 @@
     font-size: 0.9em;
 }
 
-.vectfox-debug-stage-primary .vectfox-debug-stage-icon {
-    background: color-mix(in srgb, var(--vectfox-primary) 25%, transparent);
-    color: var(--vectfox-primary);
+.vecttauri-debug-stage-primary .vecttauri-debug-stage-icon {
+    background: color-mix(in srgb, var(--vecttauri-primary) 25%, transparent);
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-debug-stage-info .vectfox-debug-stage-icon {
+.vecttauri-debug-stage-info .vecttauri-debug-stage-icon {
     background: color-mix(in srgb, #38bdf8 25%, transparent);
     color: #38bdf8;
 }
 
-.vectfox-debug-stage-warning .vectfox-debug-stage-icon {
+.vecttauri-debug-stage-warning .vecttauri-debug-stage-icon {
     background: color-mix(in srgb, #f59e0b 25%, transparent);
     color: #f59e0b;
 }
 
-.vectfox-debug-stage-secondary .vectfox-debug-stage-icon {
-    background: color-mix(in srgb, var(--vectfox-secondary) 25%, transparent);
-    color: var(--vectfox-secondary);
+.vecttauri-debug-stage-secondary .vecttauri-debug-stage-icon {
+    background: color-mix(in srgb, var(--vecttauri-secondary) 25%, transparent);
+    color: var(--vecttauri-secondary);
 }
 
-.vectfox-debug-stage-success .vectfox-debug-stage-icon {
-    background: color-mix(in srgb, var(--vectfox-success) 25%, transparent);
-    color: var(--vectfox-success);
+.vecttauri-debug-stage-success .vecttauri-debug-stage-icon {
+    background: color-mix(in srgb, var(--vecttauri-success) 25%, transparent);
+    color: var(--vecttauri-success);
 }
 
-.vectfox-debug-stage-keyword .vectfox-debug-stage-icon {
+.vecttauri-debug-stage-keyword .vecttauri-debug-stage-icon {
     background: color-mix(in srgb, #10b981 25%, transparent);
     color: #10b981;
 }
 
-.vectfox-debug-stage-boost {
+.vecttauri-debug-stage-boost {
     position: absolute;
     top: -6px;
     right: -6px;
@@ -227,33 +227,33 @@
 }
 
 /* Disabled/inactive stage (e.g., Decay when temporal_decay is off) */
-.vectfox-debug-stage-disabled {
+.vecttauri-debug-stage-disabled {
     opacity: 0.4;
     filter: grayscale(0.8);
 }
 
-.vectfox-debug-stage-disabled .vectfox-debug-stage-icon {
+.vecttauri-debug-stage-disabled .vecttauri-debug-stage-icon {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent) !important;
     color: var(--SmartThemeBodyColor) !important;
 }
 
-.vectfox-debug-stage-count {
+.vecttauri-debug-stage-count {
     font-size: 1.4em;
     font-weight: 700;
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-debug-stage-label {
+.vecttauri-debug-stage-label {
     font-size: 0.75em;
     opacity: 0.7;
     text-align: center;
 }
 
-.vectfox-debug-stage-lost {
+.vecttauri-debug-stage-lost {
     position: absolute;
     top: -6px;
     right: -6px;
-    background: var(--vectfox-danger);
+    background: var(--vecttauri-danger);
     color: white;
     font-size: 0.7em;
     font-weight: 600;
@@ -265,13 +265,13 @@
  * SETTINGS GRID
  * ============================================================================ */
 
-.vectfox-debug-settings-grid {
+.vecttauri-debug-settings-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
 }
 
-.vectfox-debug-setting {
+.vecttauri-debug-setting {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -280,19 +280,19 @@
     border-radius: 8px;
 }
 
-.vectfox-debug-setting-label {
+.vecttauri-debug-setting-label {
     font-size: 0.8em;
     opacity: 0.6;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.vectfox-debug-setting-value {
+.vecttauri-debug-setting-value {
     font-weight: 600;
     font-size: 1.1em;
 }
 
-.vectfox-debug-setting-mono {
+.vecttauri-debug-setting-mono {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.85em;
     word-break: break-all;
@@ -302,7 +302,7 @@
  * STAGE TABS
  * ============================================================================ */
 
-.vectfox-debug-stage-tabs {
+.vecttauri-debug-stage-tabs {
     display: flex;
     gap: 4px;
     margin-bottom: 16px;
@@ -310,7 +310,7 @@
     padding-bottom: 4px;
 }
 
-.vectfox-debug-stage-tab {
+.vecttauri-debug-stage-tab {
     padding: 8px 14px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
@@ -323,14 +323,14 @@
     white-space: nowrap;
 }
 
-.vectfox-debug-stage-tab:hover {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
-    border-color: color-mix(in srgb, var(--vectfox-primary) 30%, transparent);
+.vecttauri-debug-stage-tab:hover {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
 }
 
-.vectfox-debug-stage-tab.active {
-    background: var(--vectfox-primary);
-    border-color: var(--vectfox-primary);
+.vecttauri-debug-stage-tab.active {
+    background: var(--vecttauri-primary);
+    border-color: var(--vecttauri-primary);
     color: white;
 }
 
@@ -338,14 +338,14 @@
  * CHUNKS LIST
  * ============================================================================ */
 
-.vectfox-debug-chunks-list {
+.vecttauri-debug-chunks-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
     /* No max-height - show all chunks, modal body scrolls */
 }
 
-.vectfox-debug-chunk {
+.vecttauri-debug-chunk {
     padding: 12px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 12%, transparent);
@@ -353,16 +353,16 @@
     transition: all 0.2s ease;
 }
 
-.vectfox-debug-chunk:hover {
-    border-color: color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
+.vecttauri-debug-chunk:hover {
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
 }
 
-.vectfox-debug-chunk-excluded {
+.vecttauri-debug-chunk-excluded {
     opacity: 0.6;
-    border-left: 3px solid var(--vectfox-danger);
+    border-left: 3px solid var(--vecttauri-danger);
 }
 
-.vectfox-debug-chunk-header {
+.vecttauri-debug-chunk-header {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -370,13 +370,13 @@
     flex-wrap: wrap;
 }
 
-.vectfox-debug-chunk-rank {
+.vecttauri-debug-chunk-rank {
     font-weight: 700;
     font-size: 0.9em;
-    color: var(--vectfox-primary);
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-debug-chunk-score {
+.vecttauri-debug-chunk-score {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.85em;
     font-weight: 600;
@@ -384,22 +384,22 @@
     border-radius: 4px;
 }
 
-.vectfox-debug-score-high {
-    background: color-mix(in srgb, var(--vectfox-success) 20%, transparent);
-    color: var(--vectfox-success);
+.vecttauri-debug-score-high {
+    background: color-mix(in srgb, var(--vecttauri-success) 20%, transparent);
+    color: var(--vecttauri-success);
 }
 
-.vectfox-debug-score-medium {
+.vecttauri-debug-score-medium {
     background: color-mix(in srgb, #f59e0b 20%, transparent);
     color: #f59e0b;
 }
 
-.vectfox-debug-score-low {
-    background: color-mix(in srgb, var(--vectfox-danger) 20%, transparent);
-    color: var(--vectfox-danger);
+.vecttauri-debug-score-low {
+    background: color-mix(in srgb, var(--vecttauri-danger) 20%, transparent);
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-decay-badge {
+.vecttauri-debug-decay-badge {
     font-size: 0.75em;
     padding: 2px 6px;
     background: color-mix(in srgb, #f59e0b 15%, transparent);
@@ -408,7 +408,7 @@
     color: #f59e0b;
 }
 
-.vectfox-debug-keyword-match-badge {
+.vecttauri-debug-keyword-match-badge {
     font-size: 0.75em;
     padding: 2px 6px;
     background: color-mix(in srgb, #10b981 15%, transparent);
@@ -418,24 +418,24 @@
     font-weight: 600;
 }
 
-.vectfox-debug-excluded-badge {
+.vecttauri-debug-excluded-badge {
     font-size: 0.75em;
     padding: 2px 6px;
-    background: color-mix(in srgb, var(--vectfox-danger) 15%, transparent);
-    border: 1px solid var(--vectfox-danger);
+    background: color-mix(in srgb, var(--vecttauri-danger) 15%, transparent);
+    border: 1px solid var(--vecttauri-danger);
     border-radius: 4px;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
     margin-left: auto;
 }
 
-.vectfox-debug-chunk-text {
+.vecttauri-debug-chunk-text {
     font-size: 0.9em;
     line-height: 1.4;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 85%, transparent);
     margin-bottom: 8px;
 }
 
-.vectfox-debug-chunk-meta {
+.vecttauri-debug-chunk-meta {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
@@ -448,29 +448,29 @@
  * EXCLUSION ANALYSIS
  * ============================================================================ */
 
-.vectfox-debug-exclusions .vectfox-debug-card-header {
-    background: color-mix(in srgb, var(--vectfox-danger) 10%, transparent);
-    border-color: color-mix(in srgb, var(--vectfox-danger) 20%, transparent);
+.vecttauri-debug-exclusions .vecttauri-debug-card-header {
+    background: color-mix(in srgb, var(--vecttauri-danger) 10%, transparent);
+    border-color: color-mix(in srgb, var(--vecttauri-danger) 20%, transparent);
 }
 
-.vectfox-debug-exclusions .vectfox-debug-card-header i {
-    color: var(--vectfox-danger);
+.vecttauri-debug-exclusions .vecttauri-debug-card-header i {
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-exclusion-count {
+.vecttauri-debug-exclusion-count {
     margin-left: auto;
     font-size: 0.85em;
     font-weight: 400;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-exclusion-categories {
+.vecttauri-debug-exclusion-categories {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
 }
 
-.vectfox-debug-exclusion-category {
+.vecttauri-debug-exclusion-category {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -479,7 +479,7 @@
     border-radius: 8px;
 }
 
-.vectfox-debug-exclusion-icon {
+.vecttauri-debug-exclusion-icon {
     width: 36px;
     height: 36px;
     display: flex;
@@ -489,37 +489,37 @@
     font-size: 0.9em;
 }
 
-.vectfox-debug-exclusion-threshold {
+.vecttauri-debug-exclusion-threshold {
     background: color-mix(in srgb, #ef4444 20%, transparent);
     color: #ef4444;
 }
 
-.vectfox-debug-exclusion-decay {
+.vecttauri-debug-exclusion-decay {
     background: color-mix(in srgb, #f59e0b 20%, transparent);
     color: #f59e0b;
 }
 
-.vectfox-debug-exclusion-conditions {
-    background: color-mix(in srgb, var(--vectfox-secondary) 20%, transparent);
-    color: var(--vectfox-secondary);
+.vecttauri-debug-exclusion-conditions {
+    background: color-mix(in srgb, var(--vecttauri-secondary) 20%, transparent);
+    color: var(--vecttauri-secondary);
 }
 
-.vectfox-debug-exclusion-limit {
+.vecttauri-debug-exclusion-limit {
     background: color-mix(in srgb, #6b7280 20%, transparent);
     color: #6b7280;
 }
 
-.vectfox-debug-exclusion-info {
+.vecttauri-debug-exclusion-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.vectfox-debug-exclusion-info strong {
+.vecttauri-debug-exclusion-info strong {
     font-size: 1.1em;
 }
 
-.vectfox-debug-exclusion-info small {
+.vecttauri-debug-exclusion-info small {
     font-size: 0.8em;
     opacity: 0.7;
 }
@@ -528,7 +528,7 @@
  * EMPTY STATE
  * ============================================================================ */
 
-.vectfox-debug-empty {
+.vecttauri-debug-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -537,7 +537,7 @@
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 50%, transparent);
 }
 
-.vectfox-debug-empty i {
+.vecttauri-debug-empty i {
     font-size: 2em;
     margin-bottom: 12px;
     opacity: 0.5;
@@ -547,27 +547,27 @@
  * CRITICAL FAILURE ALERT (0 injected)
  * ============================================================================ */
 
-.vectfox-debug-critical-failure {
+.vecttauri-debug-critical-failure {
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-danger) 15%, transparent) 0%,
-        color-mix(in srgb, var(--vectfox-danger) 8%, transparent) 100%);
-    border: 2px solid var(--vectfox-danger);
+        color-mix(in srgb, var(--vecttauri-danger) 15%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-danger) 8%, transparent) 100%);
+    border: 2px solid var(--vecttauri-danger);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 8px;
 }
 
-.vectfox-debug-critical-header {
+.vecttauri-debug-critical-header {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 16px;
 }
 
-.vectfox-debug-critical-icon {
+.vecttauri-debug-critical-icon {
     width: 48px;
     height: 48px;
-    background: var(--vectfox-danger);
+    background: var(--vecttauri-danger);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -577,24 +577,24 @@
     flex-shrink: 0;
 }
 
-.vectfox-debug-critical-title {
+.vecttauri-debug-critical-title {
     font-size: 1.2em;
     font-weight: 700;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
     margin: 0;
 }
 
-.vectfox-debug-critical-subtitle {
+.vecttauri-debug-critical-subtitle {
     font-size: 0.9em;
     opacity: 0.8;
     margin-top: 4px;
 }
 
-.vectfox-debug-diagnosis {
+.vecttauri-debug-diagnosis {
     margin-top: 16px;
 }
 
-.vectfox-debug-diagnosis-title {
+.vecttauri-debug-diagnosis-title {
     font-weight: 600;
     font-size: 0.95em;
     margin-bottom: 12px;
@@ -603,11 +603,11 @@
     gap: 8px;
 }
 
-.vectfox-debug-diagnosis-title i {
-    color: var(--vectfox-primary);
+.vecttauri-debug-diagnosis-title i {
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-debug-diagnosis-item {
+.vecttauri-debug-diagnosis-item {
     display: flex;
     gap: 12px;
     padding: 12px;
@@ -617,17 +617,17 @@
     border-left: 3px solid transparent;
 }
 
-.vectfox-debug-diagnosis-item.is-cause {
-    border-left-color: var(--vectfox-danger);
-    background: color-mix(in srgb, var(--vectfox-danger) 10%, transparent);
+.vecttauri-debug-diagnosis-item.is-cause {
+    border-left-color: var(--vecttauri-danger);
+    background: color-mix(in srgb, var(--vecttauri-danger) 10%, transparent);
 }
 
-.vectfox-debug-diagnosis-item.is-ok {
-    border-left-color: var(--vectfox-success);
+.vecttauri-debug-diagnosis-item.is-ok {
+    border-left-color: var(--vecttauri-success);
     opacity: 0.7;
 }
 
-.vectfox-debug-diagnosis-number {
+.vecttauri-debug-diagnosis-number {
     width: 24px;
     height: 24px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
@@ -640,72 +640,72 @@
     flex-shrink: 0;
 }
 
-.vectfox-debug-diagnosis-item.is-cause .vectfox-debug-diagnosis-number {
-    background: var(--vectfox-danger);
+.vecttauri-debug-diagnosis-item.is-cause .vecttauri-debug-diagnosis-number {
+    background: var(--vecttauri-danger);
     color: white;
 }
 
-.vectfox-debug-diagnosis-item.is-ok .vectfox-debug-diagnosis-number {
-    background: var(--vectfox-success);
+.vecttauri-debug-diagnosis-item.is-ok .vecttauri-debug-diagnosis-number {
+    background: var(--vecttauri-success);
     color: white;
 }
 
-.vectfox-debug-diagnosis-content {
+.vecttauri-debug-diagnosis-content {
     flex: 1;
 }
 
-.vectfox-debug-diagnosis-label {
+.vecttauri-debug-diagnosis-label {
     font-weight: 600;
     margin-bottom: 4px;
 }
 
-.vectfox-debug-diagnosis-detail {
+.vecttauri-debug-diagnosis-detail {
     font-size: 0.85em;
     opacity: 0.8;
 }
 
-.vectfox-debug-diagnosis-fix {
+.vecttauri-debug-diagnosis-fix {
     margin-top: 8px;
     padding: 8px 12px;
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 30%, transparent);
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
     border-radius: 6px;
     font-size: 0.85em;
 }
 
-.vectfox-debug-diagnosis-fix strong {
-    color: var(--vectfox-primary);
+.vecttauri-debug-diagnosis-fix strong {
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-debug-diagnosis-status {
+.vecttauri-debug-diagnosis-status {
     font-size: 0.8em;
     padding: 2px 8px;
     border-radius: 4px;
     font-weight: 600;
 }
 
-.vectfox-debug-diagnosis-status.status-fail {
-    background: color-mix(in srgb, var(--vectfox-danger) 20%, transparent);
-    color: var(--vectfox-danger);
+.vecttauri-debug-diagnosis-status.status-fail {
+    background: color-mix(in srgb, var(--vecttauri-danger) 20%, transparent);
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-diagnosis-status.status-ok {
-    background: color-mix(in srgb, var(--vectfox-success) 20%, transparent);
-    color: var(--vectfox-success);
+.vecttauri-debug-diagnosis-status.status-ok {
+    background: color-mix(in srgb, var(--vecttauri-success) 20%, transparent);
+    color: var(--vecttauri-success);
 }
 
 /* ============================================================================
  * TRACE LOG
  * ============================================================================ */
 
-.vectfox-debug-copy-btn {
+.vecttauri-debug-copy-btn {
     margin-left: auto;
     margin-right: 12px;
-    background: color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
-    border: 1px solid var(--vectfox-primary);
+    background: color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
+    border: 1px solid var(--vecttauri-primary);
     border-radius: 6px;
     padding: 6px 12px;
-    color: var(--vectfox-primary);
+    color: var(--vecttauri-primary);
     cursor: pointer;
     font-size: 0.85em;
     font-weight: 500;
@@ -715,12 +715,12 @@
     gap: 6px;
 }
 
-.vectfox-debug-copy-btn:hover {
-    background: var(--vectfox-primary);
+.vecttauri-debug-copy-btn:hover {
+    background: var(--vecttauri-primary);
     color: white;
 }
 
-.vectfox-debug-toggle-btn {
+.vecttauri-debug-toggle-btn {
     margin-left: auto;
     background: transparent;
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 30%, transparent);
@@ -732,11 +732,11 @@
     transition: opacity 0.2s;
 }
 
-.vectfox-debug-toggle-btn:hover {
+.vecttauri-debug-toggle-btn:hover {
     opacity: 1;
 }
 
-.vectfox-debug-trace-list {
+.vecttauri-debug-trace-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -744,7 +744,7 @@
     font-size: 0.8em;
 }
 
-.vectfox-debug-trace-entry {
+.vecttauri-debug-trace-entry {
     display: grid;
     grid-template-columns: 60px 100px 1fr;
     gap: 8px;
@@ -754,29 +754,29 @@
     border-left: 3px solid var(--SmartThemeBodyColor);
 }
 
-.vectfox-debug-trace-entry.trace-init { border-left-color: #6b7280; }
-.vectfox-debug-trace-entry.trace-search { border-left-color: var(--vectfox-primary); }
-.vectfox-debug-trace-entry.trace-threshold { border-left-color: #38bdf8; }
-.vectfox-debug-trace-entry.trace-decay { border-left-color: #f59e0b; }
-.vectfox-debug-trace-entry.trace-conditions { border-left-color: var(--vectfox-secondary); }
-.vectfox-debug-trace-entry.trace-injection { border-left-color: #a855f7; }
-.vectfox-debug-trace-entry.trace-final { border-left-color: var(--vectfox-success); }
+.vecttauri-debug-trace-entry.trace-init { border-left-color: #6b7280; }
+.vecttauri-debug-trace-entry.trace-search { border-left-color: var(--vecttauri-primary); }
+.vecttauri-debug-trace-entry.trace-threshold { border-left-color: #38bdf8; }
+.vecttauri-debug-trace-entry.trace-decay { border-left-color: #f59e0b; }
+.vecttauri-debug-trace-entry.trace-conditions { border-left-color: var(--vecttauri-secondary); }
+.vecttauri-debug-trace-entry.trace-injection { border-left-color: #a855f7; }
+.vecttauri-debug-trace-entry.trace-final { border-left-color: var(--vecttauri-success); }
 
-.vectfox-debug-trace-time {
+.vecttauri-debug-trace-time {
     color: #6b7280;
     font-size: 0.9em;
 }
 
-.vectfox-debug-trace-stage {
+.vecttauri-debug-trace-stage {
     font-weight: 600;
-    color: var(--vectfox-primary);
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-debug-trace-action {
+.vecttauri-debug-trace-action {
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-debug-trace-details {
+.vecttauri-debug-trace-details {
     grid-column: 1 / -1;
     margin: 8px 0 0 0;
     padding: 8px;
@@ -792,78 +792,78 @@
  * CHUNK FATE TRACKER
  * ============================================================================ */
 
-.vectfox-debug-fate-summary {
+.vecttauri-debug-fate-summary {
     margin-left: auto;
     display: flex;
     gap: 12px;
     font-size: 0.85em;
 }
 
-.vectfox-fate-injected {
-    color: var(--vectfox-success);
+.vecttauri-fate-injected {
+    color: var(--vecttauri-success);
 }
 
-.vectfox-fate-dropped {
-    color: var(--vectfox-danger);
+.vecttauri-fate-dropped {
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-fates-list {
+.vecttauri-debug-fates-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.vectfox-debug-fate-entry {
+.vecttauri-debug-fate-entry {
     padding: 12px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
     border-radius: 8px;
-    border-left: 3px solid var(--vectfox-success);
+    border-left: 3px solid var(--vecttauri-success);
 }
 
-.vectfox-debug-fate-entry.fate-dropped {
-    border-left-color: var(--vectfox-danger);
+.vecttauri-debug-fate-entry.fate-dropped {
+    border-left-color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-fate-header {
+.vecttauri-debug-fate-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
 }
 
-.vectfox-debug-fate-hash {
+.vecttauri-debug-fate-hash {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.85em;
     color: #6b7280;
 }
 
-.vectfox-debug-fate-result {
+.vecttauri-debug-fate-result {
     font-size: 0.85em;
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 4px;
 }
 
-.vectfox-debug-fate-result.result-injected {
-    background: color-mix(in srgb, var(--vectfox-success) 20%, transparent);
-    color: var(--vectfox-success);
+.vecttauri-debug-fate-result.result-injected {
+    background: color-mix(in srgb, var(--vecttauri-success) 20%, transparent);
+    color: var(--vecttauri-success);
 }
 
-.vectfox-debug-fate-result.result-dropped {
-    background: color-mix(in srgb, var(--vectfox-danger) 20%, transparent);
-    color: var(--vectfox-danger);
+.vecttauri-debug-fate-result.result-dropped {
+    background: color-mix(in srgb, var(--vecttauri-danger) 20%, transparent);
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-fate-reason {
+.vecttauri-debug-fate-reason {
     font-size: 0.85em;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
     margin-bottom: 8px;
     padding: 6px 10px;
-    background: color-mix(in srgb, var(--vectfox-danger) 10%, transparent);
+    background: color-mix(in srgb, var(--vecttauri-danger) 10%, transparent);
     border-radius: 4px;
 }
 
-.vectfox-debug-fate-journey {
+.vecttauri-debug-fate-journey {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -871,29 +871,29 @@
     font-size: 0.8em;
 }
 
-.vectfox-fate-stage {
+.vecttauri-fate-stage {
     padding: 2px 8px;
     border-radius: 4px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 10%, transparent);
 }
 
-.vectfox-fate-stage.stage-passed {
-    background: color-mix(in srgb, var(--vectfox-success) 15%, transparent);
-    color: var(--vectfox-success);
+.vecttauri-fate-stage.stage-passed {
+    background: color-mix(in srgb, var(--vecttauri-success) 15%, transparent);
+    color: var(--vecttauri-success);
 }
 
-.vectfox-fate-stage.stage-dropped {
-    background: color-mix(in srgb, var(--vectfox-danger) 15%, transparent);
-    color: var(--vectfox-danger);
+.vecttauri-fate-stage.stage-dropped {
+    background: color-mix(in srgb, var(--vecttauri-danger) 15%, transparent);
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-fate-stage.stage-injected {
-    background: color-mix(in srgb, var(--vectfox-success) 25%, transparent);
-    color: var(--vectfox-success);
+.vecttauri-fate-stage.stage-injected {
+    background: color-mix(in srgb, var(--vecttauri-success) 25%, transparent);
+    color: var(--vecttauri-success);
     font-weight: 600;
 }
 
-.vectfox-fate-arrow {
+.vecttauri-fate-arrow {
     color: #6b7280;
     font-size: 0.9em;
 }
@@ -906,7 +906,7 @@
  * SCORE BREAKDOWN
  * ============================================================================ */
 
-.vectfox-debug-score-breakdown {
+.vecttauri-debug-score-breakdown {
     margin: 6px 0 10px 0;
     padding: 8px 10px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
@@ -915,24 +915,24 @@
     font-size: 0.8em;
 }
 
-.vectfox-score-math {
+.vecttauri-score-math {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
 }
 
-.vectfox-score-vector {
-    color: var(--vectfox-primary);
+.vecttauri-score-vector {
+    color: var(--vecttauri-primary);
     font-weight: 600;
 }
 
-.vectfox-score-operator {
+.vecttauri-score-operator {
     color: #6b7280;
     font-weight: 400;
 }
 
-.vectfox-score-boost {
+.vecttauri-score-boost {
     color: #10b981;
     font-weight: 600;
     padding: 1px 6px;
@@ -940,7 +940,7 @@
     border-radius: 4px;
 }
 
-.vectfox-score-decay {
+.vecttauri-score-decay {
     color: #f59e0b;
     font-weight: 600;
     padding: 1px 6px;
@@ -948,13 +948,13 @@
     border-radius: 4px;
 }
 
-.vectfox-score-final {
+.vecttauri-score-final {
     color: var(--SmartThemeBodyColor);
     font-weight: 700;
     font-size: 1.1em;
 }
 
-.vectfox-score-keywords {
+.vecttauri-score-keywords {
     margin-top: 6px;
     font-size: 0.9em;
     color: #10b981;
@@ -965,20 +965,20 @@
  * HYBRID SEARCH SCORE BREAKDOWN
  * ============================================================================ */
 
-.vectfox-hybrid-breakdown {
+.vecttauri-hybrid-breakdown {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.vectfox-hybrid-scores {
+.vecttauri-hybrid-scores {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.vectfox-score-vector-badge {
+.vecttauri-score-vector-badge {
     color: #60a5fa;
     font-weight: 600;
     padding: 2px 8px;
@@ -986,7 +986,7 @@
     border-radius: 4px;
 }
 
-.vectfox-score-text-badge {
+.vecttauri-score-text-badge {
     color: #34d399;
     font-weight: 600;
     padding: 2px 8px;
@@ -994,18 +994,18 @@
     border-radius: 4px;
 }
 
-.vectfox-score-warning {
+.vecttauri-score-warning {
     font-size: 1.1em;
     cursor: help;
 }
 
-.vectfox-score-good {
+.vecttauri-score-good {
     color: #10b981;
     font-size: 1.1em;
     cursor: help;
 }
 
-.vectfox-score-fusion {
+.vecttauri-score-fusion {
     color: #a78bfa;
     font-weight: 600;
     padding: 2px 8px;
@@ -1018,32 +1018,32 @@
  * HYBRID SCORE IN CHUNK HEADER
  * ============================================================================ */
 
-.vectfox-debug-chunk-score-hybrid {
+.vecttauri-debug-chunk-score-hybrid {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.vectfox-debug-chunk-score-hybrid .vectfox-score-main {
+.vecttauri-debug-chunk-score-hybrid .vecttauri-score-main {
     font-weight: 700;
     font-size: 0.95em;
     padding: 2px 8px;
     border-radius: 4px;
 }
 
-.vectfox-debug-chunk-score-hybrid .vectfox-score-mini {
+.vecttauri-debug-chunk-score-hybrid .vecttauri-score-mini {
     display: flex;
     gap: 6px;
     font-size: 0.75em;
     opacity: 0.9;
 }
 
-.vectfox-debug-chunk-score-hybrid .vectfox-mini-vector {
+.vecttauri-debug-chunk-score-hybrid .vecttauri-mini-vector {
     color: #60a5fa;
     cursor: help;
 }
 
-.vectfox-debug-chunk-score-hybrid .vectfox-mini-text {
+.vecttauri-debug-chunk-score-hybrid .vecttauri-mini-text {
     color: #34d399;
     cursor: help;
 }
@@ -1056,7 +1056,7 @@
  * HISTORY TABS
  * ============================================================================ */
 
-.vectfox-debug-history-tabs {
+.vecttauri-debug-history-tabs {
     display: flex;
     gap: 4px;
     padding: 10px 16px;
@@ -1067,7 +1067,7 @@
     flex-shrink: 0;
 }
 
-.vectfox-debug-history-tab {
+.vecttauri-debug-history-tab {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1082,36 +1082,36 @@
     flex-shrink: 0;
 }
 
-.vectfox-debug-history-tab:hover {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
-    border-color: color-mix(in srgb, var(--vectfox-primary) 30%, transparent);
+.vecttauri-debug-history-tab:hover {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
 }
 
-.vectfox-debug-history-tab.active {
-    background: var(--vectfox-primary);
-    border-color: var(--vectfox-primary);
+.vecttauri-debug-history-tab.active {
+    background: var(--vecttauri-primary);
+    border-color: var(--vecttauri-primary);
     color: white;
 }
 
-.vectfox-debug-history-tab .tab-num {
+.vecttauri-debug-history-tab .tab-num {
     font-size: 0.7em;
     opacity: 0.7;
 }
 
-.vectfox-debug-history-tab .tab-injected {
+.vecttauri-debug-history-tab .tab-injected {
     font-size: 1em;
     font-weight: 700;
 }
 
-.vectfox-debug-history-tab.tab-success .tab-injected {
-    color: var(--vectfox-success);
+.vecttauri-debug-history-tab.tab-success .tab-injected {
+    color: var(--vecttauri-success);
 }
 
-.vectfox-debug-history-tab.tab-empty .tab-injected {
-    color: var(--vectfox-danger);
+.vecttauri-debug-history-tab.tab-empty .tab-injected {
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-history-tab.active .tab-injected {
+.vecttauri-debug-history-tab.active .tab-injected {
     color: white;
 }
 
@@ -1119,31 +1119,31 @@
  * CLICKABLE/EXPANDABLE ELEMENTS
  * ============================================================================ */
 
-.vectfox-debug-clickable {
+.vecttauri-debug-clickable {
     cursor: pointer;
     transition: background 0.2s;
 }
 
-.vectfox-debug-clickable:hover {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+.vecttauri-debug-clickable:hover {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
 }
 
-.vectfox-debug-expand-icon {
+.vecttauri-debug-expand-icon {
     margin-left: auto;
     opacity: 0.5;
     transition: transform 0.2s, opacity 0.2s;
 }
 
-.vectfox-debug-clickable:hover .vectfox-debug-expand-icon {
+.vecttauri-debug-clickable:hover .vecttauri-debug-expand-icon {
     opacity: 1;
 }
 
-.vectfox-debug-expand-icon.fa-chevron-up {
+.vecttauri-debug-expand-icon.fa-chevron-up {
     transform: rotate(180deg);
 }
 
 /* Query card specific */
-.vectfox-debug-query-preview {
+.vecttauri-debug-query-preview {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.9em;
     line-height: 1.4;
@@ -1154,11 +1154,11 @@
     word-break: break-word;
 }
 
-.vectfox-debug-query-full {
+.vecttauri-debug-query-full {
     margin-top: 10px;
 }
 
-.vectfox-debug-query-full pre {
+.vecttauri-debug-query-full pre {
     margin: 0;
     padding: 12px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
@@ -1174,49 +1174,49 @@
  * EXPANDABLE CHUNKS
  * ============================================================================ */
 
-.vectfox-debug-chunk-expandable {
+.vecttauri-debug-chunk-expandable {
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.vectfox-debug-chunk-expandable:hover {
-    background: color-mix(in srgb, var(--vectfox-primary) 8%, transparent);
-    border-color: color-mix(in srgb, var(--vectfox-primary) 30%, transparent);
+.vecttauri-debug-chunk-expandable:hover {
+    background: color-mix(in srgb, var(--vecttauri-primary) 8%, transparent);
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
 }
 
-.vectfox-debug-chunk-expand-icon {
+.vecttauri-debug-chunk-expand-icon {
     margin-left: auto;
     opacity: 0.4;
     font-size: 0.8em;
     transition: transform 0.2s, opacity 0.2s;
 }
 
-.vectfox-debug-chunk-expandable:hover .vectfox-debug-chunk-expand-icon {
+.vecttauri-debug-chunk-expandable:hover .vecttauri-debug-chunk-expand-icon {
     opacity: 0.8;
 }
 
-.vectfox-debug-chunk-expandable.expanded .vectfox-debug-chunk-expand-icon {
+.vecttauri-debug-chunk-expandable.expanded .vecttauri-debug-chunk-expand-icon {
     transform: rotate(180deg);
 }
 
-.vectfox-debug-chunk-text-preview {
+.vecttauri-debug-chunk-text-preview {
     font-size: 0.9em;
     line-height: 1.4;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 85%, transparent);
     margin-bottom: 8px;
 }
 
-.vectfox-debug-chunk-expanded {
+.vecttauri-debug-chunk-expanded {
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
 }
 
-.vectfox-debug-chunk-fulltext {
+.vecttauri-debug-chunk-fulltext {
     margin-bottom: 12px;
 }
 
-.vectfox-debug-chunk-fulltext-label {
+.vecttauri-debug-chunk-fulltext-label {
     font-size: 0.75em;
     font-weight: 600;
     text-transform: uppercase;
@@ -1225,7 +1225,7 @@
     margin-bottom: 6px;
 }
 
-.vectfox-debug-chunk-fulltext pre {
+.vecttauri-debug-chunk-fulltext pre {
     margin: 0;
     padding: 10px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
@@ -1237,13 +1237,13 @@
     overflow-y: auto;
 }
 
-.vectfox-debug-meta-grid {
+.vecttauri-debug-meta-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.vectfox-debug-meta-item {
+.vecttauri-debug-meta-item {
     display: inline-flex;
     flex-direction: column;
     gap: 2px;
@@ -1254,7 +1254,7 @@
     max-width: 100%;
 }
 
-.vectfox-debug-meta-item .meta-label {
+.vecttauri-debug-meta-item .meta-label {
     font-size: 0.65em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1262,7 +1262,7 @@
     white-space: nowrap;
 }
 
-.vectfox-debug-meta-item .meta-value {
+.vecttauri-debug-meta-item .meta-value {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.8em;
     word-break: break-word;
@@ -1271,15 +1271,15 @@
     text-overflow: ellipsis;
 }
 
-.vectfox-debug-meta-item .meta-value.vectfox-matched-keywords {
+.vecttauri-debug-meta-item .meta-value.vecttauri-matched-keywords {
     color: #10b981;
     font-weight: 600;
     max-width: none;
     text-overflow: unset;
 }
 
-.vectfox-debug-click-hint {
-    color: var(--vectfox-primary);
+.vecttauri-debug-click-hint {
+    color: var(--vecttauri-primary);
     font-style: italic;
     opacity: 0.7;
 }
@@ -1288,33 +1288,33 @@
  * INJECTION VERIFICATION
  * ============================================================================ */
 
-.vectfox-debug-verification.vectfox-verification-success {
-    border-color: var(--vectfox-success);
+.vecttauri-debug-verification.vecttauri-verification-success {
+    border-color: var(--vecttauri-success);
 }
 
-.vectfox-debug-verification.vectfox-verification-success .vectfox-debug-card-header {
-    background: color-mix(in srgb, var(--vectfox-success) 15%, transparent);
-    border-color: color-mix(in srgb, var(--vectfox-success) 25%, transparent);
+.vecttauri-debug-verification.vecttauri-verification-success .vecttauri-debug-card-header {
+    background: color-mix(in srgb, var(--vecttauri-success) 15%, transparent);
+    border-color: color-mix(in srgb, var(--vecttauri-success) 25%, transparent);
 }
 
-.vectfox-debug-verification.vectfox-verification-success .vectfox-debug-card-header i:first-child {
-    color: var(--vectfox-success);
+.vecttauri-debug-verification.vecttauri-verification-success .vecttauri-debug-card-header i:first-child {
+    color: var(--vecttauri-success);
 }
 
-.vectfox-debug-verification.vectfox-verification-failed {
-    border-color: var(--vectfox-danger);
+.vecttauri-debug-verification.vecttauri-verification-failed {
+    border-color: var(--vecttauri-danger);
 }
 
-.vectfox-debug-verification.vectfox-verification-failed .vectfox-debug-card-header {
-    background: color-mix(in srgb, var(--vectfox-danger) 15%, transparent);
-    border-color: color-mix(in srgb, var(--vectfox-danger) 25%, transparent);
+.vecttauri-debug-verification.vecttauri-verification-failed .vecttauri-debug-card-header {
+    background: color-mix(in srgb, var(--vecttauri-danger) 15%, transparent);
+    border-color: color-mix(in srgb, var(--vecttauri-danger) 25%, transparent);
 }
 
-.vectfox-debug-verification.vectfox-verification-failed .vectfox-debug-card-header i:first-child {
-    color: var(--vectfox-danger);
+.vecttauri-debug-verification.vecttauri-verification-failed .vecttauri-debug-card-header i:first-child {
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-verification-badge {
+.vecttauri-verification-badge {
     margin-left: auto;
     margin-right: 8px;
     font-size: 0.75em;
@@ -1324,24 +1324,24 @@
     letter-spacing: 0.5px;
 }
 
-.vectfox-verification-badge.vectfox-verification-success {
-    background: var(--vectfox-success);
+.vecttauri-verification-badge.vecttauri-verification-success {
+    background: var(--vecttauri-success);
     color: white;
 }
 
-.vectfox-verification-badge.vectfox-verification-failed {
-    background: var(--vectfox-danger);
+.vecttauri-verification-badge.vecttauri-verification-failed {
+    background: var(--vecttauri-danger);
     color: white;
 }
 
-.vectfox-verification-summary {
+.vecttauri-verification-summary {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
     margin-bottom: 12px;
 }
 
-.vectfox-verification-stat {
+.vecttauri-verification-stat {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1350,25 +1350,25 @@
     border-radius: 6px;
 }
 
-.vectfox-verification-stat .stat-label {
+.vecttauri-verification-stat .stat-label {
     font-size: 0.7em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     opacity: 0.6;
 }
 
-.vectfox-verification-stat .stat-value {
+.vecttauri-verification-stat .stat-value {
     font-weight: 600;
     font-size: 0.95em;
 }
 
-.vectfox-verification-text-wrapper {
+.vecttauri-verification-text-wrapper {
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
 }
 
-.vectfox-verification-text-label {
+.vecttauri-verification-text-label {
     font-size: 0.75em;
     font-weight: 600;
     text-transform: uppercase;
@@ -1377,7 +1377,7 @@
     margin-bottom: 8px;
 }
 
-.vectfox-verification-text {
+.vecttauri-verification-text {
     margin: 0;
     padding: 12px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
@@ -1396,7 +1396,7 @@
  * ============================================================================ */
 
 @media (max-width: 768px) {
-    .vectfox-search-debug-content {
+    .vecttauri-search-debug-content {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -1410,37 +1410,37 @@
         border: none !important;
     }
 
-    .vectfox-search-debug-body {
+    .vecttauri-search-debug-body {
         padding: 12px;
     }
 
-    .vectfox-debug-pipeline-stages {
+    .vecttauri-debug-pipeline-stages {
         flex-wrap: wrap;
         justify-content: center;
     }
 
-    .vectfox-debug-pipeline-arrow {
+    .vecttauri-debug-pipeline-arrow {
         display: none;
     }
 
-    .vectfox-debug-pipeline-stage {
+    .vecttauri-debug-pipeline-stage {
         flex: 1 1 calc(33% - 8px);
         min-width: 70px;
     }
 
-    .vectfox-debug-settings-grid {
+    .vecttauri-debug-settings-grid {
         grid-template-columns: 1fr 1fr;
     }
 
-    .vectfox-debug-stage-tabs {
+    .vecttauri-debug-stage-tabs {
         flex-wrap: nowrap;
     }
 
-    .vectfox-debug-stage-tab {
+    .vecttauri-debug-stage-tab {
         flex-shrink: 0;
     }
 
-    .vectfox-debug-exclusion-categories {
+    .vecttauri-debug-exclusion-categories {
         grid-template-columns: 1fr;
     }
 }

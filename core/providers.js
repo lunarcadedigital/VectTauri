@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VectFox EMBEDDING PROVIDERS
+ * VectTauri EMBEDDING PROVIDERS
  * ============================================================================
  * Single source of truth for embedding providers and their configurations.
  * Import this anywhere you need provider information.
  *
- * @author VectFox
- * @version 2.0.0
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -111,7 +111,7 @@ export function getModelField(providerId) {
  * The query path in backends/standard.js + backends/qdrant.js already routes
  * through this — keep insert/list/import paths in sync by calling it here.
  *
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {string} [fallback=''] - Returned when the provider has no model field
  *   or the value is empty/unset.
  * @returns {string}
@@ -176,7 +176,7 @@ export function getUrlProviders() {
  * of EMBEDDING_PROVIDERS); they keep the legacy unprefixed keys so their behavior
  * is unchanged. Add prefixed keys here if they are ever re-enabled.
  *
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {string} [source=settings.embedding_provider] - Provider id (defaults to active source)
  * @returns {string|undefined} Base URL, or undefined for providers that take no URL.
  *   May be an empty string when the provider is URL-based but nothing is configured.

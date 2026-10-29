@@ -8,7 +8,7 @@
  * COLLECTION STRATEGY (configurable via settings.qdrant_multitenancy):
  *
  * MULTITENANCY MODE (qdrant_multitenancy = true):
- * - Uses a single shared collection: "vectfox_main"
+ * - Uses a single shared collection: "vecttauri_main"
  * - Adds content_type metadata field to distinguish different sources
  * - Uses Qdrant filtering to query only the relevant content_type
  * - More efficient for resource usage, suitable for smaller deployments
@@ -23,8 +23,8 @@
  *
  * Requires either a local Qdrant instance or Qdrant Cloud account.
  *
- * @author VectFox
- * @version 3.2.0
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -49,7 +49,7 @@ function _warnDimensionMismatch(errorBody) {
     const match = errorBody.match(/expected dim[: ]+(\d+)[^0-9]+(\d+)/i);
     const detail = match ? `Collection needs ${match[1]}-dim vectors; current provider generates ${match[2]}-dim.` : 'Vector dimension mismatch.';
     const msg = `${detail} Re-index the collection or switch back to the original embedding provider.`;
-    log.error('[VectFox] Dimension mismatch — aborting fallback chain:', msg);
+    log.error('[VectTauri] Dimension mismatch — aborting fallback chain:', msg);
     // toastr is global in the ST browser context
     if (typeof toastr !== 'undefined') {
         toastr.error(msg, 'Embedding Dimension Mismatch', { timeOut: 10000 });
@@ -66,9 +66,9 @@ function _embedTimeoutHint(settings) {
     return `NOTE: this request embeds server-side via '${source}' before querying Qdrant. Qdrant on LAN answers in <50ms, so a timeout/504 here points to the embedding provider ('${source}'), NOT Qdrant.`;
 }
 
-// NOTE: `vectfox_main` is kept verbatim for on-disk compatibility
-// with existing user Qdrant data. Do not rebrand. See plans/vectfox-rename-plan.md §1.5.
-const MULTITENANCY_COLLECTION = 'vectfox_main';
+// NOTE: `vecttauri_main` is kept verbatim for on-disk compatibility
+// with existing user Qdrant data. Do not rebrand. See plans/vecttauri-rename-plan.md §1.5.
+const MULTITENANCY_COLLECTION = 'vecttauri_main';
 
 
 function getPluginProviderParams(settings) {
@@ -103,7 +103,7 @@ function getPluginProviderParams(settings) {
 /**
  * Determines the actual collection name to use based on multitenancy setting
  * @param {string} collectionId - Original collection ID
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @returns {string} - Actual collection name to use
  */
 function getActualCollectionId(collectionId, settings) {
@@ -136,7 +136,7 @@ export class QdrantBackend extends VectorBackend {
                 host: null,
                 port: null,
             };
-            log.lifecycle('VectFox: Initializing Qdrant Cloud:', config.url, legacyPlaintext ? '(using legacy plaintext key — will migrate)' : '(plugin resolves key from secret_state)');
+            log.lifecycle('VectTauri: Initializing Qdrant Cloud:', config.url, legacyPlaintext ? '(using legacy plaintext key — will migrate)' : '(plugin resolves key from secret_state)');
         } else {
             // Local mode: use host and port
             config = {
@@ -146,10 +146,10 @@ export class QdrantBackend extends VectorBackend {
                 url: null,
                 apiKey: null,
             };
-            log.lifecycle('VectFox: Initializing local Qdrant:', `${config.host}:${config.port}`);
+            log.lifecycle('VectTauri: Initializing local Qdrant:', `${config.host}:${config.port}`);
         }
 
-        log.lifecycle('VectFox: Sending Qdrant config to Similharity plugin:', JSON.stringify({ ...config, apiKey: config.apiKey ? '***redacted***' : undefined }));
+        log.lifecycle('VectTauri: Sending Qdrant config to Similharity plugin:', JSON.stringify({ ...config, apiKey: config.apiKey ? '***redacted***' : undefined }));
 
         const response = await fetch(getPluginUrl('/api/plugins/similharity/backend/init/qdrant'), {
             method: 'POST',
@@ -163,8 +163,8 @@ export class QdrantBackend extends VectorBackend {
         }
 
         const responseData = await response.json().catch(() => ({}));
-        log.lifecycle('VectFox: Qdrant initialization response:', responseData);
-        log.lifecycle('VectFox: Using Qdrant backend (production-grade vector search)');
+        log.lifecycle('VectTauri: Qdrant initialization response:', responseData);
+        log.lifecycle('VectTauri: Using Qdrant backend (production-grade vector search)');
     }
 
     async healthCheck() {
@@ -222,7 +222,7 @@ export class QdrantBackend extends VectorBackend {
      * Extracts just the collectionId part and parses it
      *
      * Supported formats:
-     *   vf_{type}_{sourceId} (VectFox)
+     *   vf_{type}_{sourceId} (VectTauri)
      */
     _parseCollectionId(collectionId) {
         // First strip any registry prefix
@@ -234,7 +234,7 @@ export class QdrantBackend extends VectorBackend {
         // Parse the actual collection ID
         const parts = collectionId.split('_');
 
-        // VectFox format: vf_{type}_{sourceId}
+        // VectTauri format: vf_{type}_{sourceId}
         if (parts.length >= 3 && parts[0] === 'vf') {
             return {
                 type: parts[1],
@@ -243,7 +243,7 @@ export class QdrantBackend extends VectorBackend {
         }
 
         // Fallback: assume it's a chat with raw ID
-        log.warn('VectFox: Unknown collection ID format:', collectionId);
+        log.warn('VectTauri: Unknown collection ID format:', collectionId);
         return {
             type: 'chat',
             sourceId: collectionId
@@ -306,7 +306,7 @@ export class QdrantBackend extends VectorBackend {
             batches.push(items.slice(i, i + BATCH_SIZE));
         }
 
-        log.verbose(`VectFox Qdrant: Inserting ${items.length} vectors in ${batches.length} batch(es) of up to ${BATCH_SIZE} items`);
+        log.verbose(`VectTauri Qdrant: Inserting ${items.length} vectors in ${batches.length} batch(es) of up to ${BATCH_SIZE} items`);
 
         // Process each batch
         for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
@@ -332,7 +332,7 @@ export class QdrantBackend extends VectorBackend {
 
                         const metadata = {
                             ...item.metadata,
-                            // Pass through VectFox-specific fields
+                            // Pass through VectTauri-specific fields
                             importance: item.importance,
                             keywords: item.keywords,
                             conditions: item.conditions,
@@ -395,7 +395,7 @@ export class QdrantBackend extends VectorBackend {
                 throw new Error(`[Qdrant] Failed to insert ${items.length} vectors into ${actualCollectionId}: ${response.status} ${response.statusText} - ${errorBody}`);
             }
 
-            log.verbose(`VectFox Qdrant: Batch ${batchNum}/${batches.length} completed (${batch.length} vectors)`);
+            log.verbose(`VectTauri Qdrant: Batch ${batchNum}/${batches.length} completed (${batch.length} vectors)`);
         }
         try {
             // Dynamic import to avoid circular dependency
@@ -409,11 +409,11 @@ export class QdrantBackend extends VectorBackend {
             // to the standard backend in the badge logic.
             registerCollection(buildRegistryKey(collectionId, settings));
         } catch (e) {
-            log.warn('VectFox: Failed to register collection after Qdrant insert:', e);
+            log.warn('VectTauri: Failed to register collection after Qdrant insert:', e);
         }
 
         const mode = settings.qdrant_multitenancy ? 'multitenancy' : 'separate';
-        log.lifecycle(`VectFox Qdrant: Inserted ${items.length} vectors into ${actualCollectionId} (${mode} mode, content_type: ${strippedCollectionId})`);
+        log.lifecycle(`VectTauri Qdrant: Inserted ${items.length} vectors into ${actualCollectionId} (${mode} mode, content_type: ${strippedCollectionId})`);
     }
 
     async deleteVectorItems(collectionId, hashes, settings) {
@@ -613,7 +613,7 @@ export class QdrantBackend extends VectorBackend {
                 } else {
                     const errorBody = await response.text().catch(() => 'No response body');
                     const errorMsg = `${response.status} ${response.statusText} - ${errorBody}`;
-                    log.error(`VectFox: Query failed for ${collectionId}: ${errorMsg}`);
+                    log.error(`VectTauri: Query failed for ${collectionId}: ${errorMsg}`);
                     results[collectionId] = { hashes: [], metadata: [], error: errorMsg };
                 }
             } catch (error) {
@@ -637,7 +637,7 @@ export class QdrantBackend extends VectorBackend {
         };
 
         // Multitenancy: send sourceId filter so the plugin deletes only the logical
-        // collection's points from vectfox_main (instead of the entire shared collection).
+        // collection's points from vecttauri_main (instead of the entire shared collection).
         if (settings?.qdrant_multitenancy) {
             body.filters = { sourceId: strippedId };
         }
@@ -653,7 +653,7 @@ export class QdrantBackend extends VectorBackend {
             throw new Error(`[Qdrant] Failed to purge collection ${collectionId}: ${response.status} ${response.statusText} - ${errorBody}`);
         }
 
-        log.lifecycle(`VectFox Qdrant: Purged ${actualCollectionId}`);
+        log.lifecycle(`VectTauri Qdrant: Purged ${actualCollectionId}`);
     }
 
     async purgeFileVectorIndex(collectionId, settings) {
@@ -662,7 +662,7 @@ export class QdrantBackend extends VectorBackend {
 
     async purgeAllVectorIndexes(settings) {
         // Note: With separate collections per content type, we need to purge each collection individually
-        log.warn('VectFox: purgeAllVectorIndexes now requires calling purgeVectorIndex for each collection');
+        log.warn('VectTauri: purgeAllVectorIndexes now requires calling purgeVectorIndex for each collection');
         throw new Error('purgeAllVectorIndexes requires collection IDs - call purgeVectorIndex for each collection instead');
     }
 
@@ -817,7 +817,7 @@ export class QdrantBackend extends VectorBackend {
      * Embed a query text once so every request of the query can reuse the vector
      * (see core/core-vector-api.js getQueryVector).
      * @param {string} searchText
-     * @param {object} settings - VectFox settings
+     * @param {object} settings - VectTauri settings
      * @returns {Promise<number[]>}
      */
     async embedQuery(searchText, settings) {
@@ -842,7 +842,7 @@ export class QdrantBackend extends VectorBackend {
      * @param {string} collectionId - Collection to query
      * @param {string} searchText - Query text
      * @param {number} topK - Number of results to return
-     * @param {object} settings - VectFox settings
+     * @param {object} settings - VectTauri settings
      * @param {object} hybridOptions - Hybrid search options
      * @param {object} [filters] - Payload filters
      * @param {number[]|null} [queryVector] - The query's embedding, when the caller
@@ -1063,7 +1063,7 @@ export class QdrantBackend extends VectorBackend {
      * @param {string} collectionId
      * @param {string} searchText
      * @param {number} topK - Outer formula limit (typically finalTopK × 2 for dedup overfetch)
-     * @param {object} settings - VectFox settings
+     * @param {object} settings - VectTauri settings
      * @param {object} rerankParams - { weights, chatLength, halfLife, minImportance, visibleThreshold, applyContextDedupFilter, rrfScoreScale? }
      * @param {object} hybridOptions - { prefetchLimit }
      * @param {object} [filters] - Payload filters

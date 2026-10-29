@@ -1,19 +1,12 @@
-# 🦊 VectTauri — Advanced RAG for TauriTavern
+<p align="center">
+  <img src="assets/20260514_163417_vecttauri.jpg" alt="VectTauri — Event-Based AI Memory for TauriTavern" width="100%" />
+</p>
 
-> **Fork of [VectFox](https://github.com/KritBlade/VectFox)** by Kritblade, modified for **TauriTavern** (Android) with **external Similharity bridge** support.
+# VectTauri — Advanced RAG for TauriTavern
+
+> **Fork of [VectFox](https://github.com/KritBlade/VectFox)** by Kritblade — all VectFox credits belong to the original author. VectTauri adapts it for **TauriTavern** (Android).
 
 VectTauri brings full RAG (Retrieval-Augmented Generation) memory to TauriTavern using an external Similharity server running on Termux. Unlike the original VectFox which requires the Similharity plugin inside SillyTavern's Node.js backend, VectTauri connects to an **external HTTPS bridge** — making it work on TauriTavern which doesn't have a Node.js server.
-
----
-
-## 🎯 What's Different from VectFox?
-
-| Feature | VectFox (original) | VectTauri (this fork) |
-|---------|-------------------|----------------------|
-| Platform | SillyTavern (desktop) | **TauriTavern (Android)** |
-| Similharity plugin | Inside SillyTavern | **External bridge server (Termux)** |
-| Bridge URL | Hardcoded relative path | **Configurable in Settings** |
-| Backend | Qdrant / Standard | Qdrant / Standard |
 
 ---
 
@@ -35,13 +28,13 @@ VectTauri brings full RAG (Retrieval-Augmented Generation) memory to TauriTavern
 3. Click **"Install Extension"**
 4. Paste this URL:
    ```
-   https://github.com/lunarcadedigital/VectFox
+   https://github.com/lunarcadedigital/VectTauri
    ```
 5. Click **Install**
 
 ### Step 2: Setup Similharity Bridge on Termux
 
-This is the key difference from original VectFox — the Similharity plugin runs as an **external HTTPS server** on Termux.
+This is the key difference from SillyTavern installs — the Similharity plugin runs as an **external HTTPS server** on Termux.
 
 #### 2a. Install Dependencies
 

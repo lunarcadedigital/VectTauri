@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VECTFOX MIGRATION — reset world_info_threshold values tuned against raw RRF
+ * VECTTAURI MIGRATION — reset world_info_threshold values tuned against raw RRF
  * ============================================================================
  * (Folder conventions: see Migration/mg_setting_name_for_connection.js.)
  *
@@ -42,7 +42,7 @@ export const WORLD_INFO_THRESHOLD_DEFAULT = 0.3;
  * stamps `world_info_threshold_rrf_reset_done` on first run (whether or not a
  * reset happened) and never touches the value again.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @returns {{ migrated: boolean, stamped: boolean, from?: number }}
  *   migrated: the threshold was reset this run (toast + persist).
  *   stamped: the run-once flag was newly written this run (persist).

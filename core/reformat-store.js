@@ -11,7 +11,7 @@
  * Genuinely new — nothing like this exists for non-chat content today. Chat's
  * fingerprint/dedup cache (core/eventbase-store.js) is chat-UUID-keyed and
  * unrelated. Kept as its OWN top-level bucket
- * (extension_settings.vectfox.reformat_cache), separate from
+ * (extension_settings.vecttauri.reformat_cache), separate from
  * collection-metadata.js's per-collection object — that store is framed as a
  * lean settings layer, and a full document's original text plus its
  * structured output is a materially different size class than anything else
@@ -40,14 +40,14 @@ import { log } from './log.js';
 
 function _ensureReformatCacheObject() {
     if (!extension_settings) {
-        log.error('VectFox: extension_settings is null/undefined - cannot access reformat_cache');
+        log.error('VectTauri: extension_settings is null/undefined - cannot access reformat_cache');
         return false;
     }
-    if (!extension_settings.vectfox) {
-        extension_settings.vectfox = {};
+    if (!extension_settings.vecttauri) {
+        extension_settings.vecttauri = {};
     }
-    if (!extension_settings.vectfox.reformat_cache) {
-        extension_settings.vectfox.reformat_cache = {};
+    if (!extension_settings.vecttauri.reformat_cache) {
+        extension_settings.vecttauri.reformat_cache = {};
     }
     return true;
 }
@@ -58,7 +58,7 @@ function _ensureReformatCacheObject() {
  */
 export function getReformatCache(sourceHash) {
     if (!sourceHash || !_ensureReformatCacheObject()) return null;
-    return extension_settings.vectfox.reformat_cache[sourceHash] || null;
+    return extension_settings.vecttauri.reformat_cache[sourceHash] || null;
 }
 
 /**
@@ -73,7 +73,7 @@ export function getReformatCache(sourceHash) {
  */
 export function saveReformatCache(sourceHash, data) {
     if (!sourceHash) {
-        log.warn('VectFox: saveReformatCache called with null/undefined sourceHash');
+        log.warn('VectTauri: saveReformatCache called with null/undefined sourceHash');
         return null;
     }
     _ensureReformatCacheObject();
@@ -90,9 +90,9 @@ export function saveReformatCache(sourceHash, data) {
         runId: `${sourceHash}_${acceptedAt}`,
     };
 
-    extension_settings.vectfox.reformat_cache[sourceHash] = entry;
+    extension_settings.vecttauri.reformat_cache[sourceHash] = entry;
     saveSettingsDebounced();
-    log.lifecycle(`VectFox: Saved Auto-Reformat cache for source ${sourceHash} (${entry.chunks.length} chunks, runId=${entry.runId})`);
+    log.lifecycle(`VectTauri: Saved Auto-Reformat cache for source ${sourceHash} (${entry.chunks.length} chunks, runId=${entry.runId})`);
     return entry;
 }
 
@@ -101,10 +101,10 @@ export function saveReformatCache(sourceHash, data) {
  */
 export function deleteReformatCache(sourceHash) {
     if (!sourceHash || !_ensureReformatCacheObject()) return;
-    if (extension_settings.vectfox.reformat_cache[sourceHash]) {
-        delete extension_settings.vectfox.reformat_cache[sourceHash];
+    if (extension_settings.vecttauri.reformat_cache[sourceHash]) {
+        delete extension_settings.vecttauri.reformat_cache[sourceHash];
         saveSettingsDebounced();
-        log.lifecycle(`VectFox: Deleted Auto-Reformat cache for source ${sourceHash}`);
+        log.lifecycle(`VectTauri: Deleted Auto-Reformat cache for source ${sourceHash}`);
     }
 }
 
@@ -115,7 +115,7 @@ export function deleteReformatCache(sourceHash) {
  */
 export function listReformatCacheEntries() {
     if (!_ensureReformatCacheObject()) return [];
-    return Object.entries(extension_settings.vectfox.reformat_cache).map(([sourceHash, entry]) => ({
+    return Object.entries(extension_settings.vecttauri.reformat_cache).map(([sourceHash, entry]) => ({
         sourceHash,
         sourceName: entry.sourceName,
         contentType: entry.contentType,
@@ -136,7 +136,7 @@ export function listReformatCacheEntries() {
 export function clearAllReformatOriginals() {
     if (!_ensureReformatCacheObject()) return 0;
     let cleared = 0;
-    for (const entry of Object.values(extension_settings.vectfox.reformat_cache)) {
+    for (const entry of Object.values(extension_settings.vecttauri.reformat_cache)) {
         if (entry.originalText) {
             entry.originalText = '';
             cleared++;
@@ -144,7 +144,7 @@ export function clearAllReformatOriginals() {
     }
     if (cleared > 0) {
         saveSettingsDebounced();
-        log.lifecycle(`VectFox: Cleared retained original text for ${cleared} Auto-Reformat cache entries`);
+        log.lifecycle(`VectTauri: Cleared retained original text for ${cleared} Auto-Reformat cache entries`);
     }
     return cleared;
 }

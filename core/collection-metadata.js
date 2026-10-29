@@ -1,7 +1,7 @@
 /**
- * VECTFOX Collection Metadata Manager
+ * VECTTAURI Collection Metadata Manager
  *
- * Manages collection-level metadata in extension_settings.vectfox.collections
+ * Manages collection-level metadata in extension_settings.vecttauri.collections
  * This is the "settings layer" - user preferences for collections.
  *
  * Separation of concerns:
@@ -134,14 +134,14 @@ const defaultCollectionMeta = {
 function ensureCollectionsObject() {
     // VEC-26: Add proper null checks to prevent crashes
     if (!extension_settings) {
-        log.error('VectFox: extension_settings is null/undefined - cannot access collections');
+        log.error('VectTauri: extension_settings is null/undefined - cannot access collections');
         return false;
     }
-    if (!extension_settings.vectfox) {
-        extension_settings.vectfox = {};
+    if (!extension_settings.vecttauri) {
+        extension_settings.vecttauri = {};
     }
-    if (!extension_settings.vectfox.collections) {
-        extension_settings.vectfox.collections = {};
+    if (!extension_settings.vecttauri.collections) {
+        extension_settings.vecttauri.collections = {};
     }
     return true;
 }
@@ -206,7 +206,7 @@ export function getCollectionMeta(collectionId) {
         return fresh;
     }
 
-    const stored = extension_settings.vectfox.collections[collectionId];
+    const stored = extension_settings.vecttauri.collections[collectionId];
     const merged = stored
         ? { ...defaultCollectionMeta, ...stored }
         : { ...defaultCollectionMeta };
@@ -229,22 +229,22 @@ export function getCollectionMeta(collectionId) {
  */
 export function setCollectionMeta(collectionId, data) {
     if (!collectionId) {
-        log.warn('VectFox: setCollectionMeta called with null/undefined collectionId');
+        log.warn('VectTauri: setCollectionMeta called with null/undefined collectionId');
         return;
     }
 
     ensureCollectionsObject();
 
-    const existing = extension_settings.vectfox.collections[collectionId] || {};
+    const existing = extension_settings.vecttauri.collections[collectionId] || {};
 
-    extension_settings.vectfox.collections[collectionId] = {
+    extension_settings.vecttauri.collections[collectionId] = {
         ...defaultCollectionMeta,
         ...existing,
         ...data,
     };
 
     saveSettingsDebounced();
-    log.trace(`VectFox: Updated metadata for collection ${collectionId}`);
+    log.trace(`VectTauri: Updated metadata for collection ${collectionId}`);
 }
 
 /**
@@ -254,11 +254,11 @@ export function setCollectionMeta(collectionId, data) {
 export function deleteCollectionMeta(collectionId) {
     ensureCollectionsObject();
 
-    if (extension_settings.vectfox.collections[collectionId]) {
-        delete extension_settings.vectfox.collections[collectionId];
+    if (extension_settings.vecttauri.collections[collectionId]) {
+        delete extension_settings.vecttauri.collections[collectionId];
         _updateChatLockIndex(collectionId, null, '*');
         saveSettingsDebounced();
-        log.lifecycle(`VectFox: Deleted metadata for collection ${collectionId}`);
+        log.lifecycle(`VectTauri: Deleted metadata for collection ${collectionId}`);
     }
 }
 
@@ -268,7 +268,7 @@ export function deleteCollectionMeta(collectionId) {
  */
 export function getAllCollectionMeta() {
     ensureCollectionsObject();
-    return extension_settings.vectfox.collections;
+    return extension_settings.vecttauri.collections;
 }
 
 // ============================================================================
@@ -339,12 +339,12 @@ export function isCollectionAutoSyncEnabled(collectionId) {
  * @returns {object|null} Chunk metadata or null if not found
  */
 export function getChunkMetadata(hash) {
-    if (!extension_settings.vectfox) {
+    if (!extension_settings.vecttauri) {
         return null;
     }
 
-    const key = `vectfox_chunk_meta_${hash}`;
-    return extension_settings.vectfox[key] || null;
+    const key = `vecttauri_chunk_meta_${hash}`;
+    return extension_settings.vecttauri[key] || null;
 }
 
 /**
@@ -353,12 +353,12 @@ export function getChunkMetadata(hash) {
  * @param {object} metadata Chunk metadata
  */
 export function saveChunkMetadata(hash, metadata) {
-    if (!extension_settings.vectfox) {
-        extension_settings.vectfox = {};
+    if (!extension_settings.vecttauri) {
+        extension_settings.vecttauri = {};
     }
 
-    const key = `vectfox_chunk_meta_${hash}`;
-    extension_settings.vectfox[key] = {
+    const key = `vecttauri_chunk_meta_${hash}`;
+    extension_settings.vecttauri[key] = {
         ...metadata,
         updatedAt: Date.now(),
     };
@@ -371,13 +371,13 @@ export function saveChunkMetadata(hash, metadata) {
  * @param {string} hash Chunk hash
  */
 export function deleteChunkMetadata(hash) {
-    if (!extension_settings.vectfox) {
+    if (!extension_settings.vecttauri) {
         return;
     }
 
-    const key = `vectfox_chunk_meta_${hash}`;
-    if (extension_settings.vectfox[key]) {
-        delete extension_settings.vectfox[key];
+    const key = `vecttauri_chunk_meta_${hash}`;
+    if (extension_settings.vecttauri[key]) {
+        delete extension_settings.vecttauri[key];
         saveSettingsDebounced();
     }
 }
@@ -387,17 +387,17 @@ export function deleteChunkMetadata(hash) {
  * @returns {object} Map of hash -> metadata
  */
 export function getAllChunkMetadata() {
-    if (!extension_settings.vectfox) {
+    if (!extension_settings.vecttauri) {
         return {};
     }
 
     const result = {};
-    const prefix = 'vectfox_chunk_meta_';
+    const prefix = 'vecttauri_chunk_meta_';
 
-    for (const key in extension_settings.vectfox) {
+    for (const key in extension_settings.vecttauri) {
         if (key.startsWith(prefix)) {
             const hash = key.replace(prefix, '');
-            result[hash] = extension_settings.vectfox[key];
+            result[hash] = extension_settings.vecttauri[key];
         }
     }
 
@@ -410,11 +410,11 @@ export function getAllChunkMetadata() {
 
 /**
  * Migrates old scattered enabled keys to new collections structure
- * Old format: vectfox_collection_enabled_{collectionId} = true/false
+ * Old format: vecttauri_collection_enabled_{collectionId} = true/false
  * New format: collections[collectionId].enabled = true/false
  */
 export function migrateOldEnabledKeys() {
-    if (!extension_settings.vectfox) {
+    if (!extension_settings.vecttauri) {
         return { migrated: 0 };
     }
 
@@ -423,18 +423,18 @@ export function migrateOldEnabledKeys() {
     let migrated = 0;
     const keysToDelete = [];
 
-    for (const key in extension_settings.vectfox) {
-        if (key.startsWith('vectfox_collection_enabled_')) {
-            const collectionId = key.replace('vectfox_collection_enabled_', '');
-            const enabled = extension_settings.vectfox[key];
+    for (const key in extension_settings.vecttauri) {
+        if (key.startsWith('vecttauri_collection_enabled_')) {
+            const collectionId = key.replace('vecttauri_collection_enabled_', '');
+            const enabled = extension_settings.vecttauri[key];
 
             // Only migrate if we don't already have metadata for this collection
-            if (!extension_settings.vectfox.collections[collectionId]) {
-                extension_settings.vectfox.collections[collectionId] = {
+            if (!extension_settings.vecttauri.collections[collectionId]) {
+                extension_settings.vecttauri.collections[collectionId] = {
                     ...defaultCollectionMeta,
                     enabled: enabled !== false,
                 };
-                log.lifecycle(`VectFox: Migrated enabled key for ${collectionId}`);
+                log.lifecycle(`VectTauri: Migrated enabled key for ${collectionId}`);
             }
 
             keysToDelete.push(key);
@@ -444,12 +444,12 @@ export function migrateOldEnabledKeys() {
 
     // Delete old keys
     for (const key of keysToDelete) {
-        delete extension_settings.vectfox[key];
+        delete extension_settings.vecttauri[key];
     }
 
     if (migrated > 0) {
         saveSettingsDebounced();
-        log.lifecycle(`VectFox: Migrated ${migrated} old enabled keys to new collections structure`);
+        log.lifecycle(`VectTauri: Migrated ${migrated} old enabled keys to new collections structure`);
     }
 
     return { migrated };
@@ -466,7 +466,7 @@ export function cleanupOrphanedMeta(actualCollectionIds) {
     const actualSet = new Set(actualCollectionIds);
     const orphaned = [];
 
-    for (const collectionId in extension_settings.vectfox.collections) {
+    for (const collectionId in extension_settings.vecttauri.collections) {
         if (!actualSet.has(collectionId)) {
             orphaned.push(collectionId);
         }
@@ -479,13 +479,13 @@ export function cleanupOrphanedMeta(actualCollectionIds) {
     // irreversible, while a stale entry costs nothing and self-corrects on the
     // next successful discovery. Refuse and say so.
     if (actualCollectionIds.length === 0 && orphaned.length > 0) {
-        log.warn(`VectFox: cleanupOrphanedMeta refused — discovery returned ZERO collections while ${orphaned.length} metadata entr${orphaned.length === 1 ? 'y is' : 'ies are'} stored. This looks like a backend outage, not a real mass deletion; keeping all metadata (locks, triggers) intact.`);
+        log.warn(`VectTauri: cleanupOrphanedMeta refused — discovery returned ZERO collections while ${orphaned.length} metadata entr${orphaned.length === 1 ? 'y is' : 'ies are'} stored. This looks like a backend outage, not a real mass deletion; keeping all metadata (locks, triggers) intact.`);
         return { removed: 0, orphanedIds: [], refused: true };
     }
 
     for (const collectionId of orphaned) {
-        delete extension_settings.vectfox.collections[collectionId];
-        log.trace(`VectFox: Removed orphaned metadata for ${collectionId}`);
+        delete extension_settings.vecttauri.collections[collectionId];
+        log.trace(`VectTauri: Removed orphaned metadata for ${collectionId}`);
     }
 
     if (orphaned.length > 0) {
@@ -493,7 +493,7 @@ export function cleanupOrphanedMeta(actualCollectionIds) {
         // warn, not lifecycle: this deletes locks/triggers with the collection.
         // When a wipe is ever wrong (see the refusal above), this line is the
         // only trace of WHAT was lost — name the entries.
-        log.warn(`VectFox: Cleaned up ${orphaned.length} orphaned metadata entries: ${orphaned.join(', ')}`);
+        log.warn(`VectTauri: Cleaned up ${orphaned.length} orphaned metadata entries: ${orphaned.join(', ')}`);
     }
 
     return { removed: orphaned.length, orphanedIds: orphaned, refused: false };
@@ -504,13 +504,13 @@ export function cleanupOrphanedMeta(actualCollectionIds) {
 // ============================================================================
 
 /**
- * Maintains the reverse index: extension_settings.vectfox.chat_lock_index[chatId] = [collectionId, ...]
+ * Maintains the reverse index: extension_settings.vecttauri.chat_lock_index[chatId] = [collectionId, ...]
  * @param {string} collectionId
  * @param {string|null} addChatId - chat to add collectionId to (null = skip)
  * @param {string|'*'|null} removeChatId - chat to remove collectionId from, '*' = remove from all, null = skip
  */
 function _updateChatLockIndex(collectionId, addChatId, removeChatId) {
-    const store = extension_settings?.vectfox;
+    const store = extension_settings?.vecttauri;
     if (!store) return;
     if (!store.chat_lock_index) store.chat_lock_index = {};
     const idx = store.chat_lock_index;
@@ -542,7 +542,7 @@ function _updateChatLockIndex(collectionId, addChatId, removeChatId) {
  * @returns {string[]}
  */
 export function getChatLockedCollections(chatId) {
-    const idx = extension_settings?.vectfox?.chat_lock_index;
+    const idx = extension_settings?.vecttauri?.chat_lock_index;
     if (!idx || !chatId) return [];
     return Array.isArray(idx[String(chatId)]) ? [...idx[String(chatId)]] : [];
 }
@@ -583,7 +583,7 @@ export function setCollectionLock(collectionId, chatId) {
 
     setCollectionMeta(collectionId, update);
     _updateChatLockIndex(collectionId, chatId === null ? null : chatId, chatId === null ? '*' : null);
-    log.lifecycle(`VectFox: Collection ${collectionId} locks updated:`, update.lockedToChatIds);
+    log.lifecycle(`VectTauri: Collection ${collectionId} locks updated:`, update.lockedToChatIds);
 }
 
 /**
@@ -611,7 +611,7 @@ export function removeCollectionLock(collectionId, chatId) {
 
     setCollectionMeta(collectionId, update);
     _updateChatLockIndex(collectionId, null, chatId);
-    log.lifecycle(`VectFox: Removed chat ${chatId} from collection ${collectionId} locks`);
+    log.lifecycle(`VectTauri: Removed chat ${chatId} from collection ${collectionId} locks`);
 }
 
 /**
@@ -686,7 +686,7 @@ export function setCollectionCharacterLock(collectionId, characterId) {
 
     update.lockedToCharacterIds = locks;
     setCollectionMeta(collectionId, update);
-    log.lifecycle(`VectFox: Collection ${collectionId} character locks updated:`, update.lockedToCharacterIds);
+    log.lifecycle(`VectTauri: Collection ${collectionId} character locks updated:`, update.lockedToCharacterIds);
 }
 
 /**
@@ -706,7 +706,7 @@ export function removeCollectionCharacterLock(collectionId, characterId) {
 
     update.lockedToCharacterIds = locks;
     setCollectionMeta(collectionId, update);
-    log.lifecycle(`VectFox: Removed character ${characterId} from collection ${collectionId} locks`);
+    log.lifecycle(`VectTauri: Removed character ${characterId} from collection ${collectionId} locks`);
 }
 
 /**
@@ -716,7 +716,7 @@ export function removeCollectionCharacterLock(collectionId, characterId) {
 export function clearCollectionCharacterLocks(collectionId) {
     if (!collectionId) return;
     setCollectionMeta(collectionId, { lockedToCharacterIds: [] });
-    log.lifecycle(`VectFox: Cleared all character locks for collection ${collectionId}`);
+    log.lifecycle(`VectTauri: Cleared all character locks for collection ${collectionId}`);
 }
 
 /**
@@ -820,11 +820,11 @@ export function isCollectionActiveForContextAnyKey(keys, context = {}) {
  *
  * @param {object} meta - already-resolved collection metadata
  * @param {string} collectionId - original ID passed by caller (for legacy fallback)
- * @param {object} [settings] - extension_settings.vectfox (or partial)
+ * @param {object} [settings] - extension_settings.vecttauri (or partial)
  * @returns {boolean}
  */
 function _isLockAuthorized(meta, collectionId, settings) {
-    const store = settings || extension_settings?.vectfox || {};
+    const store = settings || extension_settings?.vecttauri || {};
     if (store.superadmin === true) return true;
 
     let currentHandle = '';
@@ -862,7 +862,7 @@ function _isLockAuthorized(meta, collectionId, settings) {
  * @param {object} [options]
  * @param {string} [options.chatId] - Override current chat ID for the active check
  * @param {string|number} [options.characterId] - Override current character ID
- * @param {object} [options.settings] - VectFox settings (for superadmin flag)
+ * @param {object} [options.settings] - VectTauri settings (for superadmin flag)
  * @param {boolean} [options.ignoreAuth=false] - Skip authorization gate
  * @returns {null | {
  *   storageKey: string,
@@ -916,7 +916,7 @@ export function getLock(collectionId, options = {}) {
  *   - op:     'add' = include target, 'remove' = drop target, 'clear' = empty the list
  *   - target: chatId or characterId (required for add/remove; ignored for clear)
  * @param {object} [options]
- * @param {object} [options.settings] - VectFox settings (for superadmin)
+ * @param {object} [options.settings] - VectTauri settings (for superadmin)
  * @param {boolean} [options.ignoreAuth=false] - Skip authorization (system use)
  * @returns {{ success: boolean, reason?: string }}
  */
@@ -932,7 +932,7 @@ export function setLock(collectionId, action, options = {}) {
     const meta = getCollectionMeta(collectionId);
 
     if (!ignoreAuth && !_isLockAuthorized(meta, collectionId, settings)) {
-        log.warn(`VectFox: setLock denied for ${collectionId} (kind=${kind}, op=${op}) — not superadmin and persona handle does not match creatorHandle`);
+        log.warn(`VectTauri: setLock denied for ${collectionId} (kind=${kind}, op=${op}) — not superadmin and persona handle does not match creatorHandle`);
         return { success: false, reason: 'unauthorized' };
     }
 
@@ -961,14 +961,14 @@ export function ensureCollectionMeta(collectionId, initialData = {}) {
 
     ensureCollectionsObject();
 
-    if (!extension_settings.vectfox.collections[collectionId]) {
-        extension_settings.vectfox.collections[collectionId] = {
+    if (!extension_settings.vecttauri.collections[collectionId]) {
+        extension_settings.vecttauri.collections[collectionId] = {
             ...defaultCollectionMeta,
             createdAt: Date.now(),
             ...initialData,
         };
         saveSettingsDebounced();
-        log.lifecycle(`VectFox: Created metadata for new collection ${collectionId}`);
+        log.lifecycle(`VectTauri: Created metadata for new collection ${collectionId}`);
     }
 }
 
@@ -984,7 +984,7 @@ export function recordCollectionUsage(collectionId) {
 
     ensureCollectionsObject();
 
-    const existing = extension_settings.vectfox.collections[collectionId];
+    const existing = extension_settings.vecttauri.collections[collectionId];
     if (existing) {
         existing.lastUsed = Date.now();
         existing.queryCount = (existing.queryCount || 0) + 1;
@@ -1038,7 +1038,7 @@ function checkTriggers(triggers, context, options = {}) {
                 const regex = new RegExp(pattern, flags);
                 return regex.test(searchText);
             } catch (e) {
-                log.warn(`VectFox: Invalid trigger regex: ${trigger}`);
+                log.warn(`VectTauri: Invalid trigger regex: ${trigger}`);
                 return false;
             }
         }
@@ -1093,7 +1093,7 @@ async function evaluateAdvancedConditions(meta, context, collectionId) {
 
     const results = rules.map(rule => {
         const result = evaluate(rule, context);
-        log.trace(`VectFox: Collection ${collectionId} condition ${rule.type}: ${result}`);
+        log.trace(`VectTauri: Collection ${collectionId} condition ${rule.type}: ${result}`);
         return result;
     });
 
@@ -1137,7 +1137,7 @@ export async function shouldCollectionActivate(collectionId, context) {
 
     // Gate 1: Pause button — global disable, blocks everything.
     if (meta.enabled === false) {
-        log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: ✗ DISABLED`);
+        log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: ✗ DISABLED`);
         return false;
     }
 
@@ -1146,14 +1146,14 @@ export async function shouldCollectionActivate(collectionId, context) {
     const lockedToChat = !!(currentChatId && isCollectionLockedToChat(collectionId, currentChatId));
     const lockedToCharacter = !!(currentCharacterId && isCollectionLockedToCharacter(collectionId, currentCharacterId));
     if (!lockedToChat && !lockedToCharacter) {
-        log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: ✗ NOT_LOCKED (master switch off for chat=${currentChatId}, character=${currentCharacterId})`);
+        log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: ✗ NOT_LOCKED (master switch off for chat=${currentChatId}, character=${currentCharacterId})`);
         return false;
     }
 
     const hasTriggers = meta.triggers && meta.triggers.length > 0;
     const hasConditions = meta.conditions?.enabled && meta.conditions?.rules?.length > 0;
 
-    log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: locked (chat=${lockedToChat}, character=${lockedToCharacter}), hasTriggers=${hasTriggers}, hasConditions=${hasConditions}`);
+    log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: locked (chat=${lockedToChat}, character=${lockedToCharacter}), hasTriggers=${hasTriggers}, hasConditions=${hasConditions}`);
 
     // Gate 3: Activation Triggers narrow the locked collection to matching turns.
     if (hasTriggers) {
@@ -1163,10 +1163,10 @@ export async function shouldCollectionActivate(collectionId, context) {
             scanDepth: meta.triggerScanDepth || 5,
         });
         if (!triggersMatch) {
-            log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: ✗ TRIGGERS_UNMATCHED (${meta.triggers.join(', ')})`);
+            log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: ✗ TRIGGERS_UNMATCHED (${meta.triggers.join(', ')})`);
             return false;
         }
-        log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: ✓ TRIGGERS_MATCHED`);
+        log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: ✓ TRIGGERS_MATCHED`);
     }
 
     // Gate 4: Advanced Conditions narrow further. Both must hold when both are
@@ -1174,14 +1174,14 @@ export async function shouldCollectionActivate(collectionId, context) {
     if (hasConditions) {
         const conditionsPass = await evaluateAdvancedConditions(meta, context, collectionId);
         if (!conditionsPass) {
-            log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: ✗ CONDITIONS_FAIL`);
+            log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: ✗ CONDITIONS_FAIL`);
             return false;
         }
-        log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: ✓ CONDITIONS_PASS`);
+        log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: ✓ CONDITIONS_PASS`);
     }
 
     // Gate 5: Locked and every configured filter passed.
-    log.trace(`[VECTFOX Activation Filter] Collection ${collectionId}: ✓ ACTIVE`);
+    log.trace(`[VECTTAURI Activation Filter] Collection ${collectionId}: ✓ ACTIVE`);
     return true;
 }
 
@@ -1202,9 +1202,9 @@ export async function filterActiveCollections(collectionIds, context) {
     const activeIds = results.filter(r => r.active).map(r => r.id);
 
     if (log.enabled('trace')) {
-        log.trace(`[VECTFOX Activation Filter] Summary: ${collectionIds.length} collections → ${activeIds.length} active`);
+        log.trace(`[VECTTAURI Activation Filter] Summary: ${collectionIds.length} collections → ${activeIds.length} active`);
         if (activeIds.length > 0) {
-            log.trace(`[VECTFOX Activation Filter] Active collections:`, activeIds);
+            log.trace(`[VECTTAURI Activation Filter] Active collections:`, activeIds);
         }
     }
 

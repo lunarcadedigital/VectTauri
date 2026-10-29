@@ -2,14 +2,14 @@
  * VectTauri - Similharity Bridge URL Helper
  * 
  * Returns the configurable base URL for the Similharity plugin bridge.
- * Users set this in VectFox Settings → Similharity Bridge URL.
+ * Users set this in VectTauri Settings → Similharity Bridge URL.
  * Default: https://localhost:8443
  */
 
 import { extension_settings } from "../../../../extensions.js";
 
 export function getSimilharityBaseUrl() {
-    const url = extension_settings?.vectfox?.similharity_url || "";
+    const url = extension_settings?.vecttauri?.similharity_url || "";
     // Strip trailing slash
     return url.replace(/\/+$/, "");
 }

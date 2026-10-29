@@ -21,12 +21,12 @@ function _upstreamSnippet(text) {
  * or unavailable model) that should abort the operation and be surfaced to the user,
  * instead of being silently dropped or treated as a transient per-window skip.
  *
- * Shared by every VectFox path that calls a configured model: EventBase extraction,
+ * Shared by every VectTauri path that calls a configured model: EventBase extraction,
  * the summarizer, agent-mode planning, and embedding inserts/queries. Each caller
  * passes its own contextLabel so the message reads e.g. "EventBase: …" / "Embedding: …".
  *
  * @param {object} failure
- * @param {string} [failure.contextLabel] - Prefix identifying the calling path (default 'VectFox').
+ * @param {string} [failure.contextLabel] - Prefix identifying the calling path (default 'VectTauri').
  * @param {string} failure.provider       - Provider name (OpenRouter, vLLM, …).
  * @param {string} failure.model          - The model id that was requested.
  * @param {number} failure.status         - HTTP status from the provider.
@@ -36,7 +36,7 @@ function _upstreamSnippet(text) {
  *        model error as HTTP 500 — there we classify on the forwarded text alone.
  * @returns {string|null} A user-facing fatal message, or null if not a model-config error.
  */
-export function getModelConfigErrorMessage({ contextLabel = 'VectFox', provider, model, status, responseText, enforceStatusGate = true }) {
+export function getModelConfigErrorMessage({ contextLabel = 'VectTauri', provider, model, status, responseText, enforceStatusGate = true }) {
     const snippet = _upstreamSnippet(responseText);
     if (!MODEL_CONFIG_ERROR_RE.test(snippet)) {
         return null;

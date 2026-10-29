@@ -1,12 +1,12 @@
 /**
  * ============================================================================
- * VECTFOX DATABASE BROWSER
+ * VECTTAURI DATABASE BROWSER
  * ============================================================================
  * Comprehensive vector database browser UI
  * Main entry point for browsing, managing, and editing all vector collections
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -79,7 +79,7 @@ import {
   downloadPNG,
   readPNGFile,
   convertToPNG,
-  isVectFoxPNG,
+  isVectTauriPNG,
 } from "../core/png-export.js";
 import { renderSizeInspectorTab } from "./size-inspector.js";
 
@@ -117,20 +117,20 @@ let bulkEventsBound = false;
 
 /**
  * Initializes the database browser
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  */
 export function initializeDatabaseBrowser(settings) {
   browserState.settings = settings;
-  log.lifecycle("VectFox Database Browser: Initialized");
+  log.lifecycle("VectTauri Database Browser: Initialized");
 }
 
 /**
  * Opens the database browser modal
  */
 export async function openDatabaseBrowser() {
-  log.verbose("VECTFOX Database Browser: openDatabaseBrowser called, isOpen=", browserState.isOpen);
+  log.verbose("VECTTAURI Database Browser: openDatabaseBrowser called, isOpen=", browserState.isOpen);
   if (browserState.isOpen) {
-    log.verbose("VECTFOX Database Browser: Already open (early return)");
+    log.verbose("VECTTAURI Database Browser: Already open (early return)");
     return;
   }
 
@@ -138,14 +138,14 @@ export async function openDatabaseBrowser() {
   try {
     // Check plugin availability
     browserState.pluginAvailable = await checkPluginAvailable();
-    log.verbose("VECTFOX Database Browser: pluginAvailable=", browserState.pluginAvailable);
+    log.verbose("VECTTAURI Database Browser: pluginAvailable=", browserState.pluginAvailable);
 
     // Create modal if it doesn't exist
-    if ($("#vectfox_database_browser_modal").length === 0) {
-      log.trace("VECTFOX Database Browser: creating modal");
+    if ($("#vecttauri_database_browser_modal").length === 0) {
+      log.trace("VECTTAURI Database Browser: creating modal");
       createBrowserModal();
     } else {
-      log.trace("VECTFOX Database Browser: modal already in DOM");
+      log.trace("VECTTAURI Database Browser: modal already in DOM");
     }
 
     // Show/hide plugin warning banner
@@ -155,17 +155,17 @@ export async function openDatabaseBrowser() {
     // (e.g. just-vectorized EventBase collections) land in pluginCollectionData with
     // their real source/model — otherwise View Chunks sends source: 'unknown' and
     // the plugin queries the wrong on-disk path.
-    log.trace("VECTFOX Database Browser: about to refreshCollections(true)");
+    log.trace("VECTTAURI Database Browser: about to refreshCollections(true)");
     await refreshCollections(true);
-    log.trace("VECTFOX Database Browser: refreshCollections done");
+    log.trace("VECTTAURI Database Browser: refreshCollections done");
 
     // Show modal
-    $("#vectfox_database_browser_modal").fadeIn(200);
-    log.lifecycle("VECTFOX Database Browser: Opened (fadeIn fired)");
+    $("#vecttauri_database_browser_modal").fadeIn(200);
+    log.lifecycle("VECTTAURI Database Browser: Opened (fadeIn fired)");
   } catch (err) {
     // Never leave isOpen=true on error — that would jam the button forever
     // (the early-return guard above would block every subsequent click).
-    log.error("VECTFOX Database Browser: openDatabaseBrowser threw, resetting isOpen=false", err);
+    log.error("VECTTAURI Database Browser: openDatabaseBrowser threw, resetting isOpen=false", err);
     browserState.isOpen = false;
     throw err;
   }
@@ -175,7 +175,7 @@ export async function openDatabaseBrowser() {
  * Updates the plugin warning banner visibility
  */
 function updatePluginWarningBanner() {
-  const banner = $("#vectfox_plugin_warning_banner");
+  const banner = $("#vecttauri_plugin_warning_banner");
   if (browserState.pluginAvailable) {
     banner.hide();
   } else {
@@ -187,11 +187,11 @@ function updatePluginWarningBanner() {
  * Closes the database browser modal
  */
 export function closeDatabaseBrowser() {
-  $("#vectfox_database_browser_modal").fadeOut(200);
+  $("#vecttauri_database_browser_modal").fadeOut(200);
   browserState.isOpen = false;
   // Reset event bound flags for clean rebind on next open
   resetEventFlags();
-  log.lifecycle("VECTFOX Database Browser: Closed");
+  log.lifecycle("VECTTAURI Database Browser: Closed");
 }
 
 /**
@@ -208,186 +208,186 @@ function resetEventFlags() {
  */
 function createBrowserModal() {
   const modalHtml = `
-        <div id="vectfox_database_browser_modal" class="vectfox-modal">
-            <div class="vectfox-modal-content vectfox-database-browser-content">
+        <div id="vecttauri_database_browser_modal" class="vecttauri-modal">
+            <div class="vecttauri-modal-content vecttauri-database-browser-content">
                 <!-- Header -->
-                <div class="vectfox-modal-header">
-                    <h3>🗃️ VECTFOX Database Browser</h3>
-                    <div class="vectfox-modal-header-actions">
-                        <button class="vectfox-btn vectfox-btn-sm" id="vectfox_browser_refresh_scan" title="Probe standard and qdrant backends, update the registry, and remove stale entries">
+                <div class="vecttauri-modal-header">
+                    <h3>🗃️ VECTTAURI Database Browser</h3>
+                    <div class="vecttauri-modal-header-actions">
+                        <button class="vecttauri-btn vecttauri-btn-sm" id="vecttauri_browser_refresh_scan" title="Probe standard and qdrant backends, update the registry, and remove stale entries">
                             ${icons.refreshCw(14)} Refresh Scan
                         </button>
-                        <button class="vectfox-btn vectfox-btn-sm" id="vectfox_browser_clear_reformat_originals" title="Auto-Reformat retains each source's original text for audit. Clear it to reclaim settings.json space — the accepted chunks themselves are untouched.">
+                        <button class="vecttauri-btn vecttauri-btn-sm" id="vecttauri_browser_clear_reformat_originals" title="Auto-Reformat retains each source's original text for audit. Clear it to reclaim settings.json space — the accepted chunks themselves are untouched.">
                             🧹 Clear Auto-Reformat Originals
                         </button>
                     </div>
-                    <button class="vectfox-btn-icon" id="vectfox_browser_close">✕</button>
+                    <button class="vecttauri-btn-icon" id="vecttauri_browser_close">✕</button>
                 </div>
 
                 <!-- Plugin Warning Banner (hidden by default, shown when plugin unavailable) -->
-                <div id="vectfox_plugin_warning_banner" class="vectfox-warning-banner" style="display: none;">
+                <div id="vecttauri_plugin_warning_banner" class="vecttauri-warning-banner" style="display: none;">
                     <i class="fa-solid fa-triangle-exclamation" style="color: var(--SmartThemeQuoteColor);"></i>
-                    <div class="vectfox-warning-text">
+                    <div class="vecttauri-warning-text">
                         <strong>Limited Discovery Mode</strong>
                         <span>Similharity plugin not detected. Only registered collections and current chat can be discovered.
-                        Collections created outside VECTFOX won't appear here.
-                        <a href="https://github.com/KritBlade/VectFox/tree/Similharity-Plugin#step-2-install-plugin-via-git-recommended" target="_blank">Install the plugin</a> for full filesystem scanning.</span>
+                        Collections created outside VECTTAURI won't appear here.
+                        <a href="https://github.com/KritBlade/VectTauri/tree/Similharity-Plugin#step-2-install-plugin-via-git-recommended" target="_blank">Install the plugin</a> for full filesystem scanning.</span>
                     </div>
                 </div>
 
                 <!-- Browser Tabs -->
-                <div class="vectfox-browser-tabs">
-                    <button class="vectfox-tab-btn active" data-tab="collections">
+                <div class="vecttauri-browser-tabs">
+                    <button class="vecttauri-tab-btn active" data-tab="collections">
                         ${icons.folder(16)} Collections
                     </button>
-                    <button class="vectfox-tab-btn" data-tab="search">
+                    <button class="vecttauri-tab-btn" data-tab="search">
                         ${icons.search(16)} Search
                     </button>
-                    <button class="vectfox-tab-btn" data-tab="bulk">
+                    <button class="vecttauri-tab-btn" data-tab="bulk">
                         ${icons.listChecks(16)} Bulk Operations
                     </button>
-                    <button class="vectfox-tab-btn" data-tab="size" title="Diagnose oversized collections / runaway injection">
+                    <button class="vecttauri-tab-btn" data-tab="size" title="Diagnose oversized collections / runaway injection">
                         ${icons.layers(16)} Size Inspector
                     </button>
                 </div>
 
                 <!-- Tab Content -->
-                <div class="vectfox-browser-content">
+                <div class="vecttauri-browser-content">
                     <!-- Collections Tab -->
-                    <div id="vectfox_tab_collections" class="vectfox-tab-content active">
+                    <div id="vecttauri_tab_collections" class="vecttauri-tab-content active">
                         <!-- Scope Filters (V1-style) -->
-                        <div class="vectfox-scope-filters">
-                            <button class="vectfox-scope-filter active" data-scope="all" title="Show all collections">All</button>
-                            <button class="vectfox-scope-filter" data-scope="character" title="Character = collections locked to at least one character">Character</button>
-                            <button class="vectfox-scope-filter" data-scope="chat" title="Chat = collections locked to at least one chat">Chat</button>
+                        <div class="vecttauri-scope-filters">
+                            <button class="vecttauri-scope-filter active" data-scope="all" title="Show all collections">All</button>
+                            <button class="vecttauri-scope-filter" data-scope="character" title="Character = collections locked to at least one character">Character</button>
+                            <button class="vecttauri-scope-filter" data-scope="chat" title="Chat = collections locked to at least one chat">Chat</button>
 
                             <!-- Small badge and hint describing current scope filter -->
                         </div>
 
                         <!-- Type Filters -->
-                        <div class="vectfox-type-filters">
+                        <div class="vecttauri-type-filters">
                             <label>
-                                <input type="radio" name="vectfox_type_filter" value="all" checked>
+                                <input type="radio" name="vecttauri_type_filter" value="all" checked>
                                 All Types
                             </label>
                             <label>
-                                <input type="radio" name="vectfox_type_filter" value="chat">
+                                <input type="radio" name="vecttauri_type_filter" value="chat">
                                 ${icons.messageSquare(14)} Chats
                             </label>
                             <label>
-                                <input type="radio" name="vectfox_type_filter" value="lorebook">
+                                <input type="radio" name="vecttauri_type_filter" value="lorebook">
                                 ${icons.bookOpen(14)} Lorebooks
                             </label>
                             <label>
-                                <input type="radio" name="vectfox_type_filter" value="character">
+                                <input type="radio" name="vecttauri_type_filter" value="character">
                                 ${icons.user(14)} Characters
                             </label>
                             <label>
-                                <input type="radio" name="vectfox_type_filter" value="document">
+                                <input type="radio" name="vecttauri_type_filter" value="document">
                                 ${icons.fileText(14)} Documents
                             </label>
                             <label>
-                                <input type="radio" name="vectfox_type_filter" value="web">
+                                <input type="radio" name="vecttauri_type_filter" value="web">
                                 ${icons.globe(14)} Web
                             </label>
                         </div>
 
                         <!-- Search Box + Active-only toggle -->
-                        <div class="vectfox-search-box" style="display:flex; gap:8px; align-items:center;">
+                        <div class="vecttauri-search-box" style="display:flex; gap:8px; align-items:center;">
                             <input type="text"
-                                   id="vectfox_collection_search"
+                                   id="vecttauri_collection_search"
                                    placeholder="Search collections..."
                                    autocomplete="off"
                                    style="flex:1;">
-                            <label id="vectfox_only_active_toggle_label"
+                            <label id="vecttauri_only_active_toggle_label"
                                    title="Show only collections active for the current chat (the ones with the 🔒 badge)"
                                    style="display:flex; gap:6px; align-items:center; white-space:nowrap; cursor:pointer; font-size:0.85em;">
-                                <input type="checkbox" id="vectfox_only_active_toggle">
+                                <input type="checkbox" id="vecttauri_only_active_toggle">
                                 🔒 Active here only
                             </label>
                         </div>
 
                         <!-- Collections List -->
-                        <div id="vectfox_collections_list" class="vectfox-collections-list">
-                            <div class="vectfox-loading">Loading collections...</div>
+                        <div id="vecttauri_collections_list" class="vecttauri-collections-list">
+                            <div class="vecttauri-loading">Loading collections...</div>
                         </div>
 
                         <!-- Stats Footer -->
-                        <div class="vectfox-browser-stats">
-                            <span id="vectfox_browser_stats_text">No collections</span>
-                            <div class="vectfox-browser-actions">
-                                <button id="vectfox_import_collection" class="vectfox-btn-sm" title="Import collection from file">
+                        <div class="vecttauri-browser-stats">
+                            <span id="vecttauri_browser_stats_text">No collections</span>
+                            <div class="vecttauri-browser-actions">
+                                <button id="vecttauri_import_collection" class="vecttauri-btn-sm" title="Import collection from file">
                                     📥 Import
                                 </button>
-                                <button id="vectfox_reset_registry" class="vectfox-reset-btn" title="Clear registry and rescan from disk">
+                                <button id="vecttauri_reset_registry" class="vecttauri-reset-btn" title="Clear registry and rescan from disk">
                                     <i class="fa-solid fa-arrows-rotate"></i> Resync
                                 </button>
                             </div>
                         </div>
                         <!-- Hidden file inputs for import -->
-                        <input type="file" id="vectfox_import_file" accept=".json,.vectfox.json,.png,image/png" style="display: none;">
-                        <input type="file" id="vectfox_png_image_picker" accept="image/*" style="display: none;">
+                        <input type="file" id="vecttauri_import_file" accept=".json,.vecttauri.json,.png,image/png" style="display: none;">
+                        <input type="file" id="vecttauri_png_image_picker" accept="image/*" style="display: none;">
                     </div>
 
                     <!-- Search Tab -->
-                    <div id="vectfox_tab_search" class="vectfox-tab-content">
-                        <div class="vectfox-search-panel">
+                    <div id="vecttauri_tab_search" class="vecttauri-tab-content">
+                        <div class="vecttauri-search-panel">
                             <!-- Search Input -->
-                            <div class="vectfox-search-input-row">
+                            <div class="vecttauri-search-input-row">
                                 <input type="text"
-                                       id="vectfox_semantic_search"
-                                       class="vectfox-search-input"
+                                       id="vecttauri_semantic_search"
+                                       class="vecttauri-search-input"
                                        placeholder="Search across all collections..."
                                        autocomplete="off">
-                                <button id="vectfox_search_btn" class="vectfox-btn vectfox-btn-primary">
+                                <button id="vecttauri_search_btn" class="vecttauri-btn vecttauri-btn-primary">
                                     ${icons.search(16)} Search
                                 </button>
                             </div>
 
                             <!-- Search Options -->
-                            <div class="vectfox-search-options">
-                                <div class="vectfox-search-option">
+                            <div class="vecttauri-search-options">
+                                <div class="vecttauri-search-option">
                                     <label>Results per collection:</label>
-                                    <input type="number" id="vectfox_search_topk" value="5" min="1" max="50">
+                                    <input type="number" id="vecttauri_search_topk" value="5" min="1" max="50">
                                 </div>
-                                <div class="vectfox-search-option">
+                                <div class="vecttauri-search-option">
                                     <label>Min score:</label>
-                                    <input type="number" id="vectfox_search_threshold" value="0.3" min="0" max="1" step="0.05">
+                                    <input type="number" id="vecttauri_search_threshold" value="0.3" min="0" max="1" step="0.05">
                                 </div>
-                                <div class="vectfox-search-option">
+                                <div class="vecttauri-search-option">
                                     <label>
-                                        <input type="checkbox" id="vectfox_search_enabled_only" checked>
+                                        <input type="checkbox" id="vecttauri_search_enabled_only" checked>
                                         Enabled collections only
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Keyword Filter -->
-                            <div class="vectfox-keyword-filter-section">
-                                <div class="vectfox-keyword-filter-header">
+                            <div class="vecttauri-keyword-filter-section">
+                                <div class="vecttauri-keyword-filter-header">
                                     ${icons.filter(16)} <span>Keyword Filter</span>
-                                    <button id="vectfox_scan_keywords" class="vectfox-btn-sm" title="Scan all collections for keywords">
+                                    <button id="vecttauri_scan_keywords" class="vecttauri-btn-sm" title="Scan all collections for keywords">
                                         <i class="fa-solid fa-sync"></i> Scan
                                     </button>
                                 </div>
-                                <div class="vectfox-keyword-filter-input-row">
+                                <div class="vecttauri-keyword-filter-input-row">
                                     <input type="text"
-                                           id="vectfox_keyword_filter"
-                                           class="vectfox-keyword-filter-input"
+                                           id="vecttauri_keyword_filter"
+                                           class="vecttauri-keyword-filter-input"
                                            placeholder="Filter by keywords (comma-separated)..."
                                            autocomplete="off">
-                                    <button id="vectfox_clear_keyword_filter" class="vectfox-btn-sm" title="Clear filter">
+                                    <button id="vecttauri_clear_keyword_filter" class="vecttauri-btn-sm" title="Clear filter">
                                         ${icons.x(14)}
                                     </button>
                                 </div>
-                                <div id="vectfox_keyword_tags" class="vectfox-keyword-tags">
-                                    <span class="vectfox-keyword-hint">Click "Scan" to discover keywords in your collections</span>
+                                <div id="vecttauri_keyword_tags" class="vecttauri-keyword-tags">
+                                    <span class="vecttauri-keyword-hint">Click "Scan" to discover keywords in your collections</span>
                                 </div>
                             </div>
 
                             <!-- Search Results -->
-                            <div id="vectfox_search_results" class="vectfox-search-results">
-                                <div class="vectfox-search-empty">
+                            <div id="vecttauri_search_results" class="vecttauri-search-results">
+                                <div class="vecttauri-search-empty">
                                     ${icons.search(48)}
                                     <p>Enter a query to search across all collections</p>
                                 </div>
@@ -396,19 +396,19 @@ function createBrowserModal() {
                     </div>
 
                     <!-- Bulk Operations Tab -->
-                    <div id="vectfox_tab_bulk" class="vectfox-tab-content">
-                        <div class="vectfox-bulk-panel">
+                    <div id="vecttauri_tab_bulk" class="vecttauri-tab-content">
+                        <div class="vecttauri-bulk-panel">
                             <!-- Selection Info -->
-                            <div class="vectfox-bulk-header">
-                                <div class="vectfox-bulk-select-all">
+                            <div class="vecttauri-bulk-header">
+                                <div class="vecttauri-bulk-select-all">
                                     <label>
-                                        <input type="checkbox" id="vectfox_bulk_select_all">
+                                        <input type="checkbox" id="vecttauri_bulk_select_all">
                                         Select All Visible
                                     </label>
-                                    <span id="vectfox_bulk_count">0 selected</span>
+                                    <span id="vecttauri_bulk_count">0 selected</span>
                                 </div>
-                                <div class="vectfox-bulk-filter">
-                                    <select id="vectfox_bulk_filter">
+                                <div class="vecttauri-bulk-filter">
+                                    <select id="vecttauri_bulk_filter">
                                         <option value="all">All Collections</option>
                                         <option value="enabled">Enabled Only</option>
                                         <option value="disabled">Disabled Only</option>
@@ -417,30 +417,30 @@ function createBrowserModal() {
                             </div>
 
                             <!-- Bulk Actions -->
-                            <div class="vectfox-bulk-actions">
-                                <button id="vectfox_bulk_enable" class="vectfox-btn vectfox-btn-sm" disabled>
+                            <div class="vecttauri-bulk-actions">
+                                <button id="vecttauri_bulk_enable" class="vecttauri-btn vecttauri-btn-sm" disabled>
                                     ${icons.toggleRight(16)} Enable Selected
                                 </button>
-                                <button id="vectfox_bulk_disable" class="vectfox-btn vectfox-btn-sm" disabled>
+                                <button id="vecttauri_bulk_disable" class="vecttauri-btn vecttauri-btn-sm" disabled>
                                     ${icons.toggleLeft(16)} Disable Selected
                                 </button>
-                                <button id="vectfox_bulk_export" class="vectfox-btn vectfox-btn-sm" disabled>
+                                <button id="vecttauri_bulk_export" class="vecttauri-btn vecttauri-btn-sm" disabled>
                                     ${icons.download(16)} Export Selected
                                 </button>
-                                <button id="vectfox_bulk_delete" class="vectfox-btn vectfox-btn-sm vectfox-btn-danger" disabled>
+                                <button id="vecttauri_bulk_delete" class="vecttauri-btn vecttauri-btn-sm vecttauri-btn-danger" disabled>
                                     ${icons.trash(16)} Delete Selected
                                 </button>
                             </div>
 
                             <!-- Collection List with Checkboxes -->
-                            <div id="vectfox_bulk_list" class="vectfox-bulk-list">
-                                <div class="vectfox-loading">Loading collections...</div>
+                            <div id="vecttauri_bulk_list" class="vecttauri-bulk-list">
+                                <div class="vecttauri-loading">Loading collections...</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Size Inspector Tab -->
-                    <div id="vectfox_tab_size" class="vectfox-tab-content">
+                    <div id="vecttauri_tab_size" class="vecttauri-tab-content">
                         <!-- Populated lazily by renderSizeInspectorTab() in switchTab() -->
                     </div>
                 </div>
@@ -459,17 +459,17 @@ function createBrowserModal() {
  */
 function bindBrowserEvents() {
   // Refresh Scan button — probes both backends, removes stale entries, updates registry
-  $("#vectfox_browser_refresh_scan").on("click", async function (e) {
+  $("#vecttauri_browser_refresh_scan").on("click", async function (e) {
     e.stopPropagation();
     e.preventDefault();
     const $btn = $(this);
     $btn.prop("disabled", true).text("Scanning…");
     try {
       await refreshCollections(true);
-      toastr.success("Scan complete — registry updated", "VectFox");
+      toastr.success("Scan complete — registry updated", "VectTauri");
     } catch (err) {
-      log.error("VectFox: Refresh scan failed", err);
-      toastr.error(`Scan failed: ${err.message}`, "VectFox");
+      log.error("VectTauri: Refresh scan failed", err);
+      toastr.error(`Scan failed: ${err.message}`, "VectTauri");
     } finally {
       $btn.prop("disabled", false).html(`${icons.refreshCw(14)} Refresh Scan`);
     }
@@ -479,7 +479,7 @@ function bindBrowserEvents() {
   // retained pre-reformat source text (kept for audit/revert; see reformat-store.js
   // docstring). Only clears the audit copy, never the accepted chunks/runId, so this
   // can never affect anything already vectorized.
-  $("#vectfox_browser_clear_reformat_originals").on("click", async function (e) {
+  $("#vecttauri_browser_clear_reformat_originals").on("click", async function (e) {
     e.stopPropagation();
     e.preventDefault();
     try {
@@ -488,7 +488,7 @@ function bindBrowserEvents() {
       const totalBytes = entries.reduce((sum, entry) => sum + entry.originalTextBytes, 0);
 
       if (totalBytes === 0) {
-        toastr.info("No retained Auto-Reformat originals to clear.", "VectFox");
+        toastr.info("No retained Auto-Reformat originals to clear.", "VectTauri");
         return;
       }
 
@@ -506,15 +506,15 @@ function bindBrowserEvents() {
       if (!confirmed) return;
 
       const cleared = clearAllReformatOriginals();
-      toastr.success(`Cleared retained original text for ${cleared} Auto-Reformat entr${cleared === 1 ? "y" : "ies"}.`, "VectFox");
+      toastr.success(`Cleared retained original text for ${cleared} Auto-Reformat entr${cleared === 1 ? "y" : "ies"}.`, "VectTauri");
     } catch (err) {
-      log.error("VectFox: Failed to clear Auto-Reformat originals", err);
-      toastr.error(`Failed to clear Auto-Reformat originals: ${err.message}`, "VectFox");
+      log.error("VectTauri: Failed to clear Auto-Reformat originals", err);
+      toastr.error(`Failed to clear Auto-Reformat originals: ${err.message}`, "VectTauri");
     }
   });
 
   // Close button
-  $("#vectfox_browser_close").on("click", function (e) {
+  $("#vecttauri_browser_close").on("click", function (e) {
     e.stopPropagation();
     e.preventDefault();
     closeDatabaseBrowser();
@@ -522,12 +522,12 @@ function bindBrowserEvents() {
 
   // Stop propagation on mousedown (ST listens on mousedown to close drawers)
   // This prevents the drawer from closing when clicking inside the modal
-  $("#vectfox_database_browser_modal").on("mousedown touchstart", function (e) {
+  $("#vecttauri_database_browser_modal").on("mousedown touchstart", function (e) {
     e.stopPropagation();
   });
 
   // Close when clicking directly on the modal background (overlay)
-  $("#vectfox_database_browser_modal").on("click", function (e) {
+  $("#vecttauri_database_browser_modal").on("click", function (e) {
     if (e.target === this) {
       e.preventDefault();
       closeDatabaseBrowser();
@@ -535,7 +535,7 @@ function bindBrowserEvents() {
   });
 
   // Tab switching
-  $("#vectfox_database_browser_modal .vectfox-tab-btn").on("click", function (e) {
+  $("#vecttauri_database_browser_modal .vecttauri-tab-btn").on("click", function (e) {
     e.stopPropagation();
     e.preventDefault();
     const tab = $(this).data("tab");
@@ -543,24 +543,24 @@ function bindBrowserEvents() {
   });
 
   // Scope filters
-  $("#vectfox_database_browser_modal .vectfox-scope-filter").on("click", function (e) {
+  $("#vecttauri_database_browser_modal .vecttauri-scope-filter").on("click", function (e) {
     e.stopPropagation();
     e.preventDefault();
-    $("#vectfox_database_browser_modal .vectfox-scope-filter").removeClass("active");
+    $("#vecttauri_database_browser_modal .vecttauri-scope-filter").removeClass("active");
     $(this).addClass("active");
     browserState.filters.scope = $(this).data("scope");
     renderCollections();
   });
 
   // Type filters
-  $('#vectfox_database_browser_modal input[name="vectfox_type_filter"]').on("change", function (e) {
+  $('#vecttauri_database_browser_modal input[name="vecttauri_type_filter"]').on("change", function (e) {
     e.stopPropagation();
     browserState.filters.collectionType = $(this).val();
     renderCollections();
   });
 
   // Search input
-  $("#vectfox_collection_search").on("input", function (e) {
+  $("#vecttauri_collection_search").on("input", function (e) {
     e.stopPropagation();
     browserState.filters.searchQuery = $(this).val().toLowerCase();
     renderCollections();
@@ -569,14 +569,14 @@ function bindBrowserEvents() {
   // "Active here only" toggle — filters down to the collections that currently
   // carry the 🔒 badge for the current chat. Uses the canonical isActiveById
   // lookup built from getCollectionListing inside renderCollections().
-  $("#vectfox_only_active_toggle").on("change", function (e) {
+  $("#vecttauri_only_active_toggle").on("change", function (e) {
     e.stopPropagation();
     browserState.filters.onlyActiveForChat = $(this).prop("checked");
     renderCollections();
   });
 
   // Resync button - clears registry and rescans from disk
-  $("#vectfox_reset_registry").on("click", async function (e) {
+  $("#vecttauri_reset_registry").on("click", async function (e) {
     e.stopPropagation();
     e.preventDefault();
 
@@ -595,15 +595,15 @@ function bindBrowserEvents() {
       // Probe both backends to repopulate from scratch
       await refreshCollections(true);
 
-      toastr.success("Registry cleared and resynced from disk", "VectFox");
+      toastr.success("Registry cleared and resynced from disk", "VectTauri");
     } catch (error) {
-      log.error("VectFox: Failed to resync", error);
-      toastr.error(`Failed to resync: ${error.message}`, "VectFox");
+      log.error("VectTauri: Failed to resync", error);
+      toastr.error(`Failed to resync: ${error.message}`, "VectTauri");
     }
   });
 
   // Keyboard shortcuts
-  $(document).on("keydown.vectfox_browser", function (e) {
+  $(document).on("keydown.vecttauri_browser", function (e) {
     if (!browserState.isOpen) return;
 
     if (e.key === "Escape") {
@@ -612,13 +612,13 @@ function bindBrowserEvents() {
   });
 
   // Import button
-  $("#vectfox_import_collection").on("click", function (e) {
+  $("#vecttauri_import_collection").on("click", function (e) {
     e.stopPropagation();
-    $("#vectfox_import_file").click();
+    $("#vecttauri_import_file").click();
   });
 
   // Import file handler (supports JSON and PNG)
-  $("#vectfox_import_file").on("change", async function (e) {
+  $("#vecttauri_import_file").on("change", async function (e) {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -634,13 +634,13 @@ function bindBrowserEvents() {
       const mb = (file.size / 1024 / 1024).toFixed(1);
       toastr.error(
         `File too large: ${mb} MB (max ${MAX_IMPORT_FILE_BYTES / 1024 / 1024} MB).`,
-        "VECTFOX Import",
+        "VECTTAURI Import",
       );
       return;
     }
 
     try {
-      toastr.info("Reading import file...", "VectFox");
+      toastr.info("Reading import file...", "VectTauri");
 
       let data;
 
@@ -654,13 +654,13 @@ function bindBrowserEvents() {
 
         if (!data) {
           toastr.error(
-            "This PNG does not contain VECTFOX data.",
-            "VECTFOX Import",
+            "This PNG does not contain VECTTAURI data.",
+            "VECTTAURI Import",
           );
           return;
         }
 
-        toastr.info("Found VECTFOX data in PNG!", "VectFox");
+        toastr.info("Found VECTTAURI data in PNG!", "VectTauri");
       } else {
         // JSON file
         data = await readImportFile(file);
@@ -703,7 +703,7 @@ function bindBrowserEvents() {
       if (!validation.valid) {
         toastr.error(
           `Invalid export file:\n${validation.errors.join("\n")}`,
-          "VECTFOX Import",
+          "VECTTAURI Import",
         );
         return;
       }
@@ -722,7 +722,7 @@ function bindBrowserEvents() {
           : "(re-embedded)";
         toastr.success(
           `Imported ${result.chunkCount} chunks ${vectorMsg}`,
-          "VECTFOX Import",
+          "VECTTAURI Import",
         );
 
         // Refresh collections list
@@ -731,12 +731,12 @@ function bindBrowserEvents() {
     } catch (error) {
       const isStopped = error?.name === 'AbortError' || String(error?.message || '').toLowerCase().includes('stopped by user');
       if (isStopped) {
-        toastr.info('Import stopped', 'VectFox');
+        toastr.info('Import stopped', 'VectTauri');
         await refreshCollections();
         return;
       }
-      log.error("VectFox: Import failed", error);
-      toastr.error(`Import failed: ${error.message}`, "VectFox");
+      log.error("VectTauri: Import failed", error);
+      toastr.error(`Import failed: ${error.message}`, "VectTauri");
     }
   });
 }
@@ -747,11 +747,11 @@ function bindBrowserEvents() {
  * @param {string} tabName Tab identifier
  */
 function switchTab(tabName) {
-  $("#vectfox_database_browser_modal .vectfox-tab-btn").removeClass("active");
-  $(`#vectfox_database_browser_modal .vectfox-tab-btn[data-tab="${tabName}"]`).addClass("active");
+  $("#vecttauri_database_browser_modal .vecttauri-tab-btn").removeClass("active");
+  $(`#vecttauri_database_browser_modal .vecttauri-tab-btn[data-tab="${tabName}"]`).addClass("active");
 
-  $("#vectfox_database_browser_modal .vectfox-tab-content").removeClass("active");
-  $(`#vectfox_tab_${tabName}`).addClass("active");
+  $("#vecttauri_database_browser_modal .vecttauri-tab-content").removeClass("active");
+  $(`#vecttauri_tab_${tabName}`).addClass("active");
 
   // Initialize tab-specific content
   if (tabName === "bulk") {
@@ -760,7 +760,7 @@ function switchTab(tabName) {
   } else if (tabName === "search") {
     bindSearchEvents();
   } else if (tabName === "size") {
-    renderSizeInspectorTab(document.getElementById("vectfox_tab_size"));
+    renderSizeInspectorTab(document.getElementById("vecttauri_tab_size"));
   }
 }
 
@@ -776,11 +776,11 @@ function switchTab(tabName) {
 const _sanitizeHandleForFilter = sanitizeHandleId;
 
 /**
- * Extract the persona handle embedded in a VECTFOX collection ID name.
+ * Extract the persona handle embedded in a VECTTAURI collection ID name.
  *
  * Naming convention (collection-ids.js):
- *   vectfox_<type>_<backend>_<handle>_<charname>_<uuid>   (new)
- *   vectfox_<type>_<handle>_<charname>_<uuid>             (legacy, no backend)
+ *   vecttauri_<type>_<backend>_<handle>_<charname>_<uuid>   (new)
+ *   vecttauri_<type>_<handle>_<charname>_<uuid>             (legacy, no backend)
  *
  * Returns lowercased handle string, or null if the ID isn't persona-scoped
  * or can't be parsed.
@@ -803,15 +803,15 @@ function _extractHandleFromCollectionId(collectionId) {
 
 /**
  * Collection prefixes whose collections carry a persona-owned `creatorHandle`.
- * All VECTFOX content types follow the unified `vectfox_<type>_<backend>_<handle>_...`
+ * All VECTTAURI content types follow the unified `vecttauri_<type>_<backend>_<handle>_...`
  * naming protocol and are persona-scoped.
  */
 const _PERSONA_SCOPED_PREFIXES = [
-  COLLECTION_PREFIXES.VECTFOX_EVENTBASE,
-  COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT,
-  COLLECTION_PREFIXES.VECTFOX_LOREBOOK,
-  COLLECTION_PREFIXES.VECTFOX_CHARACTER,
-  COLLECTION_PREFIXES.VECTFOX_DOCUMENT,
+  COLLECTION_PREFIXES.VECTTAURI_EVENTBASE,
+  COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT,
+  COLLECTION_PREFIXES.VECTTAURI_LOREBOOK,
+  COLLECTION_PREFIXES.VECTTAURI_CHARACTER,
+  COLLECTION_PREFIXES.VECTTAURI_DOCUMENT,
 ];
 
 /**
@@ -839,7 +839,7 @@ function _filterCollectionsByCurrentPersona(collections) {
   // show every collection on the server. See defaults in index.js.
   if (browserState.settings?.superadmin === true) {
     log.lifecycle(
-      `VECTFOX DB Browser: ⚡ superadmin=true → bypassing persona/handle filter (showing ALL ${collections.length} collections)`,
+      `VECTTAURI DB Browser: ⚡ superadmin=true → bypassing persona/handle filter (showing ALL ${collections.length} collections)`,
     );
     return collections;
   }
@@ -878,7 +878,7 @@ async function refreshCollections(withScan = false) {
     if (allCollections.length !== browserState.collections.length) {
       const hidden = allCollections.length - browserState.collections.length;
       log.verbose(
-        `VECTFOX DB Browser: Hiding ${hidden} chat-scoped collection(s) from other personas (current: ${_sanitizeHandleForFilter(getContext()?.name1)})`,
+        `VECTTAURI DB Browser: Hiding ${hidden} chat-scoped collection(s) from other personas (current: ${_sanitizeHandleForFilter(getContext()?.name1)})`,
       );
     }
 
@@ -893,15 +893,15 @@ async function refreshCollections(withScan = false) {
     const cleanupResult = cleanupOrphanedMeta(actualIds);
     if (cleanupResult.removed > 0) {
       log.lifecycle(
-        `VectFox: Cleaned up ${cleanupResult.removed} orphaned metadata entries`,
+        `VectTauri: Cleaned up ${cleanupResult.removed} orphaned metadata entries`,
       );
     }
 
     renderCollections();
   } catch (error) {
-    log.error("VectFox: Failed to load collections", error);
-    $("#vectfox_collections_list").html(`
-            <div class="vectfox-error">
+    log.error("VectTauri: Failed to load collections", error);
+    $("#vecttauri_collections_list").html(`
+            <div class="vecttauri-error">
                 Failed to load collections. Check console for details.
             </div>
         `);
@@ -912,7 +912,7 @@ async function refreshCollections(withScan = false) {
  * Renders collections list based on current filters
  */
 export function renderCollections() {
-  const container = $("#vectfox_collections_list");
+  const container = $("#vecttauri_collections_list");
 
   // Build lock-state lookup once — same canonical source of truth used by the
   // card renderer (entry.isActive comes from getCollectionListing internally
@@ -981,7 +981,7 @@ export function renderCollections() {
 
   if (filtered.length === 0) {
     container.html(`
-            <div class="vectfox-empty-state">
+            <div class="vecttauri-empty-state">
                 <p>No collections found.</p>
                 <small>Vectorize some chat messages to create collections!</small>
             </div>
@@ -1031,29 +1031,29 @@ function renderCollectionCard(collection, isActiveById = null) {
     youtube: icons.globe,
   };
   const iconFn = typeIconMap[collection.type] || icons.box;
-  const typeIcon = iconFn(14, "vectfox-type-icon");
+  const typeIcon = iconFn(14, "vecttauri-type-icon");
 
   const scopeBadge =
     {
       character:
-        '<span class="vectfox-badge vectfox-badge-character">Character</span>',
-      chat: '<span class="vectfox-badge vectfox-badge-chat">Chat</span>',
+        '<span class="vecttauri-badge vecttauri-badge-character">Character</span>',
+      chat: '<span class="vecttauri-badge vecttauri-badge-chat">Chat</span>',
     }[collection.scope] || "";
 
   const statusBadge = collection.enabled
-    ? '<span class="vectfox-badge vectfox-badge-success">Active</span>'
-    : '<span class="vectfox-badge vectfox-badge-muted">Paused</span>';
+    ? '<span class="vecttauri-badge vecttauri-badge-success">Active</span>'
+    : '<span class="vecttauri-badge vecttauri-badge-muted">Paused</span>';
 
   // Activation badge (shows triggers or conditions)
   const activationSummary = getCollectionActivationSummary(collection.id);
   let activationBadge = "";
   if (activationSummary.alwaysActive) {
     activationBadge =
-      '<span class="vectfox-badge vectfox-badge-always" title="Always active">∞ Always</span>';
+      '<span class="vecttauri-badge vecttauri-badge-always" title="Always active">∞ Always</span>';
   } else if (activationSummary.triggerCount > 0) {
-    activationBadge = `<span class="vectfox-badge vectfox-badge-triggers" title="${activationSummary.triggerCount} trigger(s)">🎯 ${activationSummary.triggerCount}</span>`;
+    activationBadge = `<span class="vecttauri-badge vecttauri-badge-triggers" title="${activationSummary.triggerCount} trigger(s)">🎯 ${activationSummary.triggerCount}</span>`;
   } else if (activationSummary.conditionsEnabled) {
-    activationBadge = `<span class="vectfox-badge vectfox-badge-conditions" title="${activationSummary.conditionCount} condition(s)">⚡ ${activationSummary.conditionCount}</span>`;
+    activationBadge = `<span class="vecttauri-badge vecttauri-badge-conditions" title="${activationSummary.conditionCount} condition(s)">⚡ ${activationSummary.conditionCount}</span>`;
   }
 
   // Backend badge - shows vector database (Standard, Qdrant)
@@ -1064,13 +1064,13 @@ function renderCollectionCard(collection, isActiveById = null) {
     }[collection.backend] || collection.backend;
 
   const backendBadge = collection.backend
-    ? `<span class="vectfox-badge vectfox-badge-backend" title="Vector backend">${backendDisplayName}</span>`
+    ? `<span class="vecttauri-badge vecttauri-badge-backend" title="Vector backend">${backendDisplayName}</span>`
     : "";
 
   // Source badge - shows embedding source (transformers, palm, openai, etc.)
   const sourceBadge =
     collection.source && collection.source !== "unknown"
-      ? `<span class="vectfox-badge vectfox-badge-source" title="Embedding source">${StringUtils.escapeHtml(collection.source)}</span>`
+      ? `<span class="vecttauri-badge vecttauri-badge-source" title="Embedding source">${StringUtils.escapeHtml(collection.source)}</span>`
       : "";
 
   // Model info - show current model and count if multiple
@@ -1078,7 +1078,7 @@ function renderCollectionCard(collection, isActiveById = null) {
   const currentModelName = collection.model || "(default)";
   const safeCurrentModelName = StringUtils.escapeHtml(currentModelName);
   const modelBadge = hasMultipleModels
-    ? `<span class="vectfox-badge vectfox-badge-model" title="Current model: ${safeCurrentModelName} (${collection.models.length} available)">📐 ${safeCurrentModelName}</span>`
+    ? `<span class="vecttauri-badge vecttauri-badge-model" title="Current model: ${safeCurrentModelName} (${collection.models.length} available)">📐 ${safeCurrentModelName}</span>`
     : "";
 
   // Lock badge — show only when a lock matches the CURRENT context. Locks elsewhere
@@ -1123,7 +1123,7 @@ function renderCollectionCard(collection, isActiveById = null) {
     if (otherChatCount > 0) {
       lockTitle += ` (also locked to ${otherChatCount} other chat${otherChatCount !== 1 ? "s" : ""})`;
     }
-    lockBadge = `<span class="vectfox-badge vectfox-badge-lock" title="${lockTitle}">🔒</span>`;
+    lockBadge = `<span class="vecttauri-badge vecttauri-badge-lock" title="${lockTitle}">🔒</span>`;
   }
 
   // Use registryKey for unique identification (source:id format)
@@ -1143,12 +1143,12 @@ function renderCollectionCard(collection, isActiveById = null) {
   const safeModel     = StringUtils.escapeHtml(collection.model || "");
 
   return `
-        <div class="vectfox-collection-card" data-collection-key="${safeKey}" data-status="${collection.enabled ? "active" : "paused"}">
-            <div class="vectfox-collection-header">
-                <span class="vectfox-collection-title">
+        <div class="vecttauri-collection-card" data-collection-key="${safeKey}" data-status="${collection.enabled ? "active" : "paused"}">
+            <div class="vecttauri-collection-header">
+                <span class="vecttauri-collection-title">
                     ${typeIcon} ${safeName}
                 </span>
-                <div class="vectfox-collection-badges">
+                <div class="vecttauri-collection-badges">
                     ${scopeBadge}
                     ${backendBadge}
                     ${sourceBadge}
@@ -1158,24 +1158,24 @@ function renderCollectionCard(collection, isActiveById = null) {
                 </div>
             </div>
 
-            <div class="vectfox-collection-meta">
+            <div class="vecttauri-collection-meta">
                 <span>${collection.chunkCount} chunks</span>
                 <span>ID: ${safeId}</span>
             </div>
 
-            <div class="vectfox-collection-actions">
-                <button class="vectfox-btn-sm vectfox-action-toggle"
+            <div class="vecttauri-collection-actions">
+                <button class="vecttauri-btn-sm vecttauri-action-toggle"
                         data-collection-key="${safeKey}"
                         data-enabled="${collection.enabled}">
                     ${collection.enabled ? icons.pause(16) + " Pause" : icons.play(16) + " Enable"}
                 </button>
-                <button class="vectfox-btn-sm vectfox-action-rename"
+                <button class="vecttauri-btn-sm vecttauri-action-rename"
                         data-collection-key="${safeKey}"
                         data-current-name="${safeName}"
                         title="Rename this collection">
                     ${icons.pencil(16)} Rename
                 </button>
-                <button class="vectfox-btn-sm vectfox-action-activation ${activationSummary.mode !== "auto" ? "vectfox-has-settings" : ""}"
+                <button class="vecttauri-btn-sm vecttauri-action-activation ${activationSummary.mode !== "auto" ? "vecttauri-has-settings" : ""}"
                         data-collection-key="${safeKey}"
                         title="Configure activation, triggers, and conditions">
                     ${icons.settings(16)} Settings
@@ -1183,7 +1183,7 @@ function renderCollectionCard(collection, isActiveById = null) {
                 ${
                   hasMultipleModels
                     ? `
-                <button class="vectfox-btn-sm vectfox-action-switch-model"
+                <button class="vecttauri-btn-sm vecttauri-action-switch-model"
                         data-collection-key="${safeKey}"
                         title="Switch embedding model (${collection.models.length} available)">
                     <i class="fa-solid fa-code-branch"></i> Model
@@ -1191,20 +1191,20 @@ function renderCollectionCard(collection, isActiveById = null) {
                 `
                     : ""
                 }
-                <button class="vectfox-btn-sm vectfox-action-visualize"
+                <button class="vecttauri-btn-sm vecttauri-action-visualize"
                         data-collection-key="${safeKey}"
                         data-backend="${safeBackend}"
                         data-source="${safeSource}"
                         title="View and edit chunks in this collection">
                     ${icons.eye(16)} View Chunks
                 </button>
-                <div class="vectfox-export-dropdown">
-                    <button class="vectfox-btn-sm vectfox-btn-export vectfox-action-export-toggle"
+                <div class="vecttauri-export-dropdown">
+                    <button class="vecttauri-btn-sm vecttauri-btn-export vecttauri-action-export-toggle"
                             title="Export collection">
                         ${icons.download(16)} Export
                     </button>
-                    <div class="vectfox-export-options">
-                        <button class="vectfox-btn-sm vectfox-btn-json vectfox-action-export"
+                    <div class="vecttauri-export-options">
+                        <button class="vecttauri-btn-sm vecttauri-btn-json vecttauri-action-export"
                                 data-collection-key="${safeKey}"
                                 data-collection-id="${safeId}"
                                 data-backend="${safeBackend}"
@@ -1213,7 +1213,7 @@ function renderCollectionCard(collection, isActiveById = null) {
                                 title="Export as JSON (includes vectors)">
                             ${icons.fileExport(16)} JSON
                         </button>
-                        <button class="vectfox-btn-sm vectfox-btn-png vectfox-action-export-png"
+                        <button class="vecttauri-btn-sm vecttauri-btn-png vecttauri-action-export-png"
                                 data-collection-key="${safeKey}"
                                 data-collection-id="${safeId}"
                                 data-backend="${safeBackend}"
@@ -1224,7 +1224,7 @@ function renderCollectionCard(collection, isActiveById = null) {
                         </button>
                     </div>
                 </div>
-                <button class="vectfox-btn-sm vectfox-btn-danger vectfox-action-delete"
+                <button class="vecttauri-btn-sm vecttauri-btn-danger vecttauri-action-delete"
                         data-collection-key="${safeKey}">
                     ${icons.trash(16)} Delete
                 </button>
@@ -1247,14 +1247,14 @@ function findCollectionByKey(key) {
 async function performPngExport(imageFile) {
   const pending = browserState.pendingPngExport;
   if (!pending) {
-    toastr.error("No export pending", "VectFox");
+    toastr.error("No export pending", "VectTauri");
     return;
   }
 
   browserState.pendingPngExport = null;
 
   try {
-    toastr.info("Preparing PNG export...", "VectFox");
+    toastr.info("Preparing PNG export...", "VectTauri");
 
     // Get export data
     const exportData = await exportCollection(
@@ -1270,16 +1270,16 @@ async function performPngExport(imageFile) {
     // Convert custom image to PNG if provided
     let pngData = null;
     if (imageFile) {
-      toastr.info("Converting image...", "VectFox");
+      toastr.info("Converting image...", "VectTauri");
       pngData = await convertToPNG(imageFile);
     }
 
     // Embed data in PNG
-    toastr.info("Embedding data in PNG...", "VectFox");
+    toastr.info("Embedding data in PNG...", "VectTauri");
     const pngWithData = await embedDataInPNG(exportData, pngData);
 
     // Download
-    const filename = `${pending.collection.name || pending.collectionId}.vectfox`;
+    const filename = `${pending.collection.name || pending.collectionId}.vecttauri`;
     downloadPNG(pngWithData, filename);
 
     // Show compression stats
@@ -1291,11 +1291,11 @@ async function performPngExport(imageFile) {
       `PNG export complete!\n${exportData.stats.chunkCount} chunks\n` +
         `Original: ${formatBytes(jsonSize)}\n` +
         `PNG: ${formatBytes(pngSize)} (${ratio}%)`,
-      "VECTFOX Export",
+      "VECTTAURI Export",
     );
   } catch (error) {
-    log.error("VectFox: PNG export failed", error);
-    toastr.error(`PNG export failed: ${error.message}`, "VectFox");
+    log.error("VectTauri: PNG export failed", error);
+    toastr.error(`PNG export failed: ${error.message}`, "VectTauri");
   }
 }
 
@@ -1318,18 +1318,18 @@ function formatBytes(bytes) {
  */
 async function openChunkVisualizer(collection) {
   try {
-    toastr.info("Loading chunks...", "VectFox");
+    toastr.info("Loading chunks...", "VectTauri");
 
     if (!collection.backend) {
-      toastr.error("Collection has no backend defined - this is a bug", "VectFox");
-      log.error("VectFox: Collection missing backend:", collection);
+      toastr.error("Collection has no backend defined - this is a bug", "VectTauri");
+      log.error("VectTauri: Collection missing backend:", collection);
       return;
     }
 
     if (!browserState.pluginAvailable) {
       toastr.warning(
         "The Similharity plugin is required to view chunks. Install the plugin to use this feature.",
-        "VectFox",
+        "VectTauri",
         { timeOut: 6000 },
       );
       return;
@@ -1349,7 +1349,7 @@ async function openChunkVisualizer(collection) {
         ...(limit ? { limit } : {}),
       };
 
-      log.verbose("VECTFOX DB Browser: Requesting chunks with:", requestBody);
+      log.verbose("VECTTAURI DB Browser: Requesting chunks with:", requestBody);
 
       const response = await fetch("/api/plugins/similharity/chunks/list", {
         method: "POST",
@@ -1368,7 +1368,7 @@ async function openChunkVisualizer(collection) {
       );
 
       if (!results || results.length === 0) {
-        toastr.warning("No chunks found in this collection", "VectFox");
+        toastr.warning("No chunks found in this collection", "VectTauri");
         return;
       }
 
@@ -1394,8 +1394,8 @@ async function openChunkVisualizer(collection) {
 
     await doLoad(null);
   } catch (error) {
-    log.error("VectFox: Failed to load chunks", error);
-    toastr.error(`Failed to load chunks: ${error.message}`, "VectFox");
+    log.error("VectTauri: Failed to load chunks", error);
+    toastr.error(`Failed to load chunks: ${error.message}`, "VectTauri");
   }
 }
 
@@ -1404,7 +1404,7 @@ async function openChunkVisualizer(collection) {
  */
 function bindCollectionCardEvents() {
   // Toggle enabled/disabled
-  $(".vectfox-action-toggle")
+  $(".vecttauri-action-toggle")
     .off("click")
     .on("click", async function (e) {
       e.stopPropagation();
@@ -1424,12 +1424,12 @@ function bindCollectionCardEvents() {
 
       toastr.success(
         `Collection ${newEnabled ? "enabled" : "paused"}`,
-        "VectFox",
+        "VectTauri",
       );
     });
 
   // Delete collection - uses unified deleteCollection() to handle all 3 stores
-  $(".vectfox-action-delete")
+  $(".vecttauri-action-delete")
     .off("click")
     .on("click", async function (e) {
       e.stopPropagation();
@@ -1473,21 +1473,21 @@ function bindCollectionCardEvents() {
         renderCollections();
 
         if (result.success) {
-          toastr.success(`Deleted collection "${collection.name}"`, "VectFox");
+          toastr.success(`Deleted collection "${collection.name}"`, "VectTauri");
         } else {
           toastr.warning(
             `Partial deletion: ${result.errors.join(", ")}`,
-            "VectFox",
+            "VectTauri",
           );
         }
       } catch (error) {
-        log.error("VectFox: Failed to delete collection", error);
-        toastr.error(`Failed to delete collection: ${error.message}`, "VectFox");
+        log.error("VectTauri: Failed to delete collection", error);
+        toastr.error(`Failed to delete collection: ${error.message}`, "VectTauri");
       }
     });
 
   // Visualize chunks
-  $(".vectfox-action-visualize")
+  $(".vecttauri-action-visualize")
     .off("click")
     .on("click", async function (e) {
       e.stopPropagation();
@@ -1498,15 +1498,15 @@ function bindCollectionCardEvents() {
     });
 
   // Export toggle - show/hide export options
-  $(".vectfox-action-export-toggle")
+  $(".vecttauri-action-export-toggle")
     .off("click")
     .on("click", function (e) {
       e.stopPropagation();
-      const $dropdown = $(this).closest(".vectfox-export-dropdown");
+      const $dropdown = $(this).closest(".vecttauri-export-dropdown");
       const isExpanded = $dropdown.hasClass("expanded");
 
       // Close any other open dropdowns
-      $(".vectfox-export-dropdown.expanded")
+      $(".vecttauri-export-dropdown.expanded")
         .not($dropdown)
         .removeClass("expanded");
 
@@ -1516,15 +1516,15 @@ function bindCollectionCardEvents() {
 
   // Close export dropdown when clicking elsewhere
   $(document)
-    .off("click.vectfox-export")
-    .on("click.vectfox-export", function (e) {
-      if (!$(e.target).closest(".vectfox-export-dropdown").length) {
-        $(".vectfox-export-dropdown.expanded").removeClass("expanded");
+    .off("click.vecttauri-export")
+    .on("click.vecttauri-export", function (e) {
+      if (!$(e.target).closest(".vecttauri-export-dropdown").length) {
+        $(".vecttauri-export-dropdown.expanded").removeClass("expanded");
       }
     });
 
   // Export collection (JSON)
-  $(".vectfox-action-export")
+  $(".vecttauri-action-export")
     .off("click")
     .on("click", async function (e) {
       e.stopPropagation();
@@ -1538,7 +1538,7 @@ function bindCollectionCardEvents() {
       if (!collection) return;
 
       try {
-        toastr.info("Exporting collection...", "VectFox");
+        toastr.info("Exporting collection...", "VectTauri");
 
         const exportData = await exportCollection(
           collectionId,
@@ -1554,16 +1554,16 @@ function bindCollectionCardEvents() {
 
         toastr.success(
           `Exported ${exportData.stats.chunkCount} chunks (${exportData.stats.chunksWithVectors} with vectors)`,
-          "VECTFOX Export",
+          "VECTTAURI Export",
         );
       } catch (error) {
-        log.error("VectFox: Export failed", error);
-        toastr.error(`Export failed: ${error.message}`, "VectFox");
+        log.error("VectTauri: Export failed", error);
+        toastr.error(`Export failed: ${error.message}`, "VectTauri");
       }
     });
 
   // Export collection (PNG)
-  $(".vectfox-action-export-png")
+  $(".vecttauri-action-export-png")
     .off("click")
     .on("click", async function (e) {
       e.stopPropagation();
@@ -1591,11 +1591,11 @@ function bindCollectionCardEvents() {
         "Export as PNG\n\n" +
           "Would you like to use a custom image?\n\n" +
           "• Click OK to choose an image file\n" +
-          "• Click Cancel to use default VECTFOX image",
+          "• Click Cancel to use default VECTTAURI image",
       );
 
       if (useCustomImage) {
-        $("#vectfox_png_image_picker").click();
+        $("#vecttauri_png_image_picker").click();
       } else {
         // Export with default image
         await performPngExport(null);
@@ -1603,7 +1603,7 @@ function bindCollectionCardEvents() {
     });
 
   // PNG image picker handler
-  $("#vectfox_png_image_picker")
+  $("#vecttauri_png_image_picker")
     .off("change")
     .on("change", async function (e) {
       const file = e.target.files[0];
@@ -1618,7 +1618,7 @@ function bindCollectionCardEvents() {
     });
 
   // Activation editor (triggers + conditions)
-  $(".vectfox-action-activation")
+  $(".vecttauri-action-activation")
     .off("click")
     .on("click", function (e) {
       e.stopPropagation();
@@ -1633,7 +1633,7 @@ function bindCollectionCardEvents() {
     });
 
   // Rename collection
-  $(".vectfox-action-rename")
+  $(".vecttauri-action-rename")
     .off("click")
     .on("click", function (e) {
       e.stopPropagation();
@@ -1647,7 +1647,7 @@ function bindCollectionCardEvents() {
     });
 
   // Switch model (for collections with multiple embedding models)
-  $(".vectfox-action-switch-model")
+  $(".vecttauri-action-switch-model")
     .off("click")
     .on("click", async function (e) {
       e.stopPropagation();
@@ -1673,7 +1673,7 @@ function updateStats(collectionCount, chunkCount) {
       ? "No collections"
       : `${collectionCount} collection${collectionCount === 1 ? "" : "s"}, ${chunkCount} total chunks`;
 
-  $("#vectfox_browser_stats_text").text(statsText);
+  $("#vecttauri_browser_stats_text").text(statsText);
 }
 
 // ============================================================================
@@ -1687,22 +1687,22 @@ function updateStats(collectionCount, chunkCount) {
  */
 function openRenameDialog(collectionId, currentName) {
   // Create modal if needed
-  if ($("#vectfox_rename_modal").length === 0) {
+  if ($("#vecttauri_rename_modal").length === 0) {
     const modalHtml = `
-            <div id="vectfox_rename_modal" class="vectfox-modal">
-                <div class="vectfox-modal-content vectfox-rename-dialog popup">
-                    <div class="vectfox-modal-header">
+            <div id="vecttauri_rename_modal" class="vecttauri-modal">
+                <div class="vecttauri-modal-content vecttauri-rename-dialog popup">
+                    <div class="vecttauri-modal-header">
                         <h3>✏️ Rename Collection</h3>
-                        <button class="vectfox-btn-icon" id="vectfox_rename_close">✕</button>
+                        <button class="vecttauri-btn-icon" id="vecttauri_rename_close">✕</button>
                     </div>
-                    <div class="vectfox-rename-body">
-                        <label for="vectfox_rename_input">New name:</label>
-                        <input type="text" id="vectfox_rename_input" placeholder="Enter new name..." autocomplete="off">
-                        <small class="vectfox-rename-hint">Leave empty to reset to auto-generated name</small>
+                    <div class="vecttauri-rename-body">
+                        <label for="vecttauri_rename_input">New name:</label>
+                        <input type="text" id="vecttauri_rename_input" placeholder="Enter new name..." autocomplete="off">
+                        <small class="vecttauri-rename-hint">Leave empty to reset to auto-generated name</small>
                     </div>
-                    <div class="vectfox-modal-footer">
-                        <button class="vectfox-btn" id="vectfox_rename_cancel">Cancel</button>
-                        <button class="vectfox-btn vectfox-btn-primary" id="vectfox_rename_save">Save</button>
+                    <div class="vecttauri-modal-footer">
+                        <button class="vecttauri-btn" id="vecttauri_rename_cancel">Cancel</button>
+                        <button class="vecttauri-btn vecttauri-btn-primary" id="vecttauri_rename_save">Save</button>
                     </div>
                 </div>
             </div>
@@ -1710,22 +1710,22 @@ function openRenameDialog(collectionId, currentName) {
     $("body").append(modalHtml);
 
     // Bind events
-    $("#vectfox_rename_close, #vectfox_rename_cancel").on(
+    $("#vecttauri_rename_close, #vecttauri_rename_cancel").on(
       "click",
       closeRenameDialog,
     );
     // Stop mousedown propagation (ST closes drawers on mousedown/touchstart)
-    $("#vectfox_rename_modal").on("mousedown touchstart", function (e) {
+    $("#vecttauri_rename_modal").on("mousedown touchstart", function (e) {
       e.stopPropagation();
     });
     // Close on background click
-    $("#vectfox_rename_modal").on("click", function (e) {
+    $("#vecttauri_rename_modal").on("click", function (e) {
       if (e.target === this) closeRenameDialog();
     });
-    $("#vectfox_rename_input").on("keydown", function (e) {
+    $("#vecttauri_rename_input").on("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
-        $("#vectfox_rename_save").click();
+        $("#vecttauri_rename_save").click();
       } else if (e.key === "Escape") {
         closeRenameDialog();
       }
@@ -1733,17 +1733,17 @@ function openRenameDialog(collectionId, currentName) {
   }
 
   // Store collection ID for save handler
-  $("#vectfox_rename_modal").data("collection-id", collectionId);
+  $("#vecttauri_rename_modal").data("collection-id", collectionId);
 
   // Set current name
-  $("#vectfox_rename_input").val(currentName);
+  $("#vecttauri_rename_input").val(currentName);
 
   // Bind save handler (rebind each time to get fresh collectionId)
-  $("#vectfox_rename_save")
+  $("#vecttauri_rename_save")
     .off("click")
     .on("click", function () {
-      const newName = $("#vectfox_rename_input").val().trim();
-      const id = $("#vectfox_rename_modal").data("collection-id");
+      const newName = $("#vecttauri_rename_input").val().trim();
+      const id = $("#vecttauri_rename_modal").data("collection-id");
 
       // Save the new name (or null to reset)
       setCollectionMeta(id, { displayName: newName || null });
@@ -1758,15 +1758,15 @@ function openRenameDialog(collectionId, currentName) {
       refreshCollections(); // Reload to get updated names
 
       if (newName) {
-        toastr.success(`Renamed to "${newName}"`, "VectFox");
+        toastr.success(`Renamed to "${newName}"`, "VectTauri");
       } else {
-        toastr.success("Reset to auto-generated name", "VectFox");
+        toastr.success("Reset to auto-generated name", "VectTauri");
       }
     });
 
   // Show modal and focus input
-  $("#vectfox_rename_modal").fadeIn(200, function () {
-    $("#vectfox_rename_input").focus().select();
+  $("#vecttauri_rename_modal").fadeIn(200, function () {
+    $("#vecttauri_rename_input").focus().select();
   });
 }
 
@@ -1774,7 +1774,7 @@ function openRenameDialog(collectionId, currentName) {
  * Closes the rename dialog
  */
 function closeRenameDialog() {
-  $("#vectfox_rename_modal").fadeOut(200);
+  $("#vecttauri_rename_modal").fadeOut(200);
 }
 
 // ============================================================================
@@ -1787,20 +1787,20 @@ function closeRenameDialog() {
  */
 function openModelSwitcher(collection) {
   // Create modal if it doesn't exist
-  if ($("#vectfox_model_switcher_modal").length === 0) {
+  if ($("#vecttauri_model_switcher_modal").length === 0) {
     const modalHtml = `
-            <div id="vectfox_model_switcher_modal" class="vectfox-modal">
-                <div class="vectfox-modal-content vectfox-model-switcher-content popup">
-                    <div class="vectfox-modal-header">
+            <div id="vecttauri_model_switcher_modal" class="vecttauri-modal">
+                <div class="vecttauri-modal-content vecttauri-model-switcher-content popup">
+                    <div class="vecttauri-modal-header">
                         <h3><i class="fa-solid fa-code-branch"></i> Switch Embedding Model</h3>
-                        <button class="vectfox-btn-icon" id="vectfox_model_switcher_close">✕</button>
+                        <button class="vecttauri-btn-icon" id="vecttauri_model_switcher_close">✕</button>
                     </div>
-                    <div class="vectfox-modal-body">
-                        <p class="vectfox-model-switcher-desc">
+                    <div class="vecttauri-modal-body">
+                        <p class="vecttauri-model-switcher-desc">
                             Select which embedding model to use for this collection.
                             Each model may have different vectors from different embedding providers.
                         </p>
-                        <div id="vectfox_model_list" class="vectfox-model-list"></div>
+                        <div id="vecttauri_model_list" class="vecttauri-model-list"></div>
                     </div>
                 </div>
             </div>
@@ -1808,19 +1808,19 @@ function openModelSwitcher(collection) {
     $("body").append(modalHtml);
 
     // Bind close
-    $("#vectfox_model_switcher_close").on("click", closeModelSwitcher);
+    $("#vecttauri_model_switcher_close").on("click", closeModelSwitcher);
     // Stop mousedown propagation (ST closes drawers on mousedown/touchstart)
-    $("#vectfox_model_switcher_modal").on("mousedown touchstart", function (e) {
+    $("#vecttauri_model_switcher_modal").on("mousedown touchstart", function (e) {
       e.stopPropagation();
     });
     // Close on background click
-    $("#vectfox_model_switcher_modal").on("click", function (e) {
+    $("#vecttauri_model_switcher_modal").on("click", function (e) {
       if (e.target === this) closeModelSwitcher();
     });
   }
 
   // Store collection reference
-  $("#vectfox_model_switcher_modal").data("collection", collection);
+  $("#vecttauri_model_switcher_modal").data("collection", collection);
 
   // Build model list
   const modelListHtml = collection.models
@@ -1830,36 +1830,36 @@ function openModelSwitcher(collection) {
       const chunkLabel = model.chunkCount === 1 ? "chunk" : "chunks";
 
       return `
-            <div class="vectfox-model-item ${isActive ? "vectfox-model-active" : ""}"
+            <div class="vecttauri-model-item ${isActive ? "vecttauri-model-active" : ""}"
                  data-model-path="${model.path}">
-                <div class="vectfox-model-item-info">
-                    <span class="vectfox-model-name">
+                <div class="vecttauri-model-item-info">
+                    <span class="vecttauri-model-name">
                         ${isActive ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-cube"></i>'}
                         ${modelName}
                     </span>
-                    <span class="vectfox-model-chunks">${model.chunkCount} ${chunkLabel}</span>
+                    <span class="vecttauri-model-chunks">${model.chunkCount} ${chunkLabel}</span>
                 </div>
                 ${
                   isActive
-                    ? '<span class="vectfox-model-badge-current">Current</span>'
-                    : '<button class="vectfox-btn-sm vectfox-model-select-btn">Set as Primary</button>'
+                    ? '<span class="vecttauri-model-badge-current">Current</span>'
+                    : '<button class="vecttauri-btn-sm vecttauri-model-select-btn">Set as Primary</button>'
                 }
             </div>
         `;
     })
     .join("");
 
-  $("#vectfox_model_list").html(modelListHtml);
+  $("#vecttauri_model_list").html(modelListHtml);
 
   // Bind selection
-  $(".vectfox-model-select-btn")
+  $(".vecttauri-model-select-btn")
     .off("click")
     .on("click", function (e) {
       e.stopPropagation();
       const modelPath = $(this)
-        .closest(".vectfox-model-item")
+        .closest(".vecttauri-model-item")
         .data("model-path");
-      const coll = $("#vectfox_model_switcher_modal").data("collection");
+      const coll = $("#vecttauri_model_switcher_modal").data("collection");
 
       // Update collection
       coll.model = modelPath;
@@ -1875,21 +1875,21 @@ function openModelSwitcher(collection) {
 
       toastr.success(
         `Set primary model: ${modelPath || "(default)"}`,
-        "VectFox",
+        "VectTauri",
       );
       closeModelSwitcher();
       renderCollections();
     });
 
   // Show
-  $("#vectfox_model_switcher_modal").fadeIn(200);
+  $("#vecttauri_model_switcher_modal").fadeIn(200);
 }
 
 /**
  * Closes the model switcher modal
  */
 function closeModelSwitcher() {
-  $("#vectfox_model_switcher_modal").fadeOut(200);
+  $("#vecttauri_model_switcher_modal").fadeOut(200);
 }
 
 // ============================================================================
@@ -1983,7 +1983,7 @@ function openActivationEditor(collectionId, collectionName) {
     characterId: currentCharacterId,
   });
   log.verbose(
-    `[VECTFOX DB Browser] Active-for-current-chat resolution for ${collectionId}: ` +
+    `[VECTTAURI DB Browser] Active-for-current-chat resolution for ${collectionId}: ` +
     `resolved=${resolvedAlwaysActive}, scope=${meta.scope}, chatId=${currentChatId || 'none'}, charId=${currentCharacterId ?? 'none'}`
   );
 
@@ -2006,21 +2006,21 @@ function openActivationEditor(collectionId, collectionName) {
   };
 
   // Create modal if needed
-  if ($("#vectfox_activation_editor_modal").length === 0) {
+  if ($("#vecttauri_activation_editor_modal").length === 0) {
     createActivationEditorModal();
   }
 
   // Populate with current settings
   renderActivationEditor();
 
-  $("#vectfox_activation_editor_modal").fadeIn(200);
+  $("#vecttauri_activation_editor_modal").fadeIn(200);
 }
 
 /**
  * Closes the activation editor
  */
 function closeActivationEditor() {
-  $("#vectfox_activation_editor_modal").fadeOut(200);
+  $("#vecttauri_activation_editor_modal").fadeOut(200);
   activationEditorState.collectionId = null;
 }
 
@@ -2031,19 +2031,19 @@ function closeActivationEditor() {
  */
 function createActivationEditorModal() {
   const modalHtml = `
-        <div id="vectfox_activation_editor_modal" class="vectfox-modal">
-            <div class="vectfox-activation-editor">
-                <div class="vectfox-modal-header">
+        <div id="vecttauri_activation_editor_modal" class="vecttauri-modal">
+            <div class="vecttauri-activation-editor">
+                <div class="vecttauri-modal-header">
                     <h3>⚙️ Collection Settings</h3>
-                    <div class="vectfox-modal-header-actions">
-                        <button id="vectfox_activation_lock_collection" class="vectfox-btn-sm" title="Manage this collection's chat and character locks">🔒 Manage Locks</button>
+                    <div class="vecttauri-modal-header-actions">
+                        <button id="vecttauri_activation_lock_collection" class="vecttauri-btn-sm" title="Manage this collection's chat and character locks">🔒 Manage Locks</button>
                     </div>
-                    <button class="vectfox-btn-icon" id="vectfox_activation_close">✕</button>
+                    <button class="vecttauri-btn-icon" id="vecttauri_activation_close">✕</button>
                 </div>
 
-                <div class="vectfox-activation-body">
-                    <div class="vectfox-activation-collection-name">
-                        Collection: <strong id="vectfox_activation_collection_name"></strong>
+                <div class="vecttauri-activation-body">
+                    <div class="vecttauri-activation-collection-name">
+                        Collection: <strong id="vecttauri_activation_collection_name"></strong>
                     </div>
 
                     <!-- ========================================== -->
@@ -2051,16 +2051,16 @@ function createActivationEditorModal() {
                     <!-- Nothing below activates a collection that is -->
                     <!-- not locked; triggers/conditions only narrow. -->
                     <!-- ========================================== -->
-                    <div class="vectfox-activation-section vectfox-always-active">
-                        <div class="vectfox-section-header">
-                            <h4>🔒 Lock <span class="vectfox-badge-required">Required</span></h4>
+                    <div class="vecttauri-activation-section vecttauri-always-active">
+                        <div class="vecttauri-section-header">
+                            <h4>🔒 Lock <span class="vecttauri-badge-required">Required</span></h4>
                             <small>The master switch. A collection that is not locked never activates, whatever else is set below.</small>
                         </div>
-                        <label class="vectfox-checkbox-label">
-                            <input type="checkbox" id="vectfox_always_active">
-                        <strong id="vectfox_always_active_label">Active for current chat</strong>
+                        <label class="vecttauri-checkbox-label">
+                            <input type="checkbox" id="vecttauri_always_active">
+                        <strong id="vecttauri_always_active_label">Active for current chat</strong>
                         </label>
-                      <small id="vectfox_always_active_hint">When enabled, this collection is active for the current chat</small>
+                      <small id="vecttauri_always_active_hint">When enabled, this collection is active for the current chat</small>
                     </div>
 
                     <!-- ========================================== -->
@@ -2068,35 +2068,35 @@ function createActivationEditorModal() {
                     <!-- Narrows an already-locked collection. Has no -->
                     <!-- effect on its own - see the Lock block above. -->
                     <!-- ========================================== -->
-                    <div class="vectfox-activation-section vectfox-triggers-section">
-                        <div class="vectfox-section-header">
-                            <h4>🎯 Activation Triggers <span class="vectfox-badge-primary">Filter</span></h4>
+                    <div class="vecttauri-activation-section vecttauri-triggers-section">
+                        <div class="vecttauri-section-header">
+                            <h4>🎯 Activation Triggers <span class="vecttauri-badge-primary">Filter</span></h4>
                             <small>Narrows a locked collection to turns whose recent messages contain a keyword. Leave empty to keep it active on every turn.</small>
                         </div>
 
-                        <div class="vectfox-triggers-input">
+                        <div class="vecttauri-triggers-input">
                             <label>Trigger keywords:</label>
-                            <textarea id="vectfox_triggers_input"
+                            <textarea id="vecttauri_triggers_input"
                                       placeholder="Enter keywords, one per line or comma-separated.&#10;Supports regex: /pattern/i"
                                       rows="4"></textarea>
                         </div>
 
-                        <div class="vectfox-triggers-options">
-                            <div class="vectfox-option-row">
+                        <div class="vecttauri-triggers-options">
+                            <div class="vecttauri-option-row">
                                 <label>Match mode:</label>
-                                <select id="vectfox_trigger_match_mode">
+                                <select id="vecttauri_trigger_match_mode">
                                     <option value="any">ANY trigger matches (OR)</option>
                                     <option value="all">ALL triggers must match (AND)</option>
                                 </select>
                             </div>
-                            <div class="vectfox-option-row">
+                            <div class="vecttauri-option-row">
                                 <label>Scan depth:</label>
-                                <input type="number" id="vectfox_trigger_scan_depth" min="1" max="20" value="5">
+                                <input type="number" id="vecttauri_trigger_scan_depth" min="1" max="20" value="5">
                                 <small>recent messages</small>
                             </div>
-                            <div class="vectfox-option-row">
-                                <label class="vectfox-checkbox-label">
-                                    <input type="checkbox" id="vectfox_trigger_case_sensitive">
+                            <div class="vecttauri-option-row">
+                                <label class="vecttauri-checkbox-label">
+                                    <input type="checkbox" id="vecttauri_trigger_case_sensitive">
                                     Case sensitive
                                 </label>
                             </div>
@@ -2106,66 +2106,66 @@ function createActivationEditorModal() {
                     <!-- ========================================== -->
                     <!-- SECONDARY: ADVANCED CONDITIONS -->
                     <!-- ========================================== -->
-                    <div class="vectfox-activation-section vectfox-conditions-section">
-                        <div class="vectfox-section-header">
-                            <h4>⚡ Advanced Conditions <span class="vectfox-badge-secondary">Secondary</span></h4>
+                    <div class="vecttauri-activation-section vecttauri-conditions-section">
+                        <div class="vecttauri-section-header">
+                            <h4>⚡ Advanced Conditions <span class="vecttauri-badge-secondary">Secondary</span></h4>
                             <small>Complex rule-based activation (evaluated if triggers don't match or are empty)</small>
                         </div>
 
                         <!-- Enable toggle -->
-                        <div class="vectfox-conditions-toggle">
-                            <label class="vectfox-checkbox-label">
-                                <input type="checkbox" id="vectfox_conditions_enabled">
+                        <div class="vecttauri-conditions-toggle">
+                            <label class="vecttauri-checkbox-label">
+                                <input type="checkbox" id="vecttauri_conditions_enabled">
                                 Enable advanced conditions
                             </label>
                         </div>
 
                         <!-- Logic selector -->
-                        <div class="vectfox-conditions-logic">
+                        <div class="vecttauri-conditions-logic">
                             <label>Condition logic:</label>
-                            <select id="vectfox_conditions_logic">
+                            <select id="vecttauri_conditions_logic">
                                 <option value="AND">ALL conditions must match (AND)</option>
                                 <option value="OR">ANY condition can match (OR)</option>
                             </select>
                         </div>
 
                         <!-- Rules list -->
-                        <div class="vectfox-conditions-rules">
-                            <div class="vectfox-conditions-rules-header">
+                        <div class="vecttauri-conditions-rules">
+                            <div class="vecttauri-conditions-rules-header">
                                 <span>Conditions</span>
-                                <button class="vectfox-btn-sm" id="vectfox_add_condition">+ Add</button>
+                                <button class="vecttauri-btn-sm" id="vecttauri_add_condition">+ Add</button>
                             </div>
-                            <div id="vectfox_conditions_list"></div>
+                            <div id="vecttauri_conditions_list"></div>
                         </div>
                     </div>
 
                     <!-- ========================================== -->
                     <!-- PROMPT CONTEXT -->
                     <!-- ========================================== -->
-                    <div class="vectfox-activation-section vectfox-context-section">
-                        <div class="vectfox-section-header">
+                    <div class="vecttauri-activation-section vecttauri-context-section">
+                        <div class="vecttauri-section-header">
                             <h4>💬 Prompt Context</h4>
                             <small>Add context prompts to help the AI understand chunks from this collection</small>
                         </div>
 
-                        <div class="vectfox-context-settings">
-                            <div class="vectfox-option-row">
+                        <div class="vecttauri-context-settings">
+                            <div class="vecttauri-option-row">
                                 <label>Context prompt:</label>
-                                <textarea id="vectfox_collection_context"
+                                <textarea id="vecttauri_collection_context"
                                           placeholder="e.g., Things {{char}} remembers about {{user}}:"
                                           rows="2"></textarea>
                                 <small>Shown before this collection's chunks. Supports {{user}} and {{char}}.</small>
                             </div>
 
-                            <div class="vectfox-option-row">
+                            <div class="vecttauri-option-row">
                                 <label>XML tag (optional):</label>
-                                <input type="text" id="vectfox_collection_xml_tag" placeholder="e.g., memories">
+                                <input type="text" id="vecttauri_collection_xml_tag" placeholder="e.g., memories">
                                 <small>Wraps this collection's chunks in &lt;tag&gt;...&lt;/tag&gt;</small>
                             </div>
 
-                            <div class="vectfox-option-row vectfox-injection-row">
+                            <div class="vecttauri-option-row vecttauri-injection-row">
                                 <label>Injection position:</label>
-                                <select id="vectfox_collection_position">
+                                <select id="vecttauri_collection_position">
                                     <option value="">Use global default</option>
                                     <option value="2">Before Main Prompt</option>
                                     <option value="0">After Main Prompt</option>
@@ -2174,16 +2174,16 @@ function createActivationEditorModal() {
                                 <small>Where this collection's chunks appear in the prompt</small>
                             </div>
 
-                            <div class="vectfox-option-row vectfox-depth-row" id="vectfox_collection_depth_row" style="display: none;">
-                                <label>Injection depth: <span id="vectfox_collection_depth_value">2</span></label>
-                                <input type="range" id="vectfox_collection_depth" min="0" max="50" step="1" value="2">
+                            <div class="vecttauri-option-row vecttauri-depth-row" id="vecttauri_collection_depth_row" style="display: none;">
+                                <label>Injection depth: <span id="vecttauri_collection_depth_value">2</span></label>
+                                <input type="range" id="vecttauri_collection_depth" min="0" max="50" step="1" value="2">
                                 <small>Messages from end of chat to insert at</small>
                             </div>
                         </div>
                     </div>
 
                     <!-- Activation Priority Info -->
-                    <div class="vectfox-activation-info">
+                    <div class="vecttauri-activation-info">
                         <strong>Activation Chain — every step that applies must pass:</strong>
                         <ol>
                             <li><strong>Disabled</strong> → never queries (pause kills all activation)</li>
@@ -2196,9 +2196,9 @@ function createActivationEditorModal() {
                     </div>
                 </div>
 
-                <div class="vectfox-modal-footer">
-                    <button class="vectfox-btn" id="vectfox_activation_cancel">Cancel</button>
-                    <button class="vectfox-btn vectfox-btn-primary" id="vectfox_activation_save">Save</button>
+                <div class="vecttauri-modal-footer">
+                    <button class="vecttauri-btn" id="vecttauri_activation_cancel">Cancel</button>
+                    <button class="vecttauri-btn vecttauri-btn-primary" id="vecttauri_activation_save">Save</button>
                 </div>
             </div>
         </div>
@@ -2212,7 +2212,7 @@ function createActivationEditorModal() {
  * Binds event handlers for activation editor
  */
 function bindActivationEditorEvents() {
-  $("#vectfox_activation_close, #vectfox_activation_cancel").on(
+  $("#vecttauri_activation_close, #vecttauri_activation_cancel").on(
     "click",
     function (e) {
       e.preventDefault();
@@ -2221,38 +2221,38 @@ function bindActivationEditorEvents() {
     },
   );
 
-  $("#vectfox_activation_save").on("click", function (e) {
+  $("#vecttauri_activation_save").on("click", function (e) {
     e.preventDefault();
     e.stopPropagation();
     saveActivation();
   });
 
-  $("#vectfox_add_condition").on("click", function (e) {
+  $("#vecttauri_add_condition").on("click", function (e) {
     e.preventDefault();
     e.stopPropagation();
     addConditionRule();
   });
 
   // Stop mousedown propagation (ST closes drawers on mousedown/touchstart)
-  $("#vectfox_activation_editor_modal").on("mousedown touchstart", function (e) {
+  $("#vecttauri_activation_editor_modal").on("mousedown touchstart", function (e) {
     e.stopPropagation();
   });
 
   // Close on background click
-  $("#vectfox_activation_editor_modal").on("click", function (e) {
+  $("#vecttauri_activation_editor_modal").on("click", function (e) {
     if (e.target === this) closeActivationEditor();
   });
 
   // Master-switch toggle (status only, does not disable other settings).
   // Its label follows the collection's scope - see syncLockCheckboxToScope().
-  $("#vectfox_always_active").on("change", function (e) {
+  $("#vecttauri_always_active").on("change", function (e) {
     e.stopPropagation();
   });
 
   // Activation editor: Manage Locks button - opens the dialog that adds and removes
   // BOTH chat and character locks. It is the only route to a character lock; the
   // master-switch checkbox writes just the one lock matching the collection's scope.
-  $("#vectfox_activation_lock_collection").off("click").on("click", async function (e) {
+  $("#vecttauri_activation_lock_collection").off("click").on("click", async function (e) {
     e.stopPropagation();
     const collId = activationEditorState.collectionId;
 
@@ -2264,7 +2264,7 @@ function bindActivationEditorEvents() {
     try {
       openCollectionLockDialog(collId);
     } catch (err) {
-      log.error("VectFox: Failed to open lock dialog", err);
+      log.error("VectTauri: Failed to open lock dialog", err);
       toastr.error("Failed to open lock dialog");
     }
   });
@@ -2275,17 +2275,17 @@ function bindActivationEditorEvents() {
   });
 
   // Injection position toggle shows/hides depth row
-  $("#vectfox_collection_position").on("change", function (e) {
+  $("#vecttauri_collection_position").on("change", function (e) {
     e.stopPropagation();
     const position = $(this).val();
     // Show depth row only if "In-Chat @ Depth" (value 1) is selected
-    $("#vectfox_collection_depth_row").toggle(position === "1");
+    $("#vecttauri_collection_depth_row").toggle(position === "1");
   });
 
   // Injection depth slider updates label
-  $("#vectfox_collection_depth").on("input", function (e) {
+  $("#vecttauri_collection_depth").on("input", function (e) {
     e.stopPropagation();
-    $("#vectfox_collection_depth_value").text($(this).val());
+    $("#vecttauri_collection_depth_value").text($(this).val());
   });
 }
 
@@ -2310,7 +2310,7 @@ function syncLockCheckboxToScope(collectionId) {
     ? getContext()?.characterId !== undefined && getContext()?.characterId !== null
     : Boolean(getCurrentChatId());
 
-  $("#vectfox_always_active_label").text(
+  $("#vecttauri_always_active_label").text(
     isCharacterScope ? "Active for current character" : "Active for current chat",
   );
 
@@ -2324,8 +2324,8 @@ function syncLockCheckboxToScope(collectionId) {
       ? "When enabled, this collection is active in every chat with the current character."
       : "When enabled, this collection is active for the current chat.";
   }
-  $("#vectfox_always_active_hint").text(hint);
-  $("#vectfox_always_active").prop("disabled", !hasLockTarget);
+  $("#vecttauri_always_active_hint").text(hint);
+  $("#vecttauri_always_active").prop("disabled", !hasLockTarget);
 }
 
 /**
@@ -2334,38 +2334,38 @@ function syncLockCheckboxToScope(collectionId) {
 function renderActivationEditor() {
   const state = activationEditorState;
 
-  $("#vectfox_activation_collection_name").text(state.collectionName);
-  $("#vectfox_always_active").prop("checked", state.alwaysActive);
+  $("#vecttauri_activation_collection_name").text(state.collectionName);
+  $("#vecttauri_always_active").prop("checked", state.alwaysActive);
   syncLockCheckboxToScope(state.collectionId);
 
   // Triggers
   const triggersText = state.triggers.join("\n");
-  $("#vectfox_triggers_input").val(triggersText);
-  $("#vectfox_trigger_match_mode").val(state.triggerMatchMode);
-  $("#vectfox_trigger_scan_depth").val(state.triggerScanDepth);
-  $("#vectfox_trigger_case_sensitive").prop(
+  $("#vecttauri_triggers_input").val(triggersText);
+  $("#vecttauri_trigger_match_mode").val(state.triggerMatchMode);
+  $("#vecttauri_trigger_scan_depth").val(state.triggerScanDepth);
+  $("#vecttauri_trigger_case_sensitive").prop(
     "checked",
     state.triggerCaseSensitive,
   );
 
   // Conditions
-  $("#vectfox_conditions_enabled").prop("checked", state.conditions.enabled);
-  $("#vectfox_conditions_logic").val(state.conditions.logic || "AND");
+  $("#vecttauri_conditions_enabled").prop("checked", state.conditions.enabled);
+  $("#vecttauri_conditions_logic").val(state.conditions.logic || "AND");
 
   // Prompt Context
-  $("#vectfox_collection_context").val(state.context || "");
-  $("#vectfox_collection_xml_tag").val(state.xmlTag || "");
+  $("#vecttauri_collection_context").val(state.context || "");
+  $("#vecttauri_collection_xml_tag").val(state.xmlTag || "");
 
   // Injection position/depth
   const posValue = state.position !== null ? String(state.position) : "";
-  $("#vectfox_collection_position").val(posValue);
-  $("#vectfox_collection_depth").val(state.depth ?? 2);
-  $("#vectfox_collection_depth_value").text(state.depth ?? 2);
+  $("#vecttauri_collection_position").val(posValue);
+  $("#vecttauri_collection_depth").val(state.depth ?? 2);
+  $("#vecttauri_collection_depth_value").text(state.depth ?? 2);
   // Show depth row only if position is "In-Chat @ Depth" (value 1)
-  $("#vectfox_collection_depth_row").toggle(state.position === 1);
+  $("#vecttauri_collection_depth_row").toggle(state.position === 1);
 
   // Keep trigger/condition sections enabled regardless of chat activation toggle.
-  $(".vectfox-triggers-section, .vectfox-conditions-section").removeClass("vectfox-disabled");
+  $(".vecttauri-triggers-section, .vecttauri-conditions-section").removeClass("vecttauri-disabled");
 
   // Refresh lock button state for this collection
   refreshActivationLockButton();
@@ -2379,7 +2379,7 @@ function renderActivationEditor() {
 function refreshActivationLockButton() {
   try {
     const collId = activationEditorState.collectionId;
-    const $btn = $("#vectfox_activation_lock_collection");
+    const $btn = $("#vecttauri_activation_lock_collection");
     const chatId = getCurrentChatId();
     const context = getContext();
     const charId = context?.characterId || null;
@@ -2404,7 +2404,7 @@ function refreshActivationLockButton() {
     const shouldBeActive = isCollectionActiveForContext(collId, { chatId, characterId: charId });
     if (activationEditorState.collectionId) {
       activationEditorState.alwaysActive = shouldBeActive;
-      $("#vectfox_always_active").prop("checked", shouldBeActive);
+      $("#vecttauri_always_active").prop("checked", shouldBeActive);
       // CHAT_CHANGED can move us between a solo and a group chat, which changes
       // which lock the checkbox writes - and whether it can write one at all.
       syncLockCheckboxToScope(collId);
@@ -2445,7 +2445,7 @@ function refreshActivationLockButton() {
       $btn.attr("title", tooltip);
     }
   } catch (err) {
-    log.error("VectFox: Failed to refresh activation lock button", err);
+    log.error("VectTauri: Failed to refresh activation lock button", err);
   }
 }
 
@@ -2456,30 +2456,30 @@ function saveActivation() {
   const state = activationEditorState;
 
   // Parse triggers from textarea
-  const triggersRaw = $("#vectfox_triggers_input").val();
+  const triggersRaw = $("#vecttauri_triggers_input").val();
   const triggers = triggersRaw
     .split(/[\n,]/)
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
 
   // Get prompt context values (sanitize xml tag)
-  const contextPrompt = $("#vectfox_collection_context").val() || "";
-  const xmlTagRaw = $("#vectfox_collection_xml_tag").val() || "";
+  const contextPrompt = $("#vecttauri_collection_context").val() || "";
+  const xmlTagRaw = $("#vecttauri_collection_xml_tag").val() || "";
   const xmlTag = xmlTagRaw.replace(/[^a-zA-Z0-9_-]/g, "");
 
   // Get injection position/depth (empty string = use global default = null)
-  const positionRaw = $("#vectfox_collection_position").val();
+  const positionRaw = $("#vecttauri_collection_position").val();
   const position = positionRaw === "" ? null : parseInt(positionRaw);
   const depth =
     position === 1
-      ? parseInt($("#vectfox_collection_depth").val()) || 2
+      ? parseInt($("#vecttauri_collection_depth").val()) || 2
       : null;
 
-  const isChecked = $("#vectfox_always_active").prop("checked");
+  const isChecked = $("#vecttauri_always_active").prop("checked");
   const currentChatId = getCurrentChatId();
   const currentCharacterId = getContext()?.characterId;
   const saveMeta = getCollectionMeta(state.collectionId);
-  log.lifecycle(`[VectFox] saveActivation: checkbox=${isChecked}, scope=${saveMeta.scope}, chatId=${currentChatId || 'none'}, charId=${currentCharacterId ?? 'none'}, collection=${state.collectionId}`);
+  log.lifecycle(`[VectTauri] saveActivation: checkbox=${isChecked}, scope=${saveMeta.scope}, chatId=${currentChatId || 'none'}, charId=${currentCharacterId ?? 'none'}, collection=${state.collectionId}`);
 
   // The master-switch checkbox controls a single lock keyed by the collection's scope.
   // syncLockCheckboxToScope() labels it to match, and disables it when the scope's
@@ -2496,7 +2496,7 @@ function saveActivation() {
     }
   } else if (saveMeta.scope === 'character') {
     if (!currentCharacterId) {
-      toastr.info('No active character; use 🔒 Manage Locks to lock this collection to the current chat', 'VectFox');
+      toastr.info('No active character; use 🔒 Manage Locks to lock this collection to the current chat', 'VectTauri');
     } else if (isChecked) {
       setCollectionCharacterLock(state.collectionId, String(currentCharacterId));
     } else {
@@ -2508,9 +2508,9 @@ function saveActivation() {
   setCollectionMeta(state.collectionId, {
     alwaysActive: false,
     triggers: triggers,
-    triggerMatchMode: $("#vectfox_trigger_match_mode").val(),
-    triggerScanDepth: parseInt($("#vectfox_trigger_scan_depth").val()) || 5,
-    triggerCaseSensitive: $("#vectfox_trigger_case_sensitive").prop("checked"),
+    triggerMatchMode: $("#vecttauri_trigger_match_mode").val(),
+    triggerScanDepth: parseInt($("#vecttauri_trigger_scan_depth").val()) || 5,
+    triggerCaseSensitive: $("#vecttauri_trigger_case_sensitive").prop("checked"),
     context: contextPrompt,
     xmlTag: xmlTag,
     position: position,
@@ -2519,16 +2519,16 @@ function saveActivation() {
 
   // Save conditions
   const conditions = {
-    enabled: $("#vectfox_conditions_enabled").prop("checked"),
-    logic: $("#vectfox_conditions_logic").val(),
+    enabled: $("#vecttauri_conditions_enabled").prop("checked"),
+    logic: $("#vecttauri_conditions_logic").val(),
     rules: state.conditions.rules || [],
   };
   setCollectionConditions(state.collectionId, conditions);
 
   closeActivationEditor();
   renderCollections(); // metadata-only change, no need to re-discover collections
-  document.dispatchEvent(new CustomEvent('vectfox:collections-updated'));
-  toastr.success("Collection settings saved", "VectFox");
+  document.dispatchEvent(new CustomEvent('vecttauri:collections-updated'));
+  toastr.success("Collection settings saved", "VectTauri");
 }
 
 /**
@@ -2536,11 +2536,11 @@ function saveActivation() {
  */
 function renderConditionRules() {
   const rules = activationEditorState.conditions.rules || [];
-  const container = $("#vectfox_conditions_list");
+  const container = $("#vecttauri_conditions_list");
 
   if (rules.length === 0) {
     container.html(
-      '<div class="vectfox-empty-rules">No conditions yet. Click "+ Add Condition" to add one.</div>',
+      '<div class="vecttauri-empty-rules">No conditions yet. Click "+ Add Condition" to add one.</div>',
     );
     return;
   }
@@ -2564,18 +2564,18 @@ function renderConditionRule(rule, index) {
   ).join("");
 
   return `
-        <div class="vectfox-condition-rule" data-rule-index="${index}">
-            <div class="vectfox-condition-row">
-                <select class="vectfox-condition-type" data-rule-index="${index}">
+        <div class="vecttauri-condition-rule" data-rule-index="${index}">
+            <div class="vecttauri-condition-row">
+                <select class="vecttauri-condition-type" data-rule-index="${index}">
                     ${typeOptions}
                 </select>
-                <label class="vectfox-condition-negate">
+                <label class="vecttauri-condition-negate">
                     <input type="checkbox" ${rule.negate ? "checked" : ""} data-rule-index="${index}">
                     NOT
                 </label>
-                <button class="vectfox-btn-icon vectfox-condition-remove" data-rule-index="${index}">🗑️</button>
+                <button class="vecttauri-btn-icon vecttauri-condition-remove" data-rule-index="${index}">🗑️</button>
             </div>
-            <div class="vectfox-condition-settings" data-rule-index="${index}">
+            <div class="vecttauri-condition-settings" data-rule-index="${index}">
                 ${renderConditionSettings(rule, index)}
             </div>
         </div>
@@ -2592,27 +2592,27 @@ function renderConditionSettings(rule, index) {
     case "keyword": // Legacy support
     case "pattern":
       return `
-                <div class="vectfox-pattern-condition-wrapper">
-                    <div class="vectfox-pattern-row">
-                        <textarea class="vectfox-pattern-input" placeholder="Patterns (one per line)&#10;Plain text or regex: /pattern/i"
+                <div class="vecttauri-pattern-condition-wrapper">
+                    <div class="vecttauri-pattern-row">
+                        <textarea class="vecttauri-pattern-input" placeholder="Patterns (one per line)&#10;Plain text or regex: /pattern/i"
                                   data-field="patterns" data-rule-index="${index}"
                                   rows="3">${(settings.patterns || settings.values || []).join("\n")}</textarea>
                     </div>
-                    <div class="vectfox-pattern-options">
-                        <div class="vectfox-option-row">
+                    <div class="vecttauri-pattern-options">
+                        <div class="vecttauri-option-row">
                             <label>Match mode:</label>
                             <select data-field="matchMode" data-rule-index="${index}">
                                 <option value="any" ${settings.matchMode === "any" ? "selected" : ""}>ANY pattern matches</option>
                                 <option value="all" ${settings.matchMode === "all" ? "selected" : ""}>ALL patterns must match</option>
                             </select>
                         </div>
-                        <div class="vectfox-option-row">
+                        <div class="vecttauri-option-row">
                             <label>Scan depth:</label>
                             <input type="number" data-field="scanDepth" data-rule-index="${index}"
                                    min="1" max="100" value="${settings.scanDepth || 10}">
                             <small>messages</small>
                         </div>
-                        <div class="vectfox-option-row">
+                        <div class="vecttauri-option-row">
                             <label>Search in:</label>
                             <select data-field="searchIn" data-rule-index="${index}">
                                 <option value="all" ${settings.searchIn === "all" ? "selected" : ""}>All messages</option>
@@ -2620,8 +2620,8 @@ function renderConditionSettings(rule, index) {
                                 <option value="assistant" ${settings.searchIn === "assistant" ? "selected" : ""}>Assistant only</option>
                             </select>
                         </div>
-                        <div class="vectfox-option-row">
-                            <label class="vectfox-checkbox-label">
+                        <div class="vecttauri-option-row">
+                            <label class="vecttauri-checkbox-label">
                                 <input type="checkbox" data-field="caseSensitive" data-rule-index="${index}"
                                        ${settings.caseSensitive ? "checked" : ""}>
                                 Case sensitive
@@ -2670,7 +2670,7 @@ function renderConditionSettings(rule, index) {
           `<option value="${g}" ${(settings.values || []).includes(g) ? "selected" : ""}>${g}</option>`,
       ).join("");
       return `
-                <select multiple data-field="values" data-rule-index="${index}" class="vectfox-multi-select">
+                <select multiple data-field="values" data-rule-index="${index}" class="vecttauri-multi-select">
                     ${genOptions}
                 </select>
             `;
@@ -2683,23 +2683,23 @@ function renderConditionSettings(rule, index) {
         .join("");
       const selectedValues = settings.values || [];
       return `
-                <div class="vectfox-lorebook-picker-wrapper">
-                    <div class="vectfox-lorebook-picker-row">
-                        <select class="vectfox-lorebook-select" data-rule-index="${index}">
+                <div class="vecttauri-lorebook-picker-wrapper">
+                    <div class="vecttauri-lorebook-picker-row">
+                        <select class="vecttauri-lorebook-select" data-rule-index="${index}">
                             <option value="">-- Select Lorebook --</option>
                             ${worldOptions}
                         </select>
-                        <select class="vectfox-lorebook-entry-select" data-rule-index="${index}" disabled>
+                        <select class="vecttauri-lorebook-entry-select" data-rule-index="${index}" disabled>
                             <option value="">-- Select Entry (optional) --</option>
                         </select>
-                        <button class="vectfox-btn-sm vectfox-lorebook-add" data-rule-index="${index}" type="button">+ Add</button>
+                        <button class="vecttauri-btn-sm vecttauri-lorebook-add" data-rule-index="${index}" type="button">+ Add</button>
                     </div>
-                    <div class="vectfox-lorebook-selected" data-rule-index="${index}">
+                    <div class="vecttauri-lorebook-selected" data-rule-index="${index}">
                         ${selectedValues
                           .map(
                             (v) => `
-                            <span class="vectfox-lorebook-tag" data-value="${v}">
-                                ${v} <button class="vectfox-lorebook-remove" data-value="${v}" data-rule-index="${index}">×</button>
+                            <span class="vecttauri-lorebook-tag" data-value="${v}">
+                                ${v} <button class="vecttauri-lorebook-remove" data-value="${v}" data-rule-index="${index}">×</button>
                             </span>
                         `,
                           )
@@ -2727,7 +2727,7 @@ function renderConditionSettings(rule, index) {
             `;
 
     default:
-      return '<span class="vectfox-unknown-type">Unknown condition type</span>';
+      return '<span class="vecttauri-unknown-type">Unknown condition type</span>';
   }
 }
 
@@ -2736,7 +2736,7 @@ function renderConditionSettings(rule, index) {
  */
 function bindConditionRuleEvents() {
   // Type change
-  $(".vectfox-condition-type")
+  $(".vecttauri-condition-type")
     .off("change")
     .on("change", function (e) {
       e.stopPropagation();
@@ -2747,7 +2747,7 @@ function bindConditionRuleEvents() {
     });
 
   // Negate toggle
-  $(".vectfox-condition-negate input")
+  $(".vecttauri-condition-negate input")
     .off("change")
     .on("change", function (e) {
       e.stopPropagation();
@@ -2757,7 +2757,7 @@ function bindConditionRuleEvents() {
     });
 
   // Remove rule
-  $(".vectfox-condition-remove")
+  $(".vecttauri-condition-remove")
     .off("click")
     .on("click", function (e) {
       e.preventDefault();
@@ -2769,7 +2769,7 @@ function bindConditionRuleEvents() {
 
   // Settings fields (inputs, selects, and textareas)
   $(
-    ".vectfox-condition-settings input, .vectfox-condition-settings select, .vectfox-condition-settings textarea",
+    ".vecttauri-condition-settings input, .vecttauri-condition-settings select, .vecttauri-condition-settings textarea",
   )
     .off("change")
     .on("change", function (e) {
@@ -2821,14 +2821,14 @@ function bindConditionRuleEvents() {
     });
 
   // Lorebook picker: world select change - load entries
-  $(".vectfox-lorebook-select")
+  $(".vecttauri-lorebook-select")
     .off("change")
     .on("change", async function (e) {
       e.stopPropagation();
       const idx = $(this).data("rule-index");
       const worldName = $(this).val();
       const entrySelect = $(
-        `.vectfox-lorebook-entry-select[data-rule-index="${idx}"]`,
+        `.vecttauri-lorebook-entry-select[data-rule-index="${idx}"]`,
       );
 
       if (!worldName) {
@@ -2859,7 +2859,7 @@ function bindConditionRuleEvents() {
           entrySelect.prop("disabled", false);
         }
       } catch (error) {
-        log.error("VectFox: Failed to load world info", error);
+        log.error("VectTauri: Failed to load world info", error);
         entrySelect.html(
           '<option value="">-- Error loading entries --</option>',
         );
@@ -2867,20 +2867,20 @@ function bindConditionRuleEvents() {
     });
 
   // Lorebook picker: add button
-  $(".vectfox-lorebook-add")
+  $(".vecttauri-lorebook-add")
     .off("click")
     .on("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
       const idx = $(this).data("rule-index");
       const worldSelect = $(
-        `.vectfox-lorebook-select[data-rule-index="${idx}"]`,
+        `.vecttauri-lorebook-select[data-rule-index="${idx}"]`,
       );
       const entrySelect = $(
-        `.vectfox-lorebook-entry-select[data-rule-index="${idx}"]`,
+        `.vecttauri-lorebook-entry-select[data-rule-index="${idx}"]`,
       );
       const selectedContainer = $(
-        `.vectfox-lorebook-selected[data-rule-index="${idx}"]`,
+        `.vecttauri-lorebook-selected[data-rule-index="${idx}"]`,
       );
       const hiddenInput = $(
         `input[data-field="values"][data-rule-index="${idx}"]`,
@@ -2888,7 +2888,7 @@ function bindConditionRuleEvents() {
 
       const worldName = worldSelect.val();
       if (!worldName) {
-        toastr.warning("Please select a lorebook first", "VectFox");
+        toastr.warning("Please select a lorebook first", "VectTauri");
         return;
       }
 
@@ -2911,7 +2911,7 @@ function bindConditionRuleEvents() {
             .filter((v) => v)
         : [];
       if (currentValues.includes(valueToAdd)) {
-        toastr.info("Already added", "VectFox");
+        toastr.info("Already added", "VectTauri");
         return;
       }
 
@@ -2923,8 +2923,8 @@ function bindConditionRuleEvents() {
         ? `${worldName}:${entrySelect.find(":selected").text()}`
         : worldName;
       selectedContainer.append(`
-            <span class="vectfox-lorebook-tag" data-value="${valueToAdd}">
-                ${displayName} <button class="vectfox-lorebook-remove" data-value="${valueToAdd}" data-rule-index="${idx}">×</button>
+            <span class="vecttauri-lorebook-tag" data-value="${valueToAdd}">
+                ${displayName} <button class="vecttauri-lorebook-remove" data-value="${valueToAdd}" data-rule-index="${idx}">×</button>
             </span>
         `);
 
@@ -2953,7 +2953,7 @@ function bindConditionRuleEvents() {
  * Binds lorebook tag remove buttons
  */
 function bindLorebookRemoveButtons() {
-  $(".vectfox-lorebook-remove")
+  $(".vecttauri-lorebook-remove")
     .off("click")
     .on("click", function (e) {
       e.preventDefault();
@@ -2980,7 +2980,7 @@ function bindLorebookRemoveButtons() {
       }
 
       // Remove the tag
-      $(this).closest(".vectfox-lorebook-tag").remove();
+      $(this).closest(".vecttauri-lorebook-tag").remove();
     });
 }
 
@@ -3013,10 +3013,10 @@ function bindSearchEvents() {
   searchEventsBound = true;
 
   // Search button click
-  $("#vectfox_search_btn").off("click").on("click", performSearch);
+  $("#vecttauri_search_btn").off("click").on("click", performSearch);
 
   // Enter key in search input
-  $("#vectfox_semantic_search")
+  $("#vecttauri_semantic_search")
     .off("keydown")
     .on("keydown", function (e) {
       if (e.key === "Enter") {
@@ -3026,23 +3026,23 @@ function bindSearchEvents() {
     });
 
   // Keyword filter events
-  $("#vectfox_scan_keywords").off("click").on("click", scanKeywords);
-  $("#vectfox_clear_keyword_filter").off("click").on("click", clearKeywordFilter);
-  $("#vectfox_keyword_filter").off("input").on("input", updateKeywordFilterFromInput);
+  $("#vecttauri_scan_keywords").off("click").on("click", scanKeywords);
+  $("#vecttauri_clear_keyword_filter").off("click").on("click", clearKeywordFilter);
+  $("#vecttauri_keyword_filter").off("input").on("input", updateKeywordFilterFromInput);
 }
 
 /**
  * Scans all collections for keywords
  */
 async function scanKeywords() {
-  const $btn = $("#vectfox_scan_keywords");
-  const $tags = $("#vectfox_keyword_tags");
+  const $btn = $("#vecttauri_scan_keywords");
+  const $tags = $("#vecttauri_keyword_tags");
 
   $btn.prop("disabled", true).html('<i class="fa-solid fa-spinner fa-spin"></i> Scanning...');
-  $tags.html('<span class="vectfox-keyword-hint">Scanning collections...</span>');
+  $tags.html('<span class="vecttauri-keyword-hint">Scanning collections...</span>');
 
   try {
-    const enabledOnly = $("#vectfox_search_enabled_only").is(":checked");
+    const enabledOnly = $("#vecttauri_search_enabled_only").is(":checked");
     let collectionsToScan = browserState.collections;
 
     if (enabledOnly) {
@@ -3080,7 +3080,7 @@ async function scanKeywords() {
           }
         }
       } catch (err) {
-        log.warn(`VectFox: Failed to scan keywords from ${collection.id}:`, err);
+        log.warn(`VectTauri: Failed to scan keywords from ${collection.id}:`, err);
       }
     }
 
@@ -3092,14 +3092,14 @@ async function scanKeywords() {
     renderKeywordTags();
 
     if (browserState.availableKeywords.length === 0) {
-      $tags.html('<span class="vectfox-keyword-hint">No keywords found in scanned collections</span>');
+      $tags.html('<span class="vecttauri-keyword-hint">No keywords found in scanned collections</span>');
     } else {
-      toastr.success(`Found ${browserState.availableKeywords.length} unique keywords`, "VectFox");
+      toastr.success(`Found ${browserState.availableKeywords.length} unique keywords`, "VectTauri");
     }
   } catch (error) {
-    log.error("VectFox: Keyword scan failed", error);
-    $tags.html('<span class="vectfox-keyword-hint vectfox-error">Scan failed</span>');
-    toastr.error("Failed to scan keywords", "VectFox");
+    log.error("VectTauri: Keyword scan failed", error);
+    $tags.html('<span class="vecttauri-keyword-hint vecttauri-error">Scan failed</span>');
+    toastr.error("Failed to scan keywords", "VectTauri");
   } finally {
     $btn.prop("disabled", false).html('<i class="fa-solid fa-sync"></i> Scan');
   }
@@ -3109,11 +3109,11 @@ async function scanKeywords() {
  * Renders clickable keyword tags
  */
 function renderKeywordTags() {
-  const $tags = $("#vectfox_keyword_tags");
+  const $tags = $("#vecttauri_keyword_tags");
   const keywords = browserState.availableKeywords;
 
   if (keywords.length === 0) {
-    $tags.html('<span class="vectfox-keyword-hint">No keywords available</span>');
+    $tags.html('<span class="vecttauri-keyword-hint">No keywords available</span>');
     return;
   }
 
@@ -3123,7 +3123,7 @@ function renderKeywordTags() {
 
   let html = displayKeywords.map(kw => {
     const isActive = currentFilter.includes(kw.text);
-    return `<span class="vectfox-keyword-tag ${isActive ? 'active' : ''}"
+    return `<span class="vecttauri-keyword-tag ${isActive ? 'active' : ''}"
                   data-keyword="${StringUtils.escapeHtml(kw.text)}"
                   title="${kw.count} occurrence(s)">
               ${StringUtils.escapeHtml(kw.text)} <small>(${kw.count})</small>
@@ -3131,13 +3131,13 @@ function renderKeywordTags() {
   }).join('');
 
   if (keywords.length > 30) {
-    html += `<span class="vectfox-keyword-more">+${keywords.length - 30} more</span>`;
+    html += `<span class="vecttauri-keyword-more">+${keywords.length - 30} more</span>`;
   }
 
   $tags.html(html);
 
   // Bind click events on tags
-  $tags.find(".vectfox-keyword-tag").off("click").on("click", function() {
+  $tags.find(".vecttauri-keyword-tag").off("click").on("click", function() {
     const keyword = $(this).data("keyword");
     toggleKeywordFilter(keyword);
   });
@@ -3157,7 +3157,7 @@ function toggleKeywordFilter(keyword) {
   }
 
   browserState.keywordFilter = currentFilter.join(', ');
-  $("#vectfox_keyword_filter").val(browserState.keywordFilter);
+  $("#vecttauri_keyword_filter").val(browserState.keywordFilter);
   renderKeywordTags();
 }
 
@@ -3166,7 +3166,7 @@ function toggleKeywordFilter(keyword) {
  */
 function clearKeywordFilter() {
   browserState.keywordFilter = '';
-  $("#vectfox_keyword_filter").val('');
+  $("#vecttauri_keyword_filter").val('');
   renderKeywordTags();
 }
 
@@ -3174,7 +3174,7 @@ function clearKeywordFilter() {
  * Updates keyword filter from input field
  */
 function updateKeywordFilterFromInput() {
-  browserState.keywordFilter = $("#vectfox_keyword_filter").val();
+  browserState.keywordFilter = $("#vecttauri_keyword_filter").val();
   renderKeywordTags();
 }
 
@@ -3231,15 +3231,15 @@ function filterResultsByKeywords(results) {
  * Performs semantic search across collections
  */
 async function performSearch() {
-  const query = $("#vectfox_semantic_search").val().trim();
+  const query = $("#vecttauri_semantic_search").val().trim();
   if (!query) {
-    toastr.warning("Please enter a search query", "VectFox");
+    toastr.warning("Please enter a search query", "VectTauri");
     return;
   }
 
-  const topK = parseInt($("#vectfox_search_topk").val()) || 5;
-  const threshold = parseFloat($("#vectfox_search_threshold").val()) || 0.3;
-  const enabledOnly = $("#vectfox_search_enabled_only").is(":checked");
+  const topK = parseInt($("#vecttauri_search_topk").val()) || 5;
+  const threshold = parseFloat($("#vecttauri_search_threshold").val()) || 0.3;
+  const enabledOnly = $("#vecttauri_search_enabled_only").is(":checked");
 
   // Get collection IDs to search
   let collectionIds = browserState.collections.map((c) => c.id);
@@ -3269,8 +3269,8 @@ async function performSearch() {
   }
 
   if (collectionIds.length === 0) {
-    $("#vectfox_search_results").html(`
-            <div class="vectfox-search-empty">
+    $("#vecttauri_search_results").html(`
+            <div class="vecttauri-search-empty">
                 ${icons.search(48)}
                 <p>No collections available to search</p>
             </div>
@@ -3280,11 +3280,11 @@ async function performSearch() {
 
   // Show loading state
   browserState.isSearching = true;
-  $("#vectfox_search_btn")
+  $("#vecttauri_search_btn")
     .prop("disabled", true)
     .html(`${icons.search(16)} Searching...`);
-  $("#vectfox_search_results").html(`
-        <div class="vectfox-search-loading">
+  $("#vecttauri_search_results").html(`
+        <div class="vecttauri-search-loading">
             <i class="fa-solid fa-spinner fa-spin"></i> Searching ${collectionIds.length} collections...
         </div>
     `);
@@ -3304,15 +3304,15 @@ async function performSearch() {
     const filteredResults = filterResultsByKeywords(results);
     renderSearchResults(filteredResults, query, results);
   } catch (error) {
-    log.error("VectFox: Search failed", error);
-    $("#vectfox_search_results").html(`
-            <div class="vectfox-search-error">
+    log.error("VectTauri: Search failed", error);
+    $("#vecttauri_search_results").html(`
+            <div class="vecttauri-search-error">
                 ${icons.x(24)} Search failed: ${error.message}
             </div>
         `);
   } finally {
     browserState.isSearching = false;
-    $("#vectfox_search_btn")
+    $("#vecttauri_search_btn")
       .prop("disabled", false)
       .html(`${icons.search(16)} Search`);
   }
@@ -3342,8 +3342,8 @@ function renderSearchResults(results, query, originalResults = null) {
       ? `<p>No results match keyword filter: "${StringUtils.escapeHtml(browserState.keywordFilter)}"</p><small>${originalTotal} result(s) found before filtering</small>`
       : `<p>No results found for "${StringUtils.escapeHtml(query)}"</p><small>Try adjusting the score threshold or search in more collections</small>`;
 
-    $("#vectfox_search_results").html(`
-            <div class="vectfox-search-empty">
+    $("#vecttauri_search_results").html(`
+            <div class="vecttauri-search-empty">
                 ${icons.search(48)}
                 ${filterMsg}
             </div>
@@ -3351,9 +3351,9 @@ function renderSearchResults(results, query, originalResults = null) {
     return;
   }
 
-  let summaryHtml = `<div class="vectfox-search-summary">Found ${totalResults} result(s) in ${collectionIds.length} collection(s)`;
+  let summaryHtml = `<div class="vecttauri-search-summary">Found ${totalResults} result(s) in ${collectionIds.length} collection(s)`;
   if (wasFiltered) {
-    summaryHtml += ` <span class="vectfox-filter-badge" title="Keyword filter active">🏷️ filtered from ${originalTotal}</span>`;
+    summaryHtml += ` <span class="vecttauri-filter-badge" title="Keyword filter active">🏷️ filtered from ${originalTotal}</span>`;
   }
   summaryHtml += `</div>`;
 
@@ -3371,12 +3371,12 @@ function renderSearchResults(results, query, originalResults = null) {
     const uniqueKey = collection.registryKey || collection.id;
 
     html += `
-            <div class="vectfox-search-collection">
-                <div class="vectfox-search-collection-header">
+            <div class="vecttauri-search-collection">
+                <div class="vecttauri-search-collection-header">
                     ${icons.folder(16)} ${StringUtils.escapeHtml(collectionName)}
-                    <span class="vectfox-search-count">${collectionResults.hashes.length} result(s)</span>
+                    <span class="vecttauri-search-count">${collectionResults.hashes.length} result(s)</span>
                 </div>
-                <div class="vectfox-search-collection-results">
+                <div class="vecttauri-search-collection-results">
         `;
 
     for (let i = 0; i < collectionResults.hashes.length; i++) {
@@ -3391,14 +3391,14 @@ function renderSearchResults(results, query, originalResults = null) {
       const textScore = metadata.textScore !== undefined ? (metadata.textScore * 100).toFixed(0) : null;
       const isHybrid = metadata.hybridSearch || (vectorScore !== null && textScore !== null);
 
-      let scoreDisplay = `<div class="vectfox-search-result-score">${score}%</div>`;
+      let scoreDisplay = `<div class="vecttauri-search-result-score">${score}%</div>`;
       if (isHybrid) {
         scoreDisplay = `
-          <div class="vectfox-search-result-score-hybrid">
-            <div class="vectfox-score-main">${score}%</div>
-            <div class="vectfox-score-breakdown">
-              <span class="vectfox-score-vector" title="Semantic similarity">🔷${vectorScore || '?'}%</span>
-              <span class="vectfox-score-text" title="Keyword match">📝${textScore || '0'}%</span>
+          <div class="vecttauri-search-result-score-hybrid">
+            <div class="vecttauri-score-main">${score}%</div>
+            <div class="vecttauri-score-breakdown">
+              <span class="vecttauri-score-vector" title="Semantic similarity">🔷${vectorScore || '?'}%</span>
+              <span class="vecttauri-score-text" title="Keyword match">📝${textScore || '0'}%</span>
             </div>
           </div>`;
       }
@@ -3409,22 +3409,22 @@ function renderSearchResults(results, query, originalResults = null) {
       if (chunkKeywords.length > 0) {
         const keywordTags = chunkKeywords.slice(0, 5).map(kw => {
           const text = typeof kw === 'object' ? kw.text : kw;
-          return `<span class="vectfox-result-keyword">${StringUtils.escapeHtml(text)}</span>`;
+          return `<span class="vecttauri-result-keyword">${StringUtils.escapeHtml(text)}</span>`;
         }).join('');
-        const moreCount = chunkKeywords.length > 5 ? `<span class="vectfox-result-keyword-more">+${chunkKeywords.length - 5}</span>` : '';
-        keywordsHtml = `<div class="vectfox-result-keywords">${keywordTags}${moreCount}</div>`;
+        const moreCount = chunkKeywords.length > 5 ? `<span class="vecttauri-result-keyword-more">+${chunkKeywords.length - 5}</span>` : '';
+        keywordsHtml = `<div class="vecttauri-result-keywords">${keywordTags}${moreCount}</div>`;
       }
 
       html += `
-                <div class="vectfox-search-result" data-collection="${StringUtils.escapeHtml(collectionId)}" data-hash="${collectionResults.hashes[i]}">
+                <div class="vecttauri-search-result" data-collection="${StringUtils.escapeHtml(collectionId)}" data-hash="${collectionResults.hashes[i]}">
                     ${scoreDisplay}
-                    <div class="vectfox-search-result-content">
-                        <div class="vectfox-search-result-text">${StringUtils.escapeHtml(preview)}</div>
+                    <div class="vecttauri-search-result-content">
+                        <div class="vecttauri-search-result-text">${StringUtils.escapeHtml(preview)}</div>
                         ${keywordsHtml}
                     </div>
                 </div>
 
-                <button class="vectfox-btn-sm vectfox-action-visualize"
+                <button class="vecttauri-btn-sm vecttauri-action-visualize"
                         data-collection-key="${StringUtils.escapeHtml(uniqueKey)}"
                         data-backend="${StringUtils.escapeHtml(collection.backend)}"
                         data-source="${StringUtils.escapeHtml(collection.source || "transformers")}"
@@ -3437,8 +3437,8 @@ function renderSearchResults(results, query, originalResults = null) {
     html += `</div></div>`;
   }
 
-  $("#vectfox_search_results").html(html);
-  $(".vectfox-action-visualize")
+  $("#vecttauri_search_results").html(html);
+  $(".vecttauri-action-visualize")
     .off("click")
     .on("click", async function (e) {
       e.stopPropagation();
@@ -3468,8 +3468,8 @@ function renderBulkList() {
   }
 
   if (collections.length === 0) {
-    $("#vectfox_bulk_list").html(`
-            <div class="vectfox-bulk-empty">
+    $("#vecttauri_bulk_list").html(`
+            <div class="vecttauri-bulk-empty">
                 ${icons.folder(48)}
                 <p>No collections match the current filter</p>
             </div>
@@ -3484,13 +3484,13 @@ function renderBulkList() {
     const safeKey = StringUtils.escapeHtml(uniqueKey);
 
     html += `
-            <div class="vectfox-bulk-item ${isSelected ? "selected" : ""}" data-key="${safeKey}">
-                <label class="vectfox-bulk-checkbox">
+            <div class="vecttauri-bulk-item ${isSelected ? "selected" : ""}" data-key="${safeKey}">
+                <label class="vecttauri-bulk-checkbox">
                     <input type="checkbox" ${isSelected ? "checked" : ""} data-key="${safeKey}">
                 </label>
-                <div class="vectfox-bulk-item-info">
-                    <span class="vectfox-bulk-item-name">${StringUtils.escapeHtml(collection.name || collection.id)}</span>
-                    <span class="vectfox-bulk-item-meta">
+                <div class="vecttauri-bulk-item-info">
+                    <span class="vecttauri-bulk-item-name">${StringUtils.escapeHtml(collection.name || collection.id)}</span>
+                    <span class="vecttauri-bulk-item-meta">
                         ${collection.chunkCount || 0} chunks •
                         ${collection.enabled ? `${icons.toggleRight(12)} Enabled` : `${icons.toggleLeft(12)} Disabled`}
                     </span>
@@ -3499,7 +3499,7 @@ function renderBulkList() {
         `;
   }
 
-  $("#vectfox_bulk_list").html(html);
+  $("#vecttauri_bulk_list").html(html);
   updateBulkCount();
 }
 
@@ -3511,7 +3511,7 @@ function bindBulkEvents() {
   bulkEventsBound = true;
 
   // Filter change
-  $("#vectfox_bulk_filter")
+  $("#vecttauri_bulk_filter")
     .off("change")
     .on("change", function () {
       browserState.bulkFilter = $(this).val();
@@ -3520,7 +3520,7 @@ function bindBulkEvents() {
     });
 
   // Select all checkbox
-  $("#vectfox_bulk_select_all")
+  $("#vecttauri_bulk_select_all")
     .off("change")
     .on("change", function () {
       const isChecked = $(this).is(":checked");
@@ -3544,7 +3544,7 @@ function bindBulkEvents() {
     });
 
   // Individual checkbox clicks (delegated)
-  $("#vectfox_bulk_list")
+  $("#vecttauri_bulk_list")
     .off("change", 'input[type="checkbox"]')
     .on("change", 'input[type="checkbox"]', function () {
       const key = $(this).data("key");
@@ -3555,12 +3555,12 @@ function bindBulkEvents() {
       }
       updateBulkCount();
       $(this)
-        .closest(".vectfox-bulk-item")
+        .closest(".vecttauri-bulk-item")
         .toggleClass("selected", $(this).is(":checked"));
     });
 
   // Bulk enable
-  $("#vectfox_bulk_enable")
+  $("#vecttauri_bulk_enable")
     .off("click")
     .on("click", async function () {
       if (browserState.bulkSelected.size === 0) return;
@@ -3575,14 +3575,14 @@ function bindBulkEvents() {
 
       toastr.success(
         `Enabled ${browserState.bulkSelected.size} collection(s)`,
-        "VectFox",
+        "VectTauri",
       );
       renderBulkList();
       renderCollections();
     });
 
   // Bulk disable
-  $("#vectfox_bulk_disable")
+  $("#vecttauri_bulk_disable")
     .off("click")
     .on("click", async function () {
       if (browserState.bulkSelected.size === 0) return;
@@ -3597,14 +3597,14 @@ function bindBulkEvents() {
 
       toastr.success(
         `Disabled ${browserState.bulkSelected.size} collection(s)`,
-        "VectFox",
+        "VectTauri",
       );
       renderBulkList();
       renderCollections();
     });
 
   // Bulk export
-  $("#vectfox_bulk_export")
+  $("#vecttauri_bulk_export")
     .off("click")
     .on("click", async function () {
       if (browserState.bulkSelected.size === 0) return;
@@ -3616,7 +3616,7 @@ function bindBulkEvents() {
 
       toastr.info(
         `Exporting ${browserState.bulkSelected.size} collection(s)...`,
-        "VectFox",
+        "VectTauri",
       );
 
       let successCount = 0;
@@ -3640,15 +3640,15 @@ function bindBulkEvents() {
           downloadExport(exportData, collection.name || collection.id);
           successCount++;
         } catch (error) {
-          log.error(`VectFox: Failed to export ${collection.id}`, error);
+          log.error(`VectTauri: Failed to export ${collection.id}`, error);
         }
       }
 
-      toastr.success(`Exported ${successCount} collection(s)`, "VectFox");
+      toastr.success(`Exported ${successCount} collection(s)`, "VectTauri");
     });
 
   // Bulk delete - uses unified deleteCollection()
-  $("#vectfox_bulk_delete")
+  $("#vecttauri_bulk_delete")
     .off("click")
     .on("click", async function () {
       if (browserState.bulkSelected.size === 0) return;
@@ -3664,13 +3664,13 @@ function bindBulkEvents() {
 
       const confirmText = prompt("Type DELETE to confirm:");
       if (confirmText !== "DELETE") {
-        toastr.info("Deletion cancelled", "VectFox");
+        toastr.info("Deletion cancelled", "VectTauri");
         return;
       }
 
       toastr.info(
         `Deleting ${browserState.bulkSelected.size} collection(s)...`,
-        "VectFox",
+        "VectTauri",
       );
 
       let successCount = 0;
@@ -3698,7 +3698,7 @@ function bindBulkEvents() {
             partialCount++;
           }
         } catch (error) {
-          log.error(`VectFox: Failed to delete ${collection.id}`, error);
+          log.error(`VectTauri: Failed to delete ${collection.id}`, error);
         }
       }
 
@@ -3709,10 +3709,10 @@ function bindBulkEvents() {
       if (partialCount > 0) {
         toastr.warning(
           `Deleted ${successCount}, partial: ${partialCount}`,
-          "VectFox",
+          "VectTauri",
         );
       } else {
-        toastr.success(`Deleted ${successCount} collection(s)`, "VectFox");
+        toastr.success(`Deleted ${successCount} collection(s)`, "VectTauri");
       }
     });
 }
@@ -3722,12 +3722,12 @@ function bindBulkEvents() {
  */
 function updateBulkCount() {
   const count = browserState.bulkSelected.size;
-  $("#vectfox_bulk_count").text(`${count} selected`);
+  $("#vecttauri_bulk_count").text(`${count} selected`);
 
   // Enable/disable buttons based on selection
   const hasSelection = count > 0;
   $(
-    "#vectfox_bulk_enable, #vectfox_bulk_disable, #vectfox_bulk_export, #vectfox_bulk_delete",
+    "#vecttauri_bulk_enable, #vecttauri_bulk_disable, #vecttauri_bulk_export, #vecttauri_bulk_delete",
   ).prop("disabled", !hasSelection);
 }
 
@@ -3749,13 +3749,13 @@ function openCollectionLockDialog(collectionId) {
 
     // Build HTML for locked chats
     const locksHtml = locks.length === 0
-        ? '<div class="vectfox-lock-list-empty">No chats locked yet</div>'
+        ? '<div class="vecttauri-lock-list-empty">No chats locked yet</div>'
         : locks.map((chatId) => `
-            <div class="vectfox-lock-item" data-chat-id="${chatId}">
-                <span class="vectfox-lock-chat-id" title="${chatId}">${chatId}</span>
-                <div class="vectfox-lock-item-actions">
-                    ${String(chatId) === String(currentChatId) ? '<span class="vectfox-lock-badge-current">Current</span>' : ''}
-                    <button class="vectfox-lock-remove-btn" data-chat-id="${chatId}" title="Remove lock">
+            <div class="vecttauri-lock-item" data-chat-id="${chatId}">
+                <span class="vecttauri-lock-chat-id" title="${chatId}">${chatId}</span>
+                <div class="vecttauri-lock-item-actions">
+                    ${String(chatId) === String(currentChatId) ? '<span class="vecttauri-lock-badge-current">Current</span>' : ''}
+                    <button class="vecttauri-lock-remove-btn" data-chat-id="${chatId}" title="Remove lock">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
@@ -3764,18 +3764,18 @@ function openCollectionLockDialog(collectionId) {
 
     // Build HTML for locked characters
     const charLocksHtml = characterLocks.length === 0
-        ? '<div class="vectfox-lock-list-empty">No characters locked yet</div>'
+        ? '<div class="vecttauri-lock-list-empty">No characters locked yet</div>'
         : characterLocks.map((charId) => {
             const charName = characters[charId]?.data?.name || `Character ${charId}`;
             return `
-                <div class="vectfox-lock-item" data-character-id="${charId}">
-                    <span class="vectfox-lock-character-name">
+                <div class="vecttauri-lock-item" data-character-id="${charId}">
+                    <span class="vecttauri-lock-character-name">
                         <i class="fa-solid fa-user"></i>
                         ${charName}
                     </span>
-                    <div class="vectfox-lock-item-actions">
-                        ${String(charId) === String(currentCharacterId) ? '<span class="vectfox-lock-badge-current">Active</span>' : ''}
-                        <button class="vectfox-lock-remove-char-btn" data-character-id="${charId}" title="Remove lock">
+                    <div class="vecttauri-lock-item-actions">
+                        ${String(charId) === String(currentCharacterId) ? '<span class="vecttauri-lock-badge-current">Active</span>' : ''}
+                        <button class="vecttauri-lock-remove-char-btn" data-character-id="${charId}" title="Remove lock">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -3784,7 +3784,7 @@ function openCollectionLockDialog(collectionId) {
         }).join('');
 
     // Generate hint text for chat section
-    const chatHintClass = currentChatId && locks.includes(currentChatId) ? 'vectfox-lock-hint vectfox-lock-hint-success' : 'vectfox-lock-hint';
+    const chatHintClass = currentChatId && locks.includes(currentChatId) ? 'vecttauri-lock-hint vecttauri-lock-hint-success' : 'vecttauri-lock-hint';
     const chatHintText = currentChatId
         ? locks.includes(currentChatId)
             ? '✓ Already locked to this chat'
@@ -3792,7 +3792,7 @@ function openCollectionLockDialog(collectionId) {
         : 'Open a chat first to lock this collection';
 
     // Generate hint text for character section
-    const charHintClass = currentCharacterId && characterLocks.includes(currentCharacterId) ? 'vectfox-lock-hint vectfox-lock-hint-success' : 'vectfox-lock-hint';
+    const charHintClass = currentCharacterId && characterLocks.includes(currentCharacterId) ? 'vecttauri-lock-hint vecttauri-lock-hint-success' : 'vecttauri-lock-hint';
     // A chat id with no character id means a group chat. Character locks can never
     // match there — shouldCollectionActivate() only sees a characterId in a solo
     // chat — so name the reason instead of leaving a dead button unexplained.
@@ -3806,43 +3806,43 @@ function openCollectionLockDialog(collectionId) {
             : 'No character currently active';
 
     const dialogHtml = `
-        <div id="vectfox_lock_dialog" class="vectfox-modal" style="display: flex;">
-            <div class="vectfox-modal-content vectfox-lock-dialog">
-                <div class="vectfox-modal-header">
+        <div id="vecttauri_lock_dialog" class="vecttauri-modal" style="display: flex;">
+            <div class="vecttauri-modal-content vecttauri-lock-dialog">
+                <div class="vecttauri-modal-header">
                     <h3><i class="fa-solid fa-lock"></i> Manage Collection Locks</h3>
-                    <button class="vectfox-modal-close" data-action="close">
+                    <button class="vecttauri-modal-close" data-action="close">
                         <i class="fa-solid fa-times"></i>
                     </button>
                 </div>
-                <div class="vectfox-modal-body">
+                <div class="vecttauri-modal-body">
                     <!-- Chat Locks Section -->
-                    <div class="vectfox-lock-section">
-                        <h4><i class="fa-solid fa-comments"></i> Chat Locks <span class="vectfox-badge vectfox-badge-muted">${locks.length}</span></h4>
-                        <div class="vectfox-lock-list">
+                    <div class="vecttauri-lock-section">
+                        <h4><i class="fa-solid fa-comments"></i> Chat Locks <span class="vecttauri-badge vecttauri-badge-muted">${locks.length}</span></h4>
+                        <div class="vecttauri-lock-list">
                             ${locksHtml}
                         </div>
                         <p class="${chatHintClass}">${chatHintText}</p>
-                        <button id="vectfox_lock_add_current" class="vectfox-btn-sm vectfox-btn-primary" ${!currentChatId || locks.includes(currentChatId) ? 'disabled' : ''}>
+                        <button id="vecttauri_lock_add_current" class="vecttauri-btn-sm vecttauri-btn-primary" ${!currentChatId || locks.includes(currentChatId) ? 'disabled' : ''}>
                             <i class="fa-solid fa-plus"></i> Lock to Current Chat
                         </button>
                     </div>
 
-                    <hr class="vectfox-lock-divider">
+                    <hr class="vecttauri-lock-divider">
 
                     <!-- Character Locks Section -->
-                    <div class="vectfox-lock-section">
-                        <h4><i class="fa-solid fa-user"></i> Character Locks <span class="vectfox-badge vectfox-badge-muted">${characterLocks.length}</span></h4>
-                        <div class="vectfox-lock-list">
+                    <div class="vecttauri-lock-section">
+                        <h4><i class="fa-solid fa-user"></i> Character Locks <span class="vecttauri-badge vecttauri-badge-muted">${characterLocks.length}</span></h4>
+                        <div class="vecttauri-lock-list">
                             ${charLocksHtml}
                         </div>
                         <p class="${charHintClass}">${charHintText}</p>
-                        <button id="vectfox_lock_add_character" class="vectfox-btn-sm vectfox-btn-primary" ${!currentCharacterId || characterLocks.includes(currentCharacterId) ? 'disabled' : ''}>
+                        <button id="vecttauri_lock_add_character" class="vecttauri-btn-sm vecttauri-btn-primary" ${!currentCharacterId || characterLocks.includes(currentCharacterId) ? 'disabled' : ''}>
                             <i class="fa-solid fa-plus"></i> Lock to Current Character
                         </button>
                     </div>
                 </div>
-                <div class="vectfox-modal-footer">
-                    <button class="vectfox-btn" data-action="close">
+                <div class="vecttauri-modal-footer">
+                    <button class="vecttauri-btn" data-action="close">
                         <i class="fa-solid fa-check"></i> Done
                     </button>
                 </div>
@@ -3854,7 +3854,7 @@ function openCollectionLockDialog(collectionId) {
     $('body').append($dialog);
 
     // Handle add lock button (chat)
-    $('#vectfox_lock_add_current').on('click', function() {
+    $('#vecttauri_lock_add_current').on('click', function() {
         const chatId = getCurrentChatId();
         if (!chatId) {
             toastr.warning('Open a chat first');
@@ -3862,7 +3862,7 @@ function openCollectionLockDialog(collectionId) {
         }
 
         setCollectionLock(collectionId, chatId);
-        toastr.success('Collection locked to current chat', 'VectFox');
+        toastr.success('Collection locked to current chat', 'VectTauri');
 
         // Re-open dialog with updated state
         $dialog.remove();
@@ -3871,7 +3871,7 @@ function openCollectionLockDialog(collectionId) {
     });
 
     // Handle add lock button (character)
-    $('#vectfox_lock_add_character').on('click', function() {
+    $('#vecttauri_lock_add_character').on('click', function() {
         const context = getContext();
         const charId = context?.characterId;
         if (!charId) {
@@ -3880,7 +3880,7 @@ function openCollectionLockDialog(collectionId) {
         }
 
         setCollectionCharacterLock(collectionId, charId);
-        toastr.success('Collection locked to current character', 'VectFox');
+        toastr.success('Collection locked to current character', 'VectTauri');
 
         // Re-open dialog with updated state
         $dialog.remove();
@@ -3889,12 +3889,12 @@ function openCollectionLockDialog(collectionId) {
     });
 
     // Handle remove lock buttons (chat)
-    $dialog.find('.vectfox-lock-remove-btn').on('click', function(e) {
+    $dialog.find('.vecttauri-lock-remove-btn').on('click', function(e) {
         e.stopPropagation();
         const chatId = $(this).data('chat-id');
 
         removeCollectionLock(collectionId, chatId);
-        toastr.info('Removed lock from chat', 'VectFox');
+        toastr.info('Removed lock from chat', 'VectTauri');
 
         // Re-open dialog with updated state
         $dialog.remove();
@@ -3903,12 +3903,12 @@ function openCollectionLockDialog(collectionId) {
     });
 
     // Handle remove lock buttons (character)
-    $dialog.find('.vectfox-lock-remove-char-btn').on('click', function(e) {
+    $dialog.find('.vecttauri-lock-remove-char-btn').on('click', function(e) {
         e.stopPropagation();
         const charId = $(this).data('character-id');
 
         removeCollectionCharacterLock(collectionId, charId);
-        toastr.info('Removed lock from character', 'VectFox');
+        toastr.info('Removed lock from character', 'VectTauri');
 
         // Re-open dialog with updated state
         $dialog.remove();

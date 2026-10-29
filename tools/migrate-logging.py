@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-migrate-logging.py — byte-safe console.* -> log.* migrator for VectFox.
+migrate-logging.py — byte-safe console.* -> log.* migrator for VectTauri.
 
 WHY THIS EXISTS
   The logging standard (plans/logging-levels-and-classification.md + core/log.js)

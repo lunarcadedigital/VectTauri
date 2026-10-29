@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VectFox LOREBOOK RENAME DETECTOR
+ * VectTauri LOREBOOK RENAME DETECTOR
  * ============================================================================
  * Detects when a vectorized lorebook collection references a sourceName that
  * no longer matches any lorebook in ST (renamed or deleted). Shows a blocking
@@ -95,7 +95,7 @@ export async function showLorebookRenameModal(mismatches) {
         <p>The following vectorized lorebook(s) no longer match any lorebook in SillyTavern.
         The lorebook may have been <strong>renamed or deleted</strong> after vectorization:</p>
         <ul>${list}</ul>
-        <p>VectFox will inject stale vectorized content. To fix this, delete the stale
+        <p>VectTauri will inject stale vectorized content. To fix this, delete the stale
         collection and re-vectorize the current lorebook.</p>
         <hr style="margin: 1em 0;">
         <ul>
@@ -116,7 +116,7 @@ export async function showLorebookRenameModal(mismatches) {
 }
 
 /**
- * Open the VectFox Database Browser after waiting for the popup fade-out animation.
+ * Open the VectTauri Database Browser after waiting for the popup fade-out animation.
  * Must be called AFTER stopGeneration() so the browser opens into a clean state.
  */
 export async function openDatabaseBrowserForRename() {
@@ -138,15 +138,15 @@ export async function openDatabaseBrowserForRename() {
                 $extToggle.trigger('click');
             }
             setTimeout(() => {
-                const $dbBtn = $('#VectFox_database_browser');
+                const $dbBtn = $('#VectTauri_database_browser');
                 if ($dbBtn.length) {
                     $dbBtn[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
                     $dbBtn.focus();
                 } else {
                     try {
                         toastr.info(
-                            'Open the Extensions drawer and click the VectFox Database Browser button.',
-                            'VectFox',
+                            'Open the Extensions drawer and click the VectTauri Database Browser button.',
+                            'VectTauri',
                             { timeOut: 8000 },
                         );
                     } catch { /* toastr may not be available */ }

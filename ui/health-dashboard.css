@@ -3,7 +3,7 @@
  */
 
 /* Health Indicator */
-.vectfox-health-indicator {
+.vecttauri-health-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -17,44 +17,44 @@
     margin-left: 8px;
 }
 
-.vectfox-health-indicator:hover {
+.vecttauri-health-indicator:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.vectfox-health-dot {
+.vecttauri-health-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
     transition: background-color 0.3s;
 }
 
-.vectfox-health-ok .vectfox-health-dot {
+.vecttauri-health-ok .vecttauri-health-dot {
     background-color: #4caf50;
     box-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
 }
 
-.vectfox-health-warning .vectfox-health-dot {
+.vecttauri-health-warning .vecttauri-health-dot {
     background-color: #ff9800;
     box-shadow: 0 0 6px rgba(255, 152, 0, 0.5);
 }
 
-.vectfox-health-error .vectfox-health-dot {
+.vecttauri-health-error .vecttauri-health-dot {
     background-color: #f44336;
     box-shadow: 0 0 6px rgba(244, 67, 54, 0.5);
 }
 
 /* Health Dashboard Modal */
-.vectfox-health-modal {
+.vecttauri-health-modal {
     max-width: 500px;
 }
 
-.vectfox-health-dashboard {
+.vecttauri-health-dashboard {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.vectfox-health-summary {
+.vecttauri-health-summary {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -63,7 +63,7 @@
     border-radius: 8px;
 }
 
-.vectfox-health-status {
+.vecttauri-health-status {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -71,29 +71,29 @@
     font-weight: 600;
 }
 
-.vectfox-health-status.vectfox-health-ok {
+.vecttauri-health-status.vecttauri-health-ok {
     color: #4caf50;
 }
 
-.vectfox-health-status.vectfox-health-warning {
+.vecttauri-health-status.vecttauri-health-warning {
     color: #ff9800;
 }
 
-.vectfox-health-status.vectfox-health-error {
+.vecttauri-health-status.vecttauri-health-error {
     color: #f44336;
 }
 
-.vectfox-health-icon {
+.vecttauri-health-icon {
     font-size: 1.2em;
 }
 
-.vectfox-health-section {
+.vecttauri-health-section {
     padding: 12px;
     background: rgba(0, 0, 0, 0.1);
     border-radius: 8px;
 }
 
-.vectfox-health-section h4 {
+.vecttauri-health-section h4 {
     margin: 0 0 12px 0;
     font-size: 0.9em;
     opacity: 0.8;
@@ -101,13 +101,13 @@
     letter-spacing: 0.5px;
 }
 
-.vectfox-health-grid {
+.vecttauri-health-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 12px;
 }
 
-.vectfox-health-stat {
+.vecttauri-health-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -116,26 +116,26 @@
     border-radius: 6px;
 }
 
-.vectfox-stat-value {
+.vecttauri-stat-value {
     font-size: 1.4em;
     font-weight: 600;
 }
 
-.vectfox-stat-label {
+.vecttauri-stat-label {
     font-size: 0.75em;
     opacity: 0.7;
     text-transform: uppercase;
 }
 
-.vectfox-stat-error .vectfox-stat-value {
+.vecttauri-stat-error .vecttauri-stat-value {
     color: #f44336;
 }
 
-.vectfox-health-error-section {
+.vecttauri-health-error-section {
     border-left: 3px solid #f44336;
 }
 
-.vectfox-health-error-box {
+.vecttauri-health-error-box {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -144,31 +144,31 @@
     border-radius: 4px;
 }
 
-.vectfox-error-time {
+.vecttauri-error-time {
     font-size: 0.8em;
     opacity: 0.7;
 }
 
-.vectfox-error-message {
+.vecttauri-error-message {
     font-size: 0.9em;
     color: #f44336;
     word-break: break-word;
 }
 
-.vectfox-active-backends {
+.vecttauri-active-backends {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.vectfox-backend-badge {
+.vecttauri-backend-badge {
     padding: 4px 10px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     font-size: 0.85em;
 }
 
-.vectfox-modal-footer {
+.vecttauri-modal-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -176,6 +176,6 @@
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.vectfox-modal-footer small {
+.vecttauri-modal-footer small {
     opacity: 0.6;
 }

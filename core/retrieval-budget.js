@@ -72,7 +72,7 @@ function _resolveBoundedSetting(raw, fallback, min, max) {
  * (EventBase, chunk, lorebook, summarizer injection) may run before the turn
  * proceeds without that memory.
  *
- * @param {object} [settings] - VectFox settings
+ * @param {object} [settings] - VectTauri settings
  * @returns {number} milliseconds
  */
 export function resolveRetrievalTimeoutMs(settings) {
@@ -87,7 +87,7 @@ export function resolveRetrievalTimeoutMs(settings) {
 /**
  * Agent Mode: hard timeout for the planner LLM call.
  *
- * @param {object} [settings] - VectFox settings
+ * @param {object} [settings] - VectTauri settings
  * @returns {number} milliseconds
  */
 export function resolveAgenticPlannerTimeoutMs(settings) {
@@ -102,7 +102,7 @@ export function resolveAgenticPlannerTimeoutMs(settings) {
 /**
  * Agent Mode: hard timeout for each parallel fanout query.
  *
- * @param {object} [settings] - VectFox settings
+ * @param {object} [settings] - VectTauri settings
  * @returns {number} milliseconds
  */
 export function resolveAgenticQueryTimeoutMs(settings) {
@@ -125,7 +125,7 @@ export function resolveAgenticQueryTimeoutMs(settings) {
  * thinking planner; `should_disable_thinking` is only a request, and plenty of
  * models ignore it.
  *
- * @param {object} [settings] - VectFox settings
+ * @param {object} [settings] - VectTauri settings
  * @returns {number} tokens
  */
 export function resolveAgenticMaxTokens(settings) {
@@ -152,7 +152,7 @@ export function resolveAgenticMaxTokens(settings) {
  * turns agent mode OFF gets the plain base budget back, not a silently inflated
  * one.
  *
- * @param {object} [settings] - VectFox settings
+ * @param {object} [settings] - VectTauri settings
  * @returns {number} milliseconds (0 when agent mode is inactive)
  */
 export function agenticRetrievalExtraBudgetMs(settings) {
@@ -165,7 +165,7 @@ export function agenticRetrievalExtraBudgetMs(settings) {
  * The budget for the EventBase retrieval path specifically — the only path that
  * can route through Agent Mode.
  *
- * @param {object} [settings] - VectFox settings
+ * @param {object} [settings] - VectTauri settings
  * @returns {number} milliseconds
  */
 export function resolveEventBaseRetrievalTimeoutMs(settings) {

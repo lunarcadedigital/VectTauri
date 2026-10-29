@@ -67,53 +67,53 @@ export function openReformatReview({ chunks, warnings = [], sourceText = '', sou
     _renderRecords();
     _bindEvents();
 
-    $('#vectfox_rr_modal').fadeIn(200);
+    $('#vecttauri_rr_modal').fadeIn(200);
 }
 
 export function closeReformatReview() {
-    $('#vectfox_rr_modal').fadeOut(200, function () { $(this).remove(); });
+    $('#vecttauri_rr_modal').fadeOut(200, function () { $(this).remove(); });
 }
 
 function _createModal({ warnings, sourceText, sourceName, contentType }) {
-    $('#vectfox_rr_modal').remove();
+    $('#vecttauri_rr_modal').remove();
 
     const warningsHtml = warnings.length
-        ? `<div class="vectfox-rr-run-warnings">
+        ? `<div class="vecttauri-rr-run-warnings">
              <i class="fa-solid fa-triangle-exclamation"></i>
              <div>${warnings.map(w => `<div>${_escapeHtml(w)}</div>`).join('')}</div>
            </div>`
         : '';
 
     const html = `
-        <div id="vectfox_rr_modal" class="vectfox-modal">
-            <div class="vectfox-modal-overlay"></div>
-            <div class="vectfox-modal-content vectfox-rr-modal">
-                <div class="vectfox-modal-header">
+        <div id="vecttauri_rr_modal" class="vecttauri-modal">
+            <div class="vecttauri-modal-overlay"></div>
+            <div class="vecttauri-modal-content vecttauri-rr-modal">
+                <div class="vecttauri-modal-header">
                     <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Review Auto-Reformat — ${_escapeHtml(sourceName)}</h3>
-                    <button class="vectfox-modal-close" id="vectfox_rr_close"><i class="fa-solid fa-times"></i></button>
+                    <button class="vecttauri-modal-close" id="vecttauri_rr_close"><i class="fa-solid fa-times"></i></button>
                 </div>
-                <div class="vectfox-rr-body">
+                <div class="vecttauri-rr-body">
                     ${warningsHtml}
-                    <div class="vectfox-rr-summary">
-                        <span><strong id="vectfox_rr_count">0</strong> entries extracted from <strong>${_escapeHtml(sourceName)}</strong> (${_escapeHtml(contentType)})</span>
-                        <span class="vectfox-rr-hint">Review each entry below. Uncheck to drop one, edit any field to correct it, then Accept &amp; Continue.</span>
+                    <div class="vecttauri-rr-summary">
+                        <span><strong id="vecttauri_rr_count">0</strong> entries extracted from <strong>${_escapeHtml(sourceName)}</strong> (${_escapeHtml(contentType)})</span>
+                        <span class="vecttauri-rr-hint">Review each entry below. Uncheck to drop one, edit any field to correct it, then Accept &amp; Continue.</span>
                     </div>
-                    <div class="vectfox-rr-columns">
-                        <div class="vectfox-rr-source-panel">
-                            <div class="vectfox-rr-panel-title">Original source</div>
-                            <pre class="vectfox-rr-source-text">${_escapeHtml(sourceText)}</pre>
+                    <div class="vecttauri-rr-columns">
+                        <div class="vecttauri-rr-source-panel">
+                            <div class="vecttauri-rr-panel-title">Original source</div>
+                            <pre class="vecttauri-rr-source-text">${_escapeHtml(sourceText)}</pre>
                         </div>
-                        <div class="vectfox-rr-records-panel" id="vectfox_rr_records"></div>
+                        <div class="vecttauri-rr-records-panel" id="vecttauri_rr_records"></div>
                     </div>
                 </div>
-                <div class="vectfox-rr-footer">
-                    <button class="vectfox-btn vectfox-btn-secondary" id="vectfox_rr_discard">
+                <div class="vecttauri-rr-footer">
+                    <button class="vecttauri-btn vecttauri-btn-secondary" id="vecttauri_rr_discard">
                         <i class="fa-solid fa-rotate-left"></i> Discard &amp; Chunk Manually
                     </button>
-                    <button class="vectfox-btn vectfox-btn-secondary" id="vectfox_rr_rerun">
+                    <button class="vecttauri-btn vecttauri-btn-secondary" id="vecttauri_rr_rerun">
                         <i class="fa-solid fa-arrows-rotate"></i> Re-run Auto-Reformat
                     </button>
-                    <button class="vectfox-btn vectfox-btn-primary" id="vectfox_rr_accept">
+                    <button class="vecttauri-btn vecttauri-btn-primary" id="vecttauri_rr_accept">
                         <i class="fa-solid fa-check"></i> Accept &amp; Continue
                     </button>
                 </div>
@@ -122,13 +122,13 @@ function _createModal({ warnings, sourceText, sourceName, contentType }) {
     `;
     $('body').append(html);
 
-    $('#vectfox_rr_modal').on('mousedown touchstart', function (e) { e.stopPropagation(); });
+    $('#vecttauri_rr_modal').on('mousedown touchstart', function (e) { e.stopPropagation(); });
 }
 
 function _recordCardHtml(record) {
     const ungrounded = !record._nameGrounded || (record._ungroundedAliases?.length > 0);
     const warningHtml = ungrounded
-        ? `<div class="vectfox-rr-hallucination-warning">
+        ? `<div class="vecttauri-rr-hallucination-warning">
              <i class="fa-solid fa-triangle-exclamation"></i>
              ${!record._nameGrounded ? `"${_escapeHtml(record.name)}" wasn't found in the source text — verify this wasn't invented.` : ''}
              ${record._ungroundedAliases?.length ? `Alias(es) not found in source: ${_escapeHtml(record._ungroundedAliases.join(', '))}.` : ''}
@@ -136,54 +136,54 @@ function _recordCardHtml(record) {
         : '';
 
     return `
-        <div class="vectfox-rr-card ${ungrounded ? 'vectfox-rr-card-flagged' : ''}" data-id="${record._id}">
-            <div class="vectfox-rr-card-header">
+        <div class="vecttauri-rr-card ${ungrounded ? 'vecttauri-rr-card-flagged' : ''}" data-id="${record._id}">
+            <div class="vecttauri-rr-card-header">
                 <label class="checkbox_label">
-                    <input type="checkbox" class="vectfox-rr-accept-toggle" ${record._accepted ? 'checked' : ''} />
+                    <input type="checkbox" class="vecttauri-rr-accept-toggle" ${record._accepted ? 'checked' : ''} />
                     <span>Keep this entry</span>
                 </label>
-                <select class="vectfox-rr-field vectfox-rr-entry-type" data-field="entry_type">
+                <select class="vecttauri-rr-field vecttauri-rr-entry-type" data-field="entry_type">
                     ${['character', 'organization', 'concept', 'location', 'item', 'other'].map(t =>
                         `<option value="${t}" ${t === record.entry_type ? 'selected' : ''}>${t}</option>`).join('')}
                 </select>
             </div>
             ${warningHtml}
-            <div class="vectfox-rr-field-row">
+            <div class="vecttauri-rr-field-row">
                 <label>Name</label>
-                <input type="text" class="vectfox-rr-field" data-field="name" value="${_escapeHtml(record.name)}" />
+                <input type="text" class="vecttauri-rr-field" data-field="name" value="${_escapeHtml(record.name)}" />
             </div>
-            <div class="vectfox-rr-field-row">
+            <div class="vecttauri-rr-field-row">
                 <label>Aliases</label>
-                <input type="text" class="vectfox-rr-field" data-field="aliases" value="${_escapeHtml(_csv(record.aliases))}" placeholder="comma-separated" />
+                <input type="text" class="vecttauri-rr-field" data-field="aliases" value="${_escapeHtml(_csv(record.aliases))}" placeholder="comma-separated" />
             </div>
-            <div class="vectfox-rr-field-row">
+            <div class="vecttauri-rr-field-row">
                 <label>Affiliation</label>
-                <input type="text" class="vectfox-rr-field" data-field="affiliation" value="${_escapeHtml(record.affiliation)}" />
+                <input type="text" class="vecttauri-rr-field" data-field="affiliation" value="${_escapeHtml(record.affiliation)}" />
             </div>
-            <div class="vectfox-rr-field-row">
+            <div class="vecttauri-rr-field-row">
                 <label>Traits</label>
-                <input type="text" class="vectfox-rr-field" data-field="traits" value="${_escapeHtml(_csv(record.traits))}" placeholder="comma-separated" />
+                <input type="text" class="vecttauri-rr-field" data-field="traits" value="${_escapeHtml(_csv(record.traits))}" placeholder="comma-separated" />
             </div>
-            <div class="vectfox-rr-field-row">
+            <div class="vecttauri-rr-field-row">
                 <label>Relationships</label>
-                <input type="text" class="vectfox-rr-field" data-field="relationships" value="${_escapeHtml(_csv(record.relationships))}" placeholder="comma-separated" />
+                <input type="text" class="vecttauri-rr-field" data-field="relationships" value="${_escapeHtml(_csv(record.relationships))}" placeholder="comma-separated" />
             </div>
-            <div class="vectfox-rr-field-row">
+            <div class="vecttauri-rr-field-row">
                 <label>Keywords</label>
-                <input type="text" class="vectfox-rr-field" data-field="keywords" value="${_escapeHtml(_csv(record.keywords))}" placeholder="comma-separated" />
+                <input type="text" class="vecttauri-rr-field" data-field="keywords" value="${_escapeHtml(_csv(record.keywords))}" placeholder="comma-separated" />
             </div>
-            <div class="vectfox-rr-field-row vectfox-rr-field-row-body">
+            <div class="vecttauri-rr-field-row vecttauri-rr-field-row-body">
                 <label>Body</label>
-                <textarea class="vectfox-rr-field" data-field="body" rows="4">${_escapeHtml(record.body)}</textarea>
+                <textarea class="vecttauri-rr-field" data-field="body" rows="4">${_escapeHtml(record.body)}</textarea>
             </div>
         </div>
     `;
 }
 
 function _renderRecords() {
-    const container = $('#vectfox_rr_records');
+    const container = $('#vecttauri_rr_records');
     container.html(_records.map(_recordCardHtml).join(''));
-    $('#vectfox_rr_count').text(_records.length);
+    $('#vecttauri_rr_count').text(_records.length);
     _bindDirtyTracking();
 }
 
@@ -195,15 +195,15 @@ function _renderRecords() {
  * this flag; it's a review aid, not a save gate.
  */
 function _bindDirtyTracking() {
-    $('.vectfox-rr-card').each(function () {
+    $('.vecttauri-rr-card').each(function () {
         const card = $(this);
         const originals = new Map();
-        card.find('.vectfox-rr-field').each(function () {
+        card.find('.vecttauri-rr-field').each(function () {
             originals.set(this, $(this).val());
         });
-        card.find('.vectfox-rr-field').on('input change', function () {
+        card.find('.vecttauri-rr-field').on('input change', function () {
             const isDirty = $(this).val() !== originals.get(this);
-            card.toggleClass('vectfox-rr-card-dirty', isDirty || card.find('.vectfox-rr-field').toArray().some(el => $(el).val() !== originals.get(el)));
+            card.toggleClass('vecttauri-rr-card-dirty', isDirty || card.find('.vecttauri-rr-field').toArray().some(el => $(el).val() !== originals.get(el)));
         });
     });
 }
@@ -224,28 +224,28 @@ function _collectRecordFromCard(cardEl) {
         relationships: _parseCsv(get('relationships')),
         keywords: _parseCsv(get('keywords')),
         body: String(get('body') || '').trim(),
-        _accepted: card.find('.vectfox-rr-accept-toggle').prop('checked'),
+        _accepted: card.find('.vecttauri-rr-accept-toggle').prop('checked'),
     };
 }
 
 function _bindEvents() {
-    $('#vectfox_rr_close, #vectfox_rr_discard').off('click').on('click', () => {
+    $('#vecttauri_rr_close, #vecttauri_rr_discard').off('click').on('click', () => {
         closeReformatReview();
         _onDiscard?.();
     });
 
-    $('#vectfox_rr_rerun').off('click').on('click', () => {
+    $('#vecttauri_rr_rerun').off('click').on('click', () => {
         closeReformatReview();
         _onRerun?.();
     });
 
-    $('#vectfox_rr_accept').off('click').on('click', () => {
-        const accepted = $('.vectfox-rr-card').toArray()
+    $('#vecttauri_rr_accept').off('click').on('click', () => {
+        const accepted = $('.vecttauri-rr-card').toArray()
             .map(_collectRecordFromCard)
             .filter(r => r._accepted && r.name && r.body);
 
         if (accepted.length === 0) {
-            toastr.warning('No entries were kept — nothing to accept. Uncheck none, or use Discard.', 'VectFox');
+            toastr.warning('No entries were kept — nothing to accept. Uncheck none, or use Discard.', 'VectTauri');
             return;
         }
 

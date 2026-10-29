@@ -1,10 +1,10 @@
 /* ============================================================================
- * VECTFOX MODAL STYLES
+ * VECTTAURI MODAL STYLES
  * ============================================================================
  * Modal system, collapsibles, model switcher, collection settings
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================ */
 
 /* ============================================================================
@@ -18,7 +18,7 @@
  * modals are appended to <body> (outside the drawer), clicks inside them
  * would normally close the ST drawer.
  *
- * The fix: All VectFox modals must call e.stopPropagation() on 'mousedown'
+ * The fix: All VectTauri modals must call e.stopPropagation() on 'mousedown'
  * and 'touchstart' events to prevent ST's drawer-closing logic from firing.
  *
  * Example (in JS when binding modal events):
@@ -31,7 +31,7 @@
  *
  * ============================================================================ */
 
-.vectfox-modal {
+.vecttauri-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -43,7 +43,7 @@
     justify-content: center;
 }
 
-.vectfox-modal-overlay {
+.vecttauri-modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -53,11 +53,11 @@
     backdrop-filter: blur(4px);
 }
 
-.vectfox-modal-content {
+.vecttauri-modal-content {
     position: relative;
     z-index: 10000;
     background: var(--SmartThemeBlurTintColor);
-    border: 2px solid color-mix(in srgb, var(--vectfox-primary) 30%, var(--SmartThemeBorderColor));
+    border: 2px solid color-mix(in srgb, var(--vecttauri-primary) 30%, var(--SmartThemeBorderColor));
     border-radius: 16px;
     max-width: 800px;
     width: 90%;
@@ -69,7 +69,7 @@
     box-sizing: border-box;
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.5),
-        0 8px 24px color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+        0 8px 24px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
     animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -84,12 +84,12 @@
     }
 }
 
-.vectfox-modal-header {
+.vecttauri-modal-header {
     padding: 24px 28px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 15%, transparent) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 8%, transparent) 100%);
-    border-bottom: 2px solid color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+        color-mix(in srgb, var(--vecttauri-primary) 15%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 8%, transparent) 100%);
+    border-bottom: 2px solid color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -97,7 +97,7 @@
     flex-shrink: 0;
 }
 
-.vectfox-modal-header h3 {
+.vecttauri-modal-header h3 {
     margin: 0;
     font-size: 1.4em;
     font-weight: 700;
@@ -107,15 +107,15 @@
     gap: 12px;
 }
 
-.vectfox-modal-header h3 i {
-    color: var(--vectfox-primary-bright);
+.vecttauri-modal-header h3 i {
+    color: var(--vecttauri-primary-bright);
     font-size: 1.1em;
 }
 
 /* Optional group of header buttons sitting between the title and the close
    button. The close button stays a direct child of the header so it can never
    be pushed off-screen by these — see the wrap rules in styles/mobile.css. */
-.vectfox-modal-header-actions {
+.vecttauri-modal-header-actions {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -124,7 +124,7 @@
     min-width: 0;
 }
 
-.vectfox-modal-close {
+.vecttauri-modal-close {
     width: 36px;
     height: 36px;
     border-radius: 8px;
@@ -139,15 +139,15 @@
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.vectfox-modal-close:hover {
-    background: color-mix(in srgb, var(--vectfox-danger) 20%, var(--SmartThemeBlurTintColor));
-    border-color: var(--vectfox-danger);
-    color: var(--vectfox-danger);
+.vecttauri-modal-close:hover {
+    background: color-mix(in srgb, var(--vecttauri-danger) 20%, var(--SmartThemeBlurTintColor));
+    border-color: var(--vecttauri-danger);
+    color: var(--vecttauri-danger);
     transform: scale(1.1);
 }
 
 /* Warning Banner (for plugin not detected, etc.) */
-.vectfox-warning-banner {
+.vecttauri-warning-banner {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -162,50 +162,50 @@
     flex-shrink: 0;
 }
 
-.vectfox-warning-banner i {
+.vecttauri-warning-banner i {
     color: #f59e0b;
     font-size: 1.2em;
     flex-shrink: 0;
     margin-top: 2px;
 }
 
-.vectfox-warning-text {
+.vecttauri-warning-text {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.vectfox-warning-text strong {
+.vecttauri-warning-text strong {
     font-weight: 600;
     color: #f59e0b;
 }
 
-.vectfox-warning-text span {
+.vecttauri-warning-text span {
     opacity: 0.9;
     line-height: 1.4;
 }
 
-.vectfox-warning-text a {
-    color: var(--vectfox-primary-bright);
+.vecttauri-warning-text a {
+    color: var(--vecttauri-primary-bright);
     text-decoration: underline;
 }
 
-.vectfox-warning-text a:hover {
-    color: var(--vectfox-primary);
+.vecttauri-warning-text a:hover {
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-modal-body {
+.vecttauri-modal-body {
     padding: 24px 28px;
     overflow-y: auto;
     flex: 1;
     min-height: 0; /* Critical for flex overflow */
 }
 
-.vectfox-modal-footer {
+.vecttauri-modal-footer {
     display: flex;
     gap: 12px;
     padding: 20px 28px;
-    border-top: 1px solid color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
     background: linear-gradient(180deg,
         var(--SmartThemeBlurTintColor) 0%,
         color-mix(in srgb, var(--SmartThemeBodyColor) 3%, var(--SmartThemeBlurTintColor)) 100%);
@@ -214,7 +214,7 @@
     border-radius: 0 0 14px 14px;
 }
 
-.vectfox-modal-footer .vectfox-btn {
+.vecttauri-modal-footer .vecttauri-btn {
     padding: 12px 24px;
     font-size: 0.95em;
     font-weight: 600;
@@ -226,34 +226,34 @@
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-modal-footer .vectfox-btn:hover {
+.vecttauri-modal-footer .vecttauri-btn:hover {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 10%, var(--SmartThemeBlurTintColor));
     border-color: var(--SmartThemeBorderColor);
 }
 
-.vectfox-modal-footer .vectfox-btn-primary {
-    background: linear-gradient(135deg, var(--vectfox-primary) 0%, #4f46e5 100%);
-    border-color: var(--vectfox-primary);
+.vecttauri-modal-footer .vecttauri-btn-primary {
+    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #4f46e5 100%);
+    border-color: var(--vecttauri-primary);
     color: white;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--vectfox-primary) 30%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
 }
 
-.vectfox-modal-footer .vectfox-btn-primary:hover {
-    background: linear-gradient(135deg, var(--vectfox-primary-bright) 0%, var(--vectfox-primary) 100%);
-    border-color: var(--vectfox-primary-bright);
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
+.vecttauri-modal-footer .vecttauri-btn-primary:hover {
+    background: linear-gradient(135deg, var(--vecttauri-primary-bright) 0%, var(--vecttauri-primary) 100%);
+    border-color: var(--vecttauri-primary-bright);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
 }
 
 /* ============================================================================
  * COLLAPSIBLE SECTIONS WITH ANIMATION
  * ============================================================================ */
 
-.vectfox-collapsible-header {
+.vecttauri-collapsible-header {
     padding: 16px 20px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 12%, transparent) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 6%, transparent) 100%);
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+        color-mix(in srgb, var(--vecttauri-primary) 12%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 6%, transparent) 100%);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
     border-radius: 12px;
     cursor: pointer;
     display: flex;
@@ -261,37 +261,37 @@
     justify-content: space-between;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-top: 24px;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--vectfox-primary) 10%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--vecttauri-primary) 10%, transparent);
     position: relative;
     overflow: hidden;
 }
 
-.vectfox-collapsible-header::before {
+.vecttauri-collapsible-header::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 4px;
     height: 100%;
-    background: var(--vectfox-primary);
+    background: var(--vecttauri-primary);
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
 
-.vectfox-collapsible-header:hover {
+.vecttauri-collapsible-header:hover {
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 18%, transparent) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 10%, transparent) 100%);
-    border-color: var(--vectfox-primary);
+        color-mix(in srgb, var(--vecttauri-primary) 18%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 10%, transparent) 100%);
+    border-color: var(--vecttauri-primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
 }
 
-.vectfox-collapsible-header:hover::before {
+.vecttauri-collapsible-header:hover::before {
     transform: scaleY(1);
 }
 
-.vectfox-collapsible-title {
+.vecttauri-collapsible-title {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -300,44 +300,44 @@
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-collapsible-title i {
-    color: var(--vectfox-primary-bright);
+.vecttauri-collapsible-title i {
+    color: var(--vecttauri-primary-bright);
     font-size: 1.2em;
 }
 
-.vectfox-collapsible-icon {
+.vecttauri-collapsible-icon {
     color: var(--SmartThemeBodyColor);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 1.2em;
 }
 
-.vectfox-collapsible-icon.rotated {
+.vecttauri-collapsible-icon.rotated {
     transform: rotate(180deg);
 }
 
-.vectfox-collapsible-content {
+.vecttauri-collapsible-content {
     display: none;
     padding: 20px;
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
     border-top: none;
     border-radius: 0 0 12px 12px;
     margin-top: -12px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary) 4%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 4%, var(--SmartThemeBlurTintColor)) 0%,
         var(--SmartThemeBlurTintColor) 100%);
     box-shadow: inset 0 2px 4px color-mix(in srgb, black 8%, transparent);
 }
 
-.vectfox-description {
+.vecttauri-description {
     margin: 12px 0 0 0;
     padding: 12px 16px;
-    background: color-mix(in srgb, var(--vectfox-primary) 8%, transparent);
-    border-left: 4px solid var(--vectfox-primary);
+    background: color-mix(in srgb, var(--vecttauri-primary) 8%, transparent);
+    border-left: 4px solid var(--vecttauri-primary);
     border-radius: 6px;
     font-size: 0.92em;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 85%, transparent);
     line-height: 1.6;
-    box-shadow: 0 1px 4px color-mix(in srgb, var(--vectfox-primary) 10%, transparent);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--vecttauri-primary) 10%, transparent);
 }
 
 /* ============================================================================
@@ -345,43 +345,43 @@
  * ============================================================================ */
 
 @media (max-width: 480px) {
-    .vectfox-card-header {
+    .vecttauri-card-header {
         padding: 16px 18px;
     }
 
-    .vectfox-card-title {
+    .vecttauri-card-title {
         font-size: 1.1em;
     }
 
-    .vectfox-card-body {
+    .vecttauri-card-body {
         padding: 18px;
     }
 
-    .vectfox-actions-grid {
+    .vecttauri-actions-grid {
         grid-template-columns: 1fr;
     }
 
-    .vectfox-action-btn {
+    .vecttauri-action-btn {
         padding: 14px 20px;
         font-size: 0.95em;
     }
 
     /* Modal responsiveness */
-    .vectfox-modal-content {
+    .vecttauri-modal-content {
         width: 95%;
         max-height: 90vh;
         border-radius: 12px;
     }
 
-    .vectfox-modal-header {
+    .vecttauri-modal-header {
         padding: 18px 20px;
     }
 
-    .vectfox-modal-header h3 {
+    .vecttauri-modal-header h3 {
         font-size: 1.2em;
     }
 
-    .vectfox-modal-body {
+    .vecttauri-modal-body {
         padding: 18px 20px;
     }
 
@@ -412,19 +412,19 @@
         font-size: 0.9em;
     }
 
-    .vectfox-diagnostics-summary {
+    .vecttauri-diagnostics-summary {
         padding: 14px 16px;
         font-size: 0.95em;
     }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
-    .vectfox-actions-grid {
+    .vecttauri-actions-grid {
         grid-template-columns: 1fr;
     }
 
     /* Tablet modal adjustments */
-    .vectfox-modal-content {
+    .vecttauri-modal-content {
         width: 92%;
     }
 
@@ -443,28 +443,28 @@
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-    .vectfox-actions-grid {
+    .vecttauri-actions-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (min-width: 1025px) {
-    .vectfox-actions-grid {
+    .vecttauri-actions-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
-    .vectfox-action-btn {
+    .vecttauri-action-btn {
         min-height: 52px;
     }
 
-    .vectfox-collapsible-header {
+    .vecttauri-collapsible-header {
         min-height: 52px;
     }
 
-    #VectFox_settings .checkbox_label {
+    #VectTauri_settings .checkbox_label {
         min-height: 48px;
     }
 }
@@ -473,12 +473,12 @@
  * MODEL SWITCHER MODAL
  * ============================================================================ */
 
-.vectfox-model-switcher-content {
+.vecttauri-model-switcher-content {
     max-width: 420px;
     width: 90%;
 }
 
-.vectfox-model-switcher-desc {
+.vecttauri-model-switcher-desc {
     color: var(--SmartThemeBodyColor);
     opacity: 0.7;
     font-size: 0.85em;
@@ -486,13 +486,13 @@
     line-height: 1.5;
 }
 
-.vectfox-model-list {
+.vecttauri-model-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.vectfox-model-item {
+.vecttauri-model-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -503,27 +503,27 @@
     transition: all 0.15s ease;
 }
 
-.vectfox-model-item:hover {
+.vecttauri-model-item:hover {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 10%, transparent);
     border-color: color-mix(in srgb, var(--SmartThemeBodyColor) 25%, transparent);
 }
 
-.vectfox-model-active {
+.vecttauri-model-active {
     background: color-mix(in srgb, #a78bfa 10%, transparent);
     border-color: color-mix(in srgb, #a78bfa 40%, transparent);
 }
 
-.vectfox-model-active:hover {
+.vecttauri-model-active:hover {
     background: color-mix(in srgb, #a78bfa 15%, transparent);
 }
 
-.vectfox-model-item-info {
+.vecttauri-model-item-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.vectfox-model-name {
+.vecttauri-model-name {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.9em;
     font-weight: 500;
@@ -533,24 +533,24 @@
     gap: 8px;
 }
 
-.vectfox-model-name i {
+.vecttauri-model-name i {
     font-size: 0.85em;
     opacity: 0.7;
 }
 
-.vectfox-model-active .vectfox-model-name i {
+.vecttauri-model-active .vecttauri-model-name i {
     color: #a78bfa;
     opacity: 1;
 }
 
-.vectfox-model-chunks {
+.vecttauri-model-chunks {
     font-size: 0.75em;
     color: var(--SmartThemeBodyColor);
     opacity: 0.6;
     padding-left: 22px;
 }
 
-.vectfox-model-badge-current {
+.vecttauri-model-badge-current {
     font-size: 0.7em;
     font-weight: 600;
     text-transform: uppercase;
@@ -561,7 +561,7 @@
     color: #a78bfa;
 }
 
-.vectfox-model-select-btn {
+.vecttauri-model-select-btn {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 10%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 20%, transparent);
     color: var(--SmartThemeBodyColor);
@@ -572,33 +572,33 @@
     transition: all 0.15s ease;
 }
 
-.vectfox-model-select-btn:hover {
+.vecttauri-model-select-btn:hover {
     background: color-mix(in srgb, #a78bfa 20%, transparent);
     border-color: #a78bfa;
     color: #a78bfa;
 }
 
 /* Activation badges - ORANGE → YELLOW → BLUE */
-.vectfox-badge-always {
+.vecttauri-badge-always {
     color: #fde047;  /* Yellow */
     border-color: #fde047;
     background: color-mix(in srgb, #fde047 8%, transparent);
 }
 
-.vectfox-badge-triggers {
+.vecttauri-badge-triggers {
     color: #fb923c;  /* Orange */
     border-color: #fb923c;
     background: color-mix(in srgb, #fb923c 8%, transparent);
 }
 
-.vectfox-badge-conditions {
+.vecttauri-badge-conditions {
     color: #38bdf8;  /* Sky Blue */
     border-color: #38bdf8;
     background: color-mix(in srgb, #38bdf8 8%, transparent);
 }
 
 /* Collection metadata row */
-.vectfox-collection-meta {
+.vecttauri-collection-meta {
     display: flex;
     gap: 20px;
     margin-bottom: 14px;
@@ -607,23 +607,23 @@
     padding-left: 20px;
 }
 
-.vectfox-collection-meta span {
+.vecttauri-collection-meta span {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.vectfox-collection-meta span::before {
+.vecttauri-collection-meta span::before {
     content: '•';
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 30%, transparent);
 }
 
-.vectfox-collection-meta span:first-child::before {
+.vecttauri-collection-meta span:first-child::before {
     display: none;
 }
 
 /* Action buttons row */
-.vectfox-collection-actions {
+.vecttauri-collection-actions {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
@@ -633,7 +633,7 @@
 }
 
 /* Small Buttons for Collection Actions */
-.vectfox-btn-sm {
+.vecttauri-btn-sm {
     padding: 10px 18px;
     border-radius: 10px;
     border: 2px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
@@ -649,65 +649,65 @@
     gap: 6px;
 }
 
-.vectfox-btn-sm:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
-    border-color: color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
-    color: var(--vectfox-primary-bright);
+.vecttauri-btn-sm:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
+    color: var(--vecttauri-primary-bright);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
 }
 
-.vectfox-btn-sm:disabled {
+.vecttauri-btn-sm:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-.vectfox-btn-sm.vectfox-btn-primary {
-    background: linear-gradient(135deg, var(--vectfox-primary) 0%, #4f46e5 100%);
-    border-color: var(--vectfox-primary);
+.vecttauri-btn-sm.vecttauri-btn-primary {
+    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #4f46e5 100%);
+    border-color: var(--vecttauri-primary);
     color: white;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--vectfox-primary) 30%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
 }
 
-.vectfox-btn-sm.vectfox-btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--vectfox-primary-bright) 0%, var(--vectfox-primary) 100%);
-    border-color: var(--vectfox-primary-bright);
-    box-shadow: 0 6px 20px color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
+.vecttauri-btn-sm.vecttauri-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--vecttauri-primary-bright) 0%, var(--vecttauri-primary) 100%);
+    border-color: var(--vecttauri-primary-bright);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
 }
 
-.vectfox-btn-sm.vectfox-btn-danger {
-    background: linear-gradient(135deg, var(--vectfox-danger) 0%, #dc2626 100%);
-    border-color: var(--vectfox-danger);
+.vecttauri-btn-sm.vecttauri-btn-danger {
+    background: linear-gradient(135deg, var(--vecttauri-danger) 0%, #dc2626 100%);
+    border-color: var(--vecttauri-danger);
     color: white;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--vectfox-danger) 30%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--vecttauri-danger) 30%, transparent);
 }
 
-.vectfox-btn-sm.vectfox-btn-danger:hover:not(:disabled) {
-    background: linear-gradient(135deg, #f87171 0%, var(--vectfox-danger) 100%);
+.vecttauri-btn-sm.vecttauri-btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #f87171 0%, var(--vecttauri-danger) 100%);
     border-color: #f87171;
-    box-shadow: 0 6px 20px color-mix(in srgb, var(--vectfox-danger) 40%, transparent);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--vecttauri-danger) 40%, transparent);
 }
 
 /* Activation button with configured triggers/conditions */
-.vectfox-btn-sm.vectfox-has-activation {
-    background: color-mix(in srgb, var(--vectfox-primary) 12%, transparent);
-    border-color: var(--vectfox-primary);
-    color: var(--vectfox-primary-bright);
+.vecttauri-btn-sm.vecttauri-has-activation {
+    background: color-mix(in srgb, var(--vecttauri-primary) 12%, transparent);
+    border-color: var(--vecttauri-primary);
+    color: var(--vecttauri-primary-bright);
 }
 
-.vectfox-btn-sm.vectfox-has-activation:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
-    border-color: var(--vectfox-primary-bright);
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--vectfox-primary) 25%, transparent);
+.vecttauri-btn-sm.vecttauri-has-activation:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
+    border-color: var(--vecttauri-primary-bright);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--vecttauri-primary) 25%, transparent);
 }
 
 /* Stats Footer */
-.vectfox-browser-stats {
+.vecttauri-browser-stats {
     padding: 12px 24px;
     background: linear-gradient(180deg,
-        color-mix(in srgb, var(--vectfox-primary) 5%, var(--SmartThemeBlurTintColor)) 0%,
-        color-mix(in srgb, var(--vectfox-primary) 10%, var(--SmartThemeBlurTintColor)) 100%);
-    border-top: 1px solid color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
+        color-mix(in srgb, var(--vecttauri-primary) 5%, var(--SmartThemeBlurTintColor)) 0%,
+        color-mix(in srgb, var(--vecttauri-primary) 10%, var(--SmartThemeBlurTintColor)) 100%);
+    border-top: 1px solid color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
     text-align: center;
     font-size: 0.9em;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 65%, transparent);
@@ -718,7 +718,7 @@
     align-items: center;
 }
 
-.vectfox-reset-btn {
+.vecttauri-reset-btn {
     padding: 6px 12px;
     border-radius: 6px;
     background: color-mix(in srgb, var(--SmartThemeBlurTintColor) 80%, transparent);
@@ -729,18 +729,18 @@
     transition: all 0.2s ease;
 }
 
-.vectfox-reset-btn:hover {
-    background: color-mix(in srgb, var(--vectfox-primary) 20%, var(--SmartThemeBlurTintColor));
-    border-color: var(--vectfox-primary);
-    color: var(--vectfox-primary-bright);
+.vecttauri-reset-btn:hover {
+    background: color-mix(in srgb, var(--vecttauri-primary) 20%, var(--SmartThemeBlurTintColor));
+    border-color: var(--vecttauri-primary);
+    color: var(--vecttauri-primary-bright);
 }
 
-.vectfox-reset-btn i {
+.vecttauri-reset-btn i {
     margin-right: 4px;
 }
 
 /* Icon Button */
-.vectfox-btn-icon {
+.vecttauri-btn-icon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
@@ -755,68 +755,68 @@
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.vectfox-btn-icon:hover {
-    background: color-mix(in srgb, var(--vectfox-danger) 20%, var(--SmartThemeBlurTintColor));
-    border-color: var(--vectfox-danger);
-    color: var(--vectfox-danger);
+.vecttauri-btn-icon:hover {
+    background: color-mix(in srgb, var(--vecttauri-danger) 20%, var(--SmartThemeBlurTintColor));
+    border-color: var(--vecttauri-danger);
+    color: var(--vecttauri-danger);
     transform: scale(1.1);
 }
 
 /* Responsive Database Browser */
 @media (max-width: 768px) {
-    .vectfox-database-browser-content {
+    .vecttauri-database-browser-content {
         width: 98%;
         max-height: 95vh;
     }
 
-    .vectfox-browser-tabs {
+    .vecttauri-browser-tabs {
         padding: 16px 16px 0 16px;
     }
 
-    .vectfox-tab-btn {
+    .vecttauri-tab-btn {
         padding: 12px 16px;
         font-size: 0.88em;
     }
 
-    .vectfox-scope-filters {
+    .vecttauri-scope-filters {
         flex-wrap: wrap;
         padding: 16px 16px 0 16px;
         gap: 8px;
     }
 
-    .vectfox-scope-filter {
+    .vecttauri-scope-filter {
         flex: 1 1 45%;
         padding: 10px 14px;
     }
 
-    .vectfox-type-filters {
+    .vecttauri-type-filters {
         padding: 12px 16px;
         gap: 10px;
     }
 
-    .vectfox-search-box {
+    .vecttauri-search-box {
         padding: 0 16px 16px 16px;
     }
 
-    .vectfox-collections-list {
+    .vecttauri-collections-list {
         padding: 0 16px 16px 16px;
     }
 
-    .vectfox-collection-header {
+    .vecttauri-collection-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
 
-    .vectfox-collection-badges {
+    .vecttauri-collection-badges {
         order: -1;
     }
 
-    .vectfox-collection-actions {
+    .vecttauri-collection-actions {
         width: 100%;
     }
 
-    .vectfox-btn-sm {
+    .vecttauri-btn-sm {
         flex: 1;
         justify-content: center;
     }
@@ -825,10 +825,10 @@
 /* ============================================================================
  * COLLECTION SETTINGS EDITOR MODAL (formerly Activation Editor)
  * ============================================================================
- * SELF-CONTAINED - Does not rely on .vectfox-modal-content base styles
+ * SELF-CONTAINED - Does not rely on .vecttauri-modal-content base styles
  * ============================================================================ */
 
-.vectfox-activation-editor {
+.vecttauri-activation-editor {
     /* CRITICAL: Explicit positioning within fixed modal container */
     position: relative;
     z-index: 10001;
@@ -848,7 +848,7 @@
 
     /* Visual styling */
     background: var(--SmartThemeBlurTintColor, #1a1a2e);
-    border: 2px solid color-mix(in srgb, var(--vectfox-primary, #8b5cf6) 30%, var(--SmartThemeBorderColor, #333));
+    border: 2px solid color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 30%, var(--SmartThemeBorderColor, #333));
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 
@@ -857,10 +857,10 @@
     box-sizing: border-box !important;
 
     /* Animation */
-    animation: vectfox-settings-modal-in 0.25s ease-out;
+    animation: vecttauri-settings-modal-in 0.25s ease-out;
 }
 
-@keyframes vectfox-settings-modal-in {
+@keyframes vecttauri-settings-modal-in {
     from {
         opacity: 0;
         transform: scale(0.95) translateY(-10px);
@@ -872,20 +872,20 @@
 }
 
 /* HEADER - Fixed at top */
-.vectfox-activation-editor .vectfox-modal-header {
+.vecttauri-activation-editor .vecttauri-modal-header {
     flex: 0 0 auto !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vectfox-primary, #8b5cf6) 15%, transparent) 0%,
-        color-mix(in srgb, var(--vectfox-primary, #8b5cf6) 8%, transparent) 100%);
-    border-bottom: 1px solid color-mix(in srgb, var(--vectfox-primary, #8b5cf6) 20%, transparent);
+        color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 15%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 8%, transparent) 100%);
+    border-bottom: 1px solid color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 20%, transparent);
     border-radius: 10px 10px 0 0;
 }
 
-.vectfox-activation-editor .vectfox-modal-header h3 {
+.vecttauri-activation-editor .vecttauri-modal-header h3 {
     margin: 0;
     font-size: 1.1em;
     font-weight: 600;
@@ -893,7 +893,7 @@
 }
 
 /* BODY - Scrollable middle section */
-.vectfox-activation-editor .vectfox-activation-body {
+.vecttauri-activation-editor .vecttauri-activation-body {
     flex: 1 1 auto !important;
     min-height: 0 !important; /* CRITICAL for flex scroll */
     overflow-y: auto !important;
@@ -903,7 +903,7 @@
 }
 
 /* FOOTER - Fixed at bottom */
-.vectfox-activation-editor .vectfox-modal-footer {
+.vecttauri-activation-editor .vecttauri-modal-footer {
     flex: 0 0 auto !important;
     display: flex;
     justify-content: flex-end;
@@ -915,10 +915,10 @@
 }
 
 /* ALL FORM INPUTS IN ACTIVATION EDITOR - Consistent styling */
-.vectfox-activation-editor input[type="text"],
-.vectfox-activation-editor input[type="number"],
-.vectfox-activation-editor textarea,
-.vectfox-activation-editor select {
+.vecttauri-activation-editor input[type="text"],
+.vecttauri-activation-editor input[type="number"],
+.vecttauri-activation-editor textarea,
+.vecttauri-activation-editor select {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--SmartThemeBorderColor, #444);
@@ -931,26 +931,26 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.vectfox-activation-editor input[type="text"]:focus,
-.vectfox-activation-editor input[type="number"]:focus,
-.vectfox-activation-editor textarea:focus,
-.vectfox-activation-editor select:focus {
+.vecttauri-activation-editor input[type="text"]:focus,
+.vecttauri-activation-editor input[type="number"]:focus,
+.vecttauri-activation-editor textarea:focus,
+.vecttauri-activation-editor select:focus {
     outline: none;
-    border-color: var(--vectfox-primary, #8b5cf6);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vectfox-primary, #8b5cf6) 20%, transparent);
+    border-color: var(--vecttauri-primary, #8b5cf6);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 20%, transparent);
 }
 
-.vectfox-activation-editor input[type="text"]::placeholder,
-.vectfox-activation-editor textarea::placeholder {
+.vecttauri-activation-editor input[type="text"]::placeholder,
+.vecttauri-activation-editor textarea::placeholder {
     color: color-mix(in srgb, var(--SmartThemeBodyColor, #fff) 40%, transparent);
 }
 
-.vectfox-activation-editor textarea {
+.vecttauri-activation-editor textarea {
     resize: vertical;
     min-height: 60px;
 }
 
-.vectfox-activation-editor select {
+.vecttauri-activation-editor select {
     cursor: pointer;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -960,35 +960,35 @@
 }
 
 /* Context section - stacked layout for full-width inputs */
-.vectfox-context-section .vectfox-option-row {
+.vecttauri-context-section .vecttauri-option-row {
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
 }
 
-.vectfox-context-section .vectfox-option-row label {
+.vecttauri-context-section .vecttauri-option-row label {
     min-width: auto;
     font-weight: 600;
     margin-bottom: 2px;
 }
 
-.vectfox-context-section .vectfox-option-row small {
+.vecttauri-context-section .vecttauri-option-row small {
     margin-top: 4px;
 }
 
-.vectfox-context-section textarea {
+.vecttauri-context-section textarea {
     min-height: 80px;
 }
 
-.vectfox-activation-collection-name {
+.vecttauri-activation-collection-name {
     margin-bottom: 20px;
     padding: 12px 16px;
-    background: color-mix(in srgb, var(--vectfox-primary) 10%, var(--SmartThemeBlurTintColor));
+    background: color-mix(in srgb, var(--vecttauri-primary) 10%, var(--SmartThemeBlurTintColor));
     border-radius: 8px;
-    border-left: 3px solid var(--vectfox-primary);
+    border-left: 3px solid var(--vecttauri-primary);
 }
 
-.vectfox-activation-section {
+.vecttauri-activation-section {
     margin-bottom: 24px;
     padding: 16px;
     border: 1px solid var(--SmartThemeBorderColor);
@@ -996,33 +996,33 @@
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 3%, var(--SmartThemeBlurTintColor));
 }
 
-.vectfox-activation-section.vectfox-disabled {
+.vecttauri-activation-section.vecttauri-disabled {
     opacity: 0.5;
     pointer-events: none;
 }
 
-.vectfox-always-active {
-    background: color-mix(in srgb, var(--vectfox-success) 8%, var(--SmartThemeBlurTintColor));
-    border-color: color-mix(in srgb, var(--vectfox-success) 30%, var(--SmartThemeBorderColor));
+.vecttauri-always-active {
+    background: color-mix(in srgb, var(--vecttauri-success) 8%, var(--SmartThemeBlurTintColor));
+    border-color: color-mix(in srgb, var(--vecttauri-success) 30%, var(--SmartThemeBorderColor));
 }
 
-.vectfox-section-header {
+.vecttauri-section-header {
     margin-bottom: 16px;
 }
 
-.vectfox-section-header h4 {
+.vecttauri-section-header h4 {
     margin: 0 0 4px 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.vectfox-section-header small {
+.vecttauri-section-header small {
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 70%, transparent);
 }
 
 /* Primary/Secondary badges in headers - ROYGBIV STYLE */
-.vectfox-badge-primary {
+.vecttauri-badge-primary {
     font-size: 0.68em;
     padding: 2px 8px;
     color: #fb923c;  /* Orange */
@@ -1036,7 +1036,7 @@
 
 /* The lock is the master switch: nothing activates without it, so it reads
    hotter than the Filter badge on triggers/conditions that only narrow it. */
-.vectfox-badge-required {
+.vecttauri-badge-required {
     font-size: 0.68em;
     padding: 2px 8px;
     color: #f87171;  /* Red */
@@ -1048,7 +1048,7 @@
     letter-spacing: 0.6px;
 }
 
-.vectfox-badge-secondary {
+.vecttauri-badge-secondary {
     font-size: 0.68em;
     padding: 2px 8px;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 60%, transparent);
@@ -1061,22 +1061,22 @@
 }
 
 /* Triggers section */
-.vectfox-triggers-section {
-    background: color-mix(in srgb, var(--vectfox-warning) 5%, var(--SmartThemeBlurTintColor));
-    border-color: color-mix(in srgb, var(--vectfox-warning) 25%, var(--SmartThemeBorderColor));
+.vecttauri-triggers-section {
+    background: color-mix(in srgb, var(--vecttauri-warning) 5%, var(--SmartThemeBlurTintColor));
+    border-color: color-mix(in srgb, var(--vecttauri-warning) 25%, var(--SmartThemeBorderColor));
 }
 
-.vectfox-triggers-input {
+.vecttauri-triggers-input {
     margin-bottom: 16px;
 }
 
-.vectfox-triggers-input label {
+.vecttauri-triggers-input label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
 }
 
-.vectfox-triggers-input textarea {
+.vecttauri-triggers-input textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid var(--SmartThemeBorderColor);
@@ -1088,24 +1088,24 @@
     resize: vertical;
 }
 
-.vectfox-triggers-options {
+.vecttauri-triggers-options {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.vectfox-option-row {
+.vecttauri-option-row {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.vectfox-option-row label {
+.vecttauri-option-row label {
     min-width: 100px;
 }
 
-.vectfox-option-row select,
-.vectfox-option-row input[type="number"] {
+.vecttauri-option-row select,
+.vecttauri-option-row input[type="number"] {
     padding: 8px 12px;
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 6px;
@@ -1113,113 +1113,113 @@
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-option-row input[type="number"] {
+.vecttauri-option-row input[type="number"] {
     width: 70px;
 }
 
-.vectfox-option-row small {
+.vecttauri-option-row small {
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 60%, transparent);
 }
 
 /* Checkbox label styling */
-.vectfox-checkbox-label {
+.vecttauri-checkbox-label {
     display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
 }
 
-.vectfox-checkbox-label input[type="checkbox"] {
+.vecttauri-checkbox-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
     cursor: pointer;
 }
 
 /* Conditions section */
-.vectfox-conditions-section {
-    background: color-mix(in srgb, var(--vectfox-secondary) 5%, var(--SmartThemeBlurTintColor));
-    border-color: color-mix(in srgb, var(--vectfox-secondary) 25%, var(--SmartThemeBorderColor));
+.vecttauri-conditions-section {
+    background: color-mix(in srgb, var(--vecttauri-secondary) 5%, var(--SmartThemeBlurTintColor));
+    border-color: color-mix(in srgb, var(--vecttauri-secondary) 25%, var(--SmartThemeBorderColor));
 }
 
 /* Temporal Decay section */
-.vectfox-decay-section {
+.vecttauri-decay-section {
     background: color-mix(in srgb, #f97316 5%, var(--SmartThemeBlurTintColor));
     border-color: color-mix(in srgb, #f97316 25%, var(--SmartThemeBorderColor));
 }
 
-.vectfox-decay-override {
+.vecttauri-decay-override {
     margin-bottom: 16px;
 }
 
-.vectfox-decay-override small {
+.vecttauri-decay-override small {
     display: block;
     margin-top: 4px;
     margin-left: 26px;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 60%, transparent);
 }
 
-.vectfox-decay-settings {
+.vecttauri-decay-settings {
     padding: 12px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
     border-radius: 8px;
     margin-top: 8px;
 }
 
-.vectfox-decay-settings .vectfox-option-row {
+.vecttauri-decay-settings .vecttauri-option-row {
     margin-bottom: 12px;
 }
 
-.vectfox-decay-settings .vectfox-option-row:last-child {
+.vecttauri-decay-settings .vecttauri-option-row:last-child {
     margin-bottom: 0;
 }
 
-.vectfox-decay-settings .vectfox-option-row small {
+.vecttauri-decay-settings .vecttauri-option-row small {
     margin-left: 0;
 }
 
-.vectfox-conditions-toggle {
+.vecttauri-conditions-toggle {
     margin-bottom: 16px;
 }
 
-.vectfox-conditions-logic {
+.vecttauri-conditions-logic {
     margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.vectfox-conditions-notice {
+.vecttauri-conditions-notice {
     padding: 10px 14px;
     border-radius: 8px;
     margin-bottom: 16px;
     font-size: 0.9em;
 }
 
-.vectfox-notice-success {
-    background: color-mix(in srgb, var(--vectfox-success) 15%, transparent);
-    border: 1px solid var(--vectfox-success);
-    color: var(--vectfox-success);
+.vecttauri-notice-success {
+    background: color-mix(in srgb, var(--vecttauri-success) 15%, transparent);
+    border: 1px solid var(--vecttauri-success);
+    color: var(--vecttauri-success);
 }
 
-.vectfox-notice-warning {
-    background: color-mix(in srgb, var(--vectfox-warning) 15%, transparent);
-    border: 1px solid var(--vectfox-warning);
-    color: var(--vectfox-warning);
+.vecttauri-notice-warning {
+    background: color-mix(in srgb, var(--vecttauri-warning) 15%, transparent);
+    border: 1px solid var(--vecttauri-warning);
+    color: var(--vecttauri-warning);
 }
 
-.vectfox-notice-info {
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, transparent);
-    border: 1px solid var(--vectfox-primary);
-    color: var(--vectfox-primary);
+.vecttauri-notice-info {
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, transparent);
+    border: 1px solid var(--vecttauri-primary);
+    color: var(--vecttauri-primary);
 }
 
-.vectfox-conditions-rules {
+.vecttauri-conditions-rules {
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 8px;
     overflow: hidden;
 }
 
-.vectfox-conditions-rules-header {
+.vecttauri-conditions-rules-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1229,35 +1229,35 @@
     font-weight: 600;
 }
 
-#vectfox_conditions_list {
+#vecttauri_conditions_list {
     max-height: 250px;
     overflow-y: auto;
 }
 
-.vectfox-empty-rules {
+.vecttauri-empty-rules {
     padding: 24px;
     text-align: center;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 60%, transparent);
     font-style: italic;
 }
 
-.vectfox-condition-rule {
+.vecttauri-condition-rule {
     padding: 12px 16px;
     border-bottom: 1px solid var(--SmartThemeBorderColor);
 }
 
-.vectfox-condition-rule:last-child {
+.vecttauri-condition-rule:last-child {
     border-bottom: none;
 }
 
-.vectfox-condition-row {
+.vecttauri-condition-row {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
 }
 
-.vectfox-condition-type {
+.vecttauri-condition-type {
     flex: 1;
     padding: 8px 12px;
     border: 1px solid var(--SmartThemeBorderColor);
@@ -1266,37 +1266,37 @@
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-condition-negate {
+.vecttauri-condition-negate {
     display: flex;
     align-items: center;
     gap: 4px;
     font-size: 0.85em;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
 }
 
-.vectfox-condition-remove {
+.vecttauri-condition-remove {
     padding: 6px 10px;
     border: none;
     background: transparent;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
     cursor: pointer;
     font-size: 1.1em;
 }
 
-.vectfox-condition-remove:hover {
-    background: color-mix(in srgb, var(--vectfox-danger) 15%, transparent);
+.vecttauri-condition-remove:hover {
+    background: color-mix(in srgb, var(--vecttauri-danger) 15%, transparent);
     border-radius: 4px;
 }
 
-.vectfox-condition-settings {
+.vecttauri-condition-settings {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
 }
 
-.vectfox-condition-settings input,
-.vectfox-condition-settings select {
+.vecttauri-condition-settings input,
+.vecttauri-condition-settings select {
     padding: 8px 12px;
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 6px;
@@ -1304,35 +1304,35 @@
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-condition-settings input[type="text"] {
+.vecttauri-condition-settings input[type="text"] {
     flex: 1;
     min-width: 150px;
 }
 
-.vectfox-multi-select {
+.vecttauri-multi-select {
     min-height: 80px;
     width: 100%;
 }
 
 /* Activation info box */
-.vectfox-activation-info {
+.vecttauri-activation-info {
     padding: 16px;
-    background: color-mix(in srgb, var(--vectfox-primary) 8%, var(--SmartThemeBlurTintColor));
-    border: 1px solid color-mix(in srgb, var(--vectfox-primary) 20%, var(--SmartThemeBorderColor));
+    background: color-mix(in srgb, var(--vecttauri-primary) 8%, var(--SmartThemeBlurTintColor));
+    border: 1px solid color-mix(in srgb, var(--vecttauri-primary) 20%, var(--SmartThemeBorderColor));
     border-radius: 10px;
     font-size: 0.9em;
 }
 
-.vectfox-activation-info ol {
+.vecttauri-activation-info ol {
     margin: 10px 0 0 20px;
     padding: 0;
 }
 
-.vectfox-activation-info li {
+.vecttauri-activation-info li {
     margin-bottom: 6px;
 }
 
-.vectfox-activation-info li:last-child {
+.vecttauri-activation-info li:last-child {
     margin-bottom: 0;
 }
 
@@ -1340,7 +1340,7 @@
  * MODAL BACKDROP BLUR (Modal over Modal)
  * ============================================================================ */
 
-.vectfox-modal {
+.vecttauri-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -1356,7 +1356,7 @@
 }
 
 /* Higher z-index for nested modals */
-.vectfox-modal .vectfox-modal {
+.vecttauri-modal .vecttauri-modal {
     z-index: 10000;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(6px);
@@ -1367,21 +1367,21 @@
  * LOREBOOK PICKER STYLING
  * ============================================================================ */
 
-.vectfox-lorebook-picker-wrapper {
+.vecttauri-lorebook-picker-wrapper {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.vectfox-lorebook-picker-row {
+.vecttauri-lorebook-picker-row {
     display: flex;
     gap: 8px;
     align-items: center;
     flex-wrap: wrap;
 }
 
-.vectfox-lorebook-picker-row select {
+.vecttauri-lorebook-picker-row select {
     flex: 1;
     min-width: 150px;
     padding: 8px 12px;
@@ -1391,12 +1391,12 @@
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-lorebook-picker-row select:disabled {
+.vecttauri-lorebook-picker-row select:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.vectfox-lorebook-selected {
+.vecttauri-lorebook-selected {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -1407,19 +1407,19 @@
     border-radius: 8px;
 }
 
-.vectfox-lorebook-tag {
+.vecttauri-lorebook-tag {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
-    background: linear-gradient(135deg, var(--vectfox-secondary) 0%, color-mix(in srgb, var(--vectfox-secondary) 80%, transparent) 100%);
+    background: linear-gradient(135deg, var(--vecttauri-secondary) 0%, color-mix(in srgb, var(--vecttauri-secondary) 80%, transparent) 100%);
     color: white;
     border-radius: 16px;
     font-size: 0.85em;
     font-weight: 500;
 }
 
-.vectfox-lorebook-remove {
+.vecttauri-lorebook-remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1436,7 +1436,7 @@
     transition: background 0.2s ease;
 }
 
-.vectfox-lorebook-remove:hover {
+.vecttauri-lorebook-remove:hover {
     background: rgba(255, 255, 255, 0.4);
 }
 
@@ -1444,25 +1444,25 @@
  * EMOTION CONDITION WRAPPER
  * ============================================================================ */
 
-.vectfox-emotion-condition-wrapper {
+.vecttauri-emotion-condition-wrapper {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.vectfox-emotion-notice {
+.vecttauri-emotion-notice {
     font-size: 0.85em;
     padding: 8px 12px;
 }
 
-.vectfox-emotion-controls {
+.vecttauri-emotion-controls {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.vectfox-emotion-controls select {
+.vecttauri-emotion-controls select {
     flex: 1;
     min-width: 120px;
 }
@@ -1471,18 +1471,18 @@
  * PATTERN CONDITION STYLING
  * ============================================================================ */
 
-.vectfox-pattern-condition-wrapper {
+.vecttauri-pattern-condition-wrapper {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.vectfox-pattern-row {
+.vecttauri-pattern-row {
     width: 100%;
 }
 
-.vectfox-pattern-input {
+.vecttauri-pattern-input {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--SmartThemeBorderColor);
@@ -1495,18 +1495,18 @@
     min-height: 60px;
 }
 
-.vectfox-pattern-input::placeholder {
+.vecttauri-pattern-input::placeholder {
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 50%, transparent);
 }
 
-.vectfox-pattern-options {
+.vecttauri-pattern-options {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
 }
 
 @media (max-width: 500px) {
-    .vectfox-pattern-options {
+    .vecttauri-pattern-options {
         grid-template-columns: 1fr;
     }
 }
@@ -1515,22 +1515,22 @@
  * RENAME DIALOG
  * ============================================================================ */
 
-.vectfox-rename-dialog {
+.vecttauri-rename-dialog {
     max-width: 450px !important;
 }
 
-.vectfox-rename-body {
+.vecttauri-rename-body {
     padding: 24px;
 }
 
-.vectfox-rename-body label {
+.vecttauri-rename-body label {
     display: block;
     margin-bottom: 10px;
     font-weight: 600;
     font-size: 0.95em;
 }
 
-.vectfox-rename-body input[type="text"] {
+.vecttauri-rename-body input[type="text"] {
     width: 100%;
     padding: 14px 16px;
     border: 2px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
@@ -1541,17 +1541,17 @@
     transition: all 0.2s ease;
 }
 
-.vectfox-rename-body input[type="text"]:focus {
+.vecttauri-rename-body input[type="text"]:focus {
     outline: none;
-    border-color: var(--vectfox-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+    border-color: var(--vecttauri-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
 }
 
-.vectfox-rename-body input[type="text"]::placeholder {
+.vecttauri-rename-body input[type="text"]::placeholder {
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 40%, transparent);
 }
 
-.vectfox-rename-hint {
+.vecttauri-rename-hint {
     display: block;
     margin-top: 10px;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 55%, transparent);
@@ -1564,160 +1564,160 @@
  * ============================================================================ */
 
 /* Base responsive rules - always apply */
-.vectfox-activation-editor .vectfox-option-row {
+.vecttauri-activation-editor .vecttauri-option-row {
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.vectfox-activation-editor .vectfox-option-row label {
+.vecttauri-activation-editor .vecttauri-option-row label {
     min-width: clamp(80px, 20vw, 100px);
 }
 
-.vectfox-activation-editor .vectfox-option-row select,
-.vectfox-activation-editor .vectfox-option-row input[type="number"],
-.vectfox-activation-editor .vectfox-option-row input[type="text"] {
+.vecttauri-activation-editor .vecttauri-option-row select,
+.vecttauri-activation-editor .vecttauri-option-row input[type="number"],
+.vecttauri-activation-editor .vecttauri-option-row input[type="text"] {
     min-width: 0;
     flex: 1;
 }
 
-.vectfox-activation-editor .vectfox-condition-settings {
+.vecttauri-activation-editor .vecttauri-condition-settings {
     flex-wrap: wrap;
 }
 
-.vectfox-activation-editor .vectfox-condition-settings input,
-.vectfox-activation-editor .vectfox-condition-settings select,
-.vectfox-activation-editor .vectfox-condition-settings textarea {
+.vecttauri-activation-editor .vecttauri-condition-settings input,
+.vecttauri-activation-editor .vecttauri-condition-settings select,
+.vecttauri-activation-editor .vecttauri-condition-settings textarea {
     min-width: 0;
     flex: 1 1 auto;
 }
 
 /* Small screens and high zoom - use container queries where supported */
 @media (max-width: 500px), (max-height: 600px) {
-    .vectfox-activation-editor {
+    .vecttauri-activation-editor {
         width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
         max-height: calc(100dvh - 20px);
         border-radius: 8px;
     }
 
-    .vectfox-activation-editor .vectfox-modal-header {
+    .vecttauri-activation-editor .vecttauri-modal-header {
         padding: 12px 16px;
     }
 
-    .vectfox-activation-editor .vectfox-modal-header h3 {
+    .vecttauri-activation-editor .vecttauri-modal-header h3 {
         font-size: 1em;
     }
 
-    .vectfox-activation-body {
+    .vecttauri-activation-body {
         padding: 10px;
     }
 
-    .vectfox-activation-collection-name {
+    .vecttauri-activation-collection-name {
         padding: 8px 12px;
         font-size: 0.9em;
         margin-bottom: 12px;
     }
 
-    .vectfox-activation-section {
+    .vecttauri-activation-section {
         padding: 10px;
         margin-bottom: 12px;
         border-radius: 8px;
     }
 
-    .vectfox-section-header {
+    .vecttauri-section-header {
         margin-bottom: 10px;
     }
 
-    .vectfox-section-header h4 {
+    .vecttauri-section-header h4 {
         font-size: 0.9em;
         flex-wrap: wrap;
         gap: 6px;
     }
 
-    .vectfox-section-header small {
+    .vecttauri-section-header small {
         font-size: 0.75em;
         display: block;
         margin-top: 4px;
     }
 
-    .vectfox-triggers-input textarea {
+    .vecttauri-triggers-input textarea {
         padding: 8px;
         font-size: 0.85em;
         min-height: 60px;
     }
 
-    .vectfox-option-row {
+    .vecttauri-option-row {
         gap: 6px;
     }
 
-    .vectfox-option-row label {
+    .vecttauri-option-row label {
         width: 100%;
         min-width: auto;
         font-size: 0.85em;
     }
 
-    .vectfox-option-row select,
-    .vectfox-option-row input {
+    .vecttauri-option-row select,
+    .vecttauri-option-row input {
         font-size: 0.85em;
         padding: 8px;
     }
 
-    .vectfox-option-row small {
+    .vecttauri-option-row small {
         width: 100%;
         font-size: 0.7em;
     }
 
-    .vectfox-conditions-logic {
+    .vecttauri-conditions-logic {
         flex-direction: column;
         gap: 6px;
     }
 
-    .vectfox-conditions-logic select {
+    .vecttauri-conditions-logic select {
         width: 100%;
     }
 
-    .vectfox-condition-rule {
+    .vecttauri-condition-rule {
         padding: 8px;
     }
 
-    .vectfox-condition-settings {
+    .vecttauri-condition-settings {
         flex-direction: column;
         gap: 6px;
     }
 
-    .vectfox-condition-settings input,
-    .vectfox-condition-settings select {
+    .vecttauri-condition-settings input,
+    .vecttauri-condition-settings select {
         width: 100%;
     }
 
-    .vectfox-decay-settings {
+    .vecttauri-decay-settings {
         padding: 8px;
     }
 
-    .vectfox-activation-info {
+    .vecttauri-activation-info {
         padding: 8px;
         font-size: 0.8em;
     }
 
-    .vectfox-activation-info ol {
+    .vecttauri-activation-info ol {
         padding-left: 16px;
         margin: 6px 0 0 0;
     }
 
-    .vectfox-activation-editor .vectfox-modal-footer {
+    .vecttauri-activation-editor .vecttauri-modal-footer {
         padding: 10px 12px;
         gap: 8px;
     }
 
-    .vectfox-activation-editor .vectfox-modal-footer .vectfox-btn {
+    .vecttauri-activation-editor .vecttauri-modal-footer .vecttauri-btn {
         flex: 1;
         padding: 10px 12px;
         font-size: 0.9em;
     }
 
-    .vectfox-badge-primary,
-    .vectfox-badge-required,
-    .vectfox-badge-secondary {
+    .vecttauri-badge-primary,
+    .vecttauri-badge-required,
+    .vecttauri-badge-secondary {
         font-size: 0.6em;
         padding: 2px 5px;
     }
@@ -1725,7 +1725,7 @@
 
 /* Very constrained viewports (extreme zoom or tiny screens) */
 @media (max-width: 380px), (max-height: 500px) {
-    .vectfox-activation-editor {
+    .vecttauri-activation-editor {
         width: 100vw;
         max-width: 100vw;
         height: 100vh;
@@ -1736,50 +1736,50 @@
         margin: 0;
     }
 
-    .vectfox-activation-info {
+    .vecttauri-activation-info {
         display: none; /* Hide info on very small screens to save space */
     }
 
-    .vectfox-section-header small {
+    .vecttauri-section-header small {
         display: none; /* Hide descriptions to save space */
     }
 }
 
-.vectfox-btn-danger {
+.vecttauri-btn-danger {
     padding: 8px 12px;
     background: transparent;
-    border: 1px solid color-mix(in srgb, var(--vectfox-danger) 30%, var(--SmartThemeBorderColor));
+    border: 1px solid color-mix(in srgb, var(--vecttauri-danger) 30%, var(--SmartThemeBorderColor));
     border-radius: 6px;
-    color: var(--vectfox-danger);
+    color: var(--vecttauri-danger);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
-.vectfox-btn-danger:hover {
-    background: color-mix(in srgb, var(--vectfox-danger) 15%, transparent);
-    border-color: var(--vectfox-danger);
+.vecttauri-btn-danger:hover {
+    background: color-mix(in srgb, var(--vecttauri-danger) 15%, transparent);
+    border-color: var(--vecttauri-danger);
 }
 
 /* ============================================================================
  * TEMPORAL WEIGHTING TYPE TOGGLE (Decay vs Nostalgia)
  * ============================================================================ */
 
-.vectfox-type-toggle {
+.vecttauri-type-toggle {
     display: flex;
     gap: 12px;
     margin-bottom: 16px;
 }
 
-.vectfox-type-option {
+.vecttauri-type-option {
     flex: 1;
     cursor: pointer;
 }
 
-.vectfox-type-option input[type="radio"] {
+.vecttauri-type-option input[type="radio"] {
     display: none;
 }
 
-.vectfox-type-card {
+.vecttauri-type-card {
     padding: 14px 16px;
     border: 2px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
     border-radius: 10px;
@@ -1787,36 +1787,36 @@
     transition: all 0.2s ease;
 }
 
-.vectfox-type-card:hover {
-    border-color: color-mix(in srgb, var(--vectfox-primary) 40%, transparent);
-    background: color-mix(in srgb, var(--vectfox-primary) 8%, var(--SmartThemeBlurTintColor));
+.vecttauri-type-card:hover {
+    border-color: color-mix(in srgb, var(--vecttauri-primary) 40%, transparent);
+    background: color-mix(in srgb, var(--vecttauri-primary) 8%, var(--SmartThemeBlurTintColor));
 }
 
-.vectfox-type-option.selected .vectfox-type-card,
-.vectfox-type-option input:checked + .vectfox-type-card {
-    border-color: var(--vectfox-primary);
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, var(--SmartThemeBlurTintColor));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vectfox-primary) 20%, transparent);
+.vecttauri-type-option.selected .vecttauri-type-card,
+.vecttauri-type-option input:checked + .vecttauri-type-card {
+    border-color: var(--vecttauri-primary);
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, var(--SmartThemeBlurTintColor));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vecttauri-primary) 20%, transparent);
 }
 
-.vectfox-type-header {
+.vecttauri-type-header {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 6px;
 }
 
-.vectfox-type-icon {
+.vecttauri-type-icon {
     font-size: 1.3em;
 }
 
-.vectfox-type-header strong {
+.vecttauri-type-header strong {
     font-size: 1em;
     font-weight: 600;
     color: var(--SmartThemeBodyColor);
 }
 
-.vectfox-type-card small {
+.vecttauri-type-card small {
     display: block;
     font-size: 0.82em;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 70%, transparent);
@@ -1824,7 +1824,7 @@
 }
 
 /* Curve section label */
-.vectfox-curve-label {
+.vecttauri-curve-label {
     font-size: 0.9em;
     font-weight: 500;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 80%, transparent);
@@ -1832,7 +1832,7 @@
 }
 
 /* Inline settings row (for half-life, rate, etc.) */
-.vectfox-cv-inline-setting {
+.vecttauri-cv-inline-setting {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1840,13 +1840,13 @@
     flex-wrap: wrap;
 }
 
-.vectfox-cv-inline-setting label {
+.vecttauri-cv-inline-setting label {
     font-size: 0.9em;
     color: var(--SmartThemeBodyColor);
     min-width: 80px;
 }
 
-.vectfox-cv-inline-setting input[type="number"] {
+.vecttauri-cv-inline-setting input[type="number"] {
     width: 80px;
     padding: 6px 10px;
     border-radius: 6px;
@@ -1856,27 +1856,27 @@
     font-size: 0.9em;
 }
 
-.vectfox-cv-inline-setting small {
+.vecttauri-cv-inline-setting small {
     font-size: 0.82em;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 60%, transparent);
 }
 
 /* Responsive: stack vertically on small screens */
 @media (max-width: 500px) {
-    .vectfox-type-toggle {
+    .vecttauri-type-toggle {
         flex-direction: column;
         gap: 10px;
     }
 
-    .vectfox-type-card {
+    .vecttauri-type-card {
         padding: 12px 14px;
     }
 
-    .vectfox-type-header {
+    .vecttauri-type-header {
         gap: 8px;
     }
 
-    .vectfox-type-icon {
+    .vecttauri-type-icon {
         font-size: 1.1em;
     }
 }

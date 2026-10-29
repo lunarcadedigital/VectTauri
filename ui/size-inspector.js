@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VECTFOX SIZE INSPECTOR
+ * VECTTAURI SIZE INSPECTOR
  * ============================================================================
  * Diagnostic tool: surveys every collection on disk + Qdrant and reports
  * per-collection chunk-size distribution. Click a row to drill into the
@@ -9,8 +9,8 @@
  * Used to diagnose runaway injection (e.g. GitHub issue #3 — 1M+ token
  * injections) by finding bloated metadata or oversized event payloads.
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -37,30 +37,30 @@ export function renderSizeInspectorTab(container) {
     const $c = window.jQuery ? window.jQuery(container) : null;
     if (!$c || !$c.length) return;
 
-    if ($c.find(".vectfox-size-inspector").length) {
+    if ($c.find(".vecttauri-size-inspector").length) {
         // Already rendered — just rebind in case events were lost.
         bindEvents();
         return;
     }
 
     $c.html(`
-        <div class="vectfox-size-inspector">
-            <div class="vectfox-size-toolbar">
-                <button id="vectfox_size_scan_btn" class="vectfox-btn vectfox-btn-primary">
+        <div class="vecttauri-size-inspector">
+            <div class="vecttauri-size-toolbar">
+                <button id="vecttauri_size_scan_btn" class="vecttauri-btn vecttauri-btn-primary">
                     ${icons.refreshCw(14)} Scan all collections
                 </button>
-                <span class="vectfox-size-hint">
+                <span class="vecttauri-size-hint">
                     Surveys every collection (FS + Qdrant) and reports the largest entries.
                     Use this to diagnose oversized injections.
                 </span>
             </div>
 
-            <div id="vectfox_size_status" class="vectfox-size-status"></div>
+            <div id="vecttauri_size_status" class="vecttauri-size-status"></div>
 
-            <div id="vectfox_size_summary_wrap" class="vectfox-size-summary-wrap" style="display:none;">
-                <h4>Per-collection summary <span class="vectfox-size-sort-hint">(sorted by max chars, click a row to drill in)</span></h4>
-                <div class="vectfox-size-table-scroll">
-                    <table class="vectfox-size-table" id="vectfox_size_summary_table">
+            <div id="vecttauri_size_summary_wrap" class="vecttauri-size-summary-wrap" style="display:none;">
+                <h4>Per-collection summary <span class="vecttauri-size-sort-hint">(sorted by max chars, click a row to drill in)</span></h4>
+                <div class="vecttauri-size-table-scroll">
+                    <table class="vecttauri-size-table" id="vecttauri_size_summary_table">
                         <thead>
                             <tr>
                                 <th>Collection</th>
@@ -77,15 +77,15 @@ export function renderSizeInspectorTab(container) {
                 </div>
             </div>
 
-            <div id="vectfox_size_detail_wrap" class="vectfox-size-detail-wrap" style="display:none;">
-                <div class="vectfox-size-detail-header">
-                    <button id="vectfox_size_back_btn" class="vectfox-btn-sm">
+            <div id="vecttauri_size_detail_wrap" class="vecttauri-size-detail-wrap" style="display:none;">
+                <div class="vecttauri-size-detail-header">
+                    <button id="vecttauri_size_back_btn" class="vecttauri-btn-sm">
                         ${icons.chevronLeft(14)} Back to summary
                     </button>
-                    <h4 id="vectfox_size_detail_title">Collection detail</h4>
+                    <h4 id="vecttauri_size_detail_title">Collection detail</h4>
                 </div>
-                <div class="vectfox-size-table-scroll">
-                    <table class="vectfox-size-table" id="vectfox_size_detail_table">
+                <div class="vecttauri-size-table-scroll">
+                    <table class="vecttauri-size-table" id="vecttauri_size_detail_table">
                         <thead>
                             <tr>
                                 <th class="num">#</th>
@@ -108,21 +108,21 @@ function bindEvents() {
     const $ = window.jQuery;
     if (!$) return;
 
-    $("#vectfox_size_scan_btn").off("click").on("click", async function (e) {
+    $("#vecttauri_size_scan_btn").off("click").on("click", async function (e) {
         e.stopPropagation();
         e.preventDefault();
         await runScan();
     });
 
-    $("#vectfox_size_back_btn").off("click").on("click", function (e) {
+    $("#vecttauri_size_back_btn").off("click").on("click", function (e) {
         e.stopPropagation();
         e.preventDefault();
-        $("#vectfox_size_detail_wrap").hide();
-        $("#vectfox_size_summary_wrap").show();
+        $("#vecttauri_size_detail_wrap").hide();
+        $("#vecttauri_size_summary_wrap").show();
     });
 
     // Delegate row clicks (rows are re-rendered after scan)
-    $("#vectfox_size_summary_table tbody").off("click", "tr.clickable").on("click", "tr.clickable", function () {
+    $("#vecttauri_size_summary_table tbody").off("click", "tr.clickable").on("click", "tr.clickable", function () {
         const key = $(this).attr("data-key");
         if (key) showCollectionDetail(key);
     });
@@ -130,15 +130,15 @@ function bindEvents() {
 
 async function runScan() {
     const $ = window.jQuery;
-    const $btn = $("#vectfox_size_scan_btn");
-    const $status = $("#vectfox_size_status");
-    const $wrap = $("#vectfox_size_summary_wrap");
-    const $tbody = $("#vectfox_size_summary_table tbody");
+    const $btn = $("#vecttauri_size_scan_btn");
+    const $status = $("#vecttauri_size_status");
+    const $wrap = $("#vecttauri_size_summary_wrap");
+    const $tbody = $("#vecttauri_size_summary_table tbody");
 
     $btn.prop("disabled", true);
     $status.removeClass("error").text("Listing collections…");
     $wrap.hide();
-    $("#vectfox_size_detail_wrap").hide();
+    $("#vecttauri_size_detail_wrap").hide();
     $tbody.empty();
     _cache.summaries = [];
     _cache.itemsByKey.clear();
@@ -150,9 +150,9 @@ async function runScan() {
         // and per-entry source/model resolution. Each returned entry already
         // carries { id, registryKey, backend, source, model, chunkCount } — no
         // local fetch + dedup needed here. See Doc/collection_helper.md.
-        const settings = extension_settings?.vectfox;
+        const settings = extension_settings?.vecttauri;
         if (!settings) {
-            throw new Error("VectFox settings not initialized");
+            throw new Error("VectTauri settings not initialized");
         }
         $status.text("Listing collections via loadAllCollections…");
         const collections = await loadAllCollections(settings, false);
@@ -218,7 +218,7 @@ async function runScan() {
         $wrap.show();
         $status.text(`Done. ${summaries.length} collections scanned. Click a row to see its largest entries.`);
     } catch (err) {
-        console.error("[VectFox SizeInspector] scan failed", err);
+        console.error("[VectTauri SizeInspector] scan failed", err);
         $status.addClass("error").text(`Scan failed: ${err.message}`);
     } finally {
         $btn.prop("disabled", false);
@@ -258,7 +258,7 @@ function summarize(collectionId, backend, items, registryKey) {
 }
 
 function renderSummaryRows(rows) {
-    const $tbody = window.jQuery("#vectfox_size_summary_table tbody");
+    const $tbody = window.jQuery("#vecttauri_size_summary_table tbody");
     $tbody.empty();
     for (const r of rows) {
         const cls = r.error ? "error" : (r.count > 0 ? "clickable" : "");
@@ -281,11 +281,11 @@ function showCollectionDetail(key) {
     const items = _cache.itemsByKey.get(key) || [];
     const summary = _cache.summaries.find(s => s.key === key);
 
-    $("#vectfox_size_detail_title").text(
+    $("#vecttauri_size_detail_title").text(
         summary ? `${summary.collectionId} — ${items.length} entries` : "Collection detail"
     );
 
-    const $tbody = $("#vectfox_size_detail_table tbody");
+    const $tbody = $("#vecttauri_size_detail_table tbody");
     $tbody.empty();
 
     const rows = items.map((it, idx) => {
@@ -312,8 +312,8 @@ function showCollectionDetail(key) {
         `);
     }
 
-    $("#vectfox_size_summary_wrap").hide();
-    $("#vectfox_size_detail_wrap").show();
+    $("#vecttauri_size_summary_wrap").hide();
+    $("#vecttauri_size_detail_wrap").show();
 }
 
 // ---------- small helpers ----------

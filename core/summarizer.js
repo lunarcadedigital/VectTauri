@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VectFox SUMMARIZER
+ * VectTauri SUMMARIZER
  * ============================================================================
  * Summarizes chat message text before it is embedded and stored, producing
  * compact, information-dense summaries optimized for semantic retrieval.
@@ -60,7 +60,7 @@ export function isSummarizationFatalError(err) {
  * These settings are shared between chunk summarization (currently disabled) and the
  * EventBase extractor — so any vectorization that goes through an LLM call requires them.
  *
- * @param {object} settings - VectFox settings object
+ * @param {object} settings - VectTauri settings object
  * @returns {{ok: true} | {ok: false, reason: string}}
  */
 export function validateLLMConfig(settings = {}) {
@@ -141,7 +141,7 @@ const DEFAULT_TIMEOUT_MS = 30000;
  * helpers and delete this function.
  *
  * @param {string} text - Raw message/chunk text to summarize
- * @param {object} settings - VectFox settings object
+ * @param {object} settings - VectTauri settings object
  * @returns {Promise<string>} Summary text
  * @throws {SummarizationFatalError} on config/auth/invalid-model failures
  * @throws {Error} on transient provider failures (HTTP 5xx, empty response)
@@ -151,7 +151,7 @@ export async function summarizeText(text, settings) {
 
     const provider = settings?.chat_provider || 'openrouter';
     // don't remove
-    //log.verbose(`[VectFox Summarizer] summarizeText called — provider=${provider}, textLen=${text.length}`);
+    //log.verbose(`[VectTauri Summarizer] summarizeText called — provider=${provider}, textLen=${text.length}`);
     const model = (settings?.chat_model || '').trim();
     if (!model) {
         throw new SummarizationFatalError(
@@ -246,7 +246,7 @@ async function _callOpenRouter(prompt, model, settings, originalLength, maxToken
             ...resolveModelParameterStyle(settings),
         });
         // don't remove
-        //log.verbose(`[VectFox Summarizer] OpenRouter: ${originalLength} chars → ${content.length} chars`);
+        //log.verbose(`[VectTauri Summarizer] OpenRouter: ${originalLength} chars → ${content.length} chars`);
         return content;
     } catch (e) {
         throw _mapSummarizerError(e);

@@ -1,11 +1,11 @@
 /**
  * ============================================================================
- * VECTFOX CHAT VECTORIZATION
+ * VECTTAURI CHAT VECTORIZATION
  * ============================================================================
  * Core logic for vectorizing chat messages and retrieving relevant context
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================
  */
 
@@ -37,7 +37,7 @@ import { EXTENSION_PROMPT_TAG, EVENTBASE_PROMPT_TAG, SUMMARIZER_PROMPT_TAG, HASH
 import { runBoundedRetrieval } from './bounded-retrieval.js';
 import { resolveEventBaseRetrievalTimeoutMs } from './retrieval-budget.js';
 import { log } from './log.js';
-import { isVectFoxEnabled } from './feature-gate.js';
+import { isVectTauriEnabled } from './feature-gate.js';
 // Import from collection-ids.js - single source of truth for collection ID operations
 import {
     getChatUUID,
@@ -102,7 +102,7 @@ function getTextWithoutAttachments(message) {
 async function groupMessagesByStrategy(messages, strategy, batchSize = 4, keywordLevel = 'balanced', settings = {}) {
     if (!messages.length) return [];
 
-    log.verbose(`[VectFox] groupMessagesByStrategy: ${messages.length} messages, strategy=${strategy}, chat_provider=${settings?.chat_provider || 'openrouter'}`);
+    log.verbose(`[VectTauri] groupMessagesByStrategy: ${messages.length} messages, strategy=${strategy}, chat_provider=${settings?.chat_provider || 'openrouter'}`);
 
     const summarize = (text) => summarizeText(text, settings);
 
@@ -200,7 +200,7 @@ async function groupMessagesByStrategy(messages, strategy, batchSize = 4, keywor
  * Applies chunk-level conditions to filter results
  * @param {object[]} chunks Chunks with metadata
  * @param {object[]} chat Chat messages for context
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @returns {Promise<object[]>} Filtered chunks
  */
 async function applyChunkConditions(chunks, chat, settings) {
@@ -228,7 +228,7 @@ async function applyChunkConditions(chunks, chat, settings) {
         isGroupChat: settings.isGroupChat || false,
         currentCharacter: settings.currentCharacter || null,
         activeLorebookEntries: settings.activeLorebookEntries || [],
-        activationHistory: window.VectFox_ActivationHistory || {}
+        activationHistory: window.VectTauri_ActivationHistory || {}
     });
 
     // Filter chunks by their conditions
@@ -241,7 +241,7 @@ async function applyChunkConditions(chunks, chat, settings) {
         }
     });
 
-    log.verbose(`VectFox: Chunk conditions filtered ${filtered.length} → ${conditionFilteredChunks.length}`);
+    log.verbose(`VectTauri: Chunk conditions filtered ${filtered.length} → ${conditionFilteredChunks.length}`);
     return conditionFilteredChunks;
 }
 
@@ -251,12 +251,12 @@ async function applyChunkConditions(chunks, chat, settings) {
  * @param {number} messageCount Current message count
  */
 function trackChunkActivation(hash, messageCount) {
-    if (!window.VectFox_ActivationHistory) {
-        window.VectFox_ActivationHistory = {};
+    if (!window.VectTauri_ActivationHistory) {
+        window.VectTauri_ActivationHistory = {};
     }
 
-    const history = window.VectFox_ActivationHistory[hash] || { count: 0, lastActivation: null };
-    window.VectFox_ActivationHistory[hash] = {
+    const history = window.VectTauri_ActivationHistory[hash] || { count: 0, lastActivation: null };
+    window.VectTauri_ActivationHistory[hash] = {
         count: history.count + 1,
         lastActivation: messageCount
     };
@@ -271,16 +271,16 @@ function trackChunkActivation(hash, messageCount) {
  * 3. Process batch: take message, chunk it, insert chunks, remove from queue
  * 4. Repeat until queue empty
  *
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {number} batchSize Number of messages to process per call
  * @returns {Promise<object>} Progress info
  */
 export async function synchronizeChat(settings, batchSize = 5, triggerEvent = null) {
     log.lifecycle(`[AutoSync] synchronizeChat: invoked (trigger=${triggerEvent || 'unknown'})`);
 
-    // Master switch: no auto-sync work while VectFox is disabled.
-    if (!isVectFoxEnabled(settings)) {
-        log.lifecycle('[AutoSync] BAIL: VectFox master switch OFF');
+    // Master switch: no auto-sync work while VectTauri is disabled.
+    if (!isVectTauriEnabled(settings)) {
+        log.lifecycle('[AutoSync] BAIL: VectTauri master switch OFF');
         return { remaining: -1, messagesProcessed: 0, chunksCreated: 0 };
     }
 
@@ -391,7 +391,7 @@ export async function synchronizeChat(settings, batchSize = 5, triggerEvent = nu
 
 /**
  * Stage 1: Gather all collections that should be queried
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @returns {string[]} Array of collection IDs to query
  */
 function gatherCollectionsToQuery(settings) {
@@ -401,14 +401,14 @@ function gatherCollectionsToQuery(settings) {
     // Workflow isolation:
     //   vf_eventbase_*     → always excluded (EventBase pipeline owns them)
     //   vf_archiveevent_*  → always excluded (EventBase pipeline owns them)
-    //   vf_lorebook_*      → always excluded (Lorebook WI pipeline owns them, injects to <VectFoxLorebook>)
+    //   vf_lorebook_*      → always excluded (Lorebook WI pipeline owns them, injects to <VectTauriLorebook>)
     for (const registryKey of registry) {
         const parsedKey = parseRegistryKey(registryKey);
         const collectionId = parsedKey.collectionId;
 
-        if (collectionId?.startsWith(COLLECTION_PREFIXES.VECTFOX_EVENTBASE) ||
-            collectionId?.startsWith(COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT) ||
-            collectionId?.startsWith(COLLECTION_PREFIXES.VECTFOX_LOREBOOK)) {
+        if (collectionId?.startsWith(COLLECTION_PREFIXES.VECTTAURI_EVENTBASE) ||
+            collectionId?.startsWith(COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT) ||
+            collectionId?.startsWith(COLLECTION_PREFIXES.VECTTAURI_LOREBOOK)) {
             continue;
         }
 
@@ -427,7 +427,7 @@ function gatherCollectionsToQuery(settings) {
 /**
  * Stage 2: Build the search query from recent messages
  * @param {object[]} chat Current chat messages
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @returns {string} Query text
  */
 function buildSearchQuery(chat, settings) {
@@ -444,7 +444,7 @@ function buildSearchQuery(chat, settings) {
  * Stage 3: Query all active collections and merge results
  * @param {string[]} activeCollections Collections that passed activation filters
  * @param {string} queryText Search query
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {object[]} chat Current chat messages
  * @param {object} debugData Debug tracking object
  * @returns {Promise<object[]>} Array of chunk objects with scores
@@ -481,7 +481,7 @@ async function queryAndMergeCollections(activeCollections, queryText, settings, 
                 }))
             });
 
-            log.trace(`VectFox: Retrieved ${queryResults.hashes.length} chunks from ${collectionId}`);
+            log.trace(`VectTauri: Retrieved ${queryResults.hashes.length} chunks from ${collectionId}`);
 
             // Build chunks with text for visualizer
             const collectionChunks = queryResults.metadata.map((meta, idx) => {
@@ -500,7 +500,7 @@ async function queryAndMergeCollections(activeCollections, queryText, settings, 
 
                     // Debug: Log when text is not found
                     if (textSource === 'not_found') {
-                        log.warn(`[VectFox] ⚠️ Chunk text not found! hash=${hash}, meta.text=${meta.text ? 'exists' : 'missing'}, chatMessage=${chatMessage ? 'found' : 'not found'}`);
+                        log.warn(`[VectTauri] ⚠️ Chunk text not found! hash=${hash}, meta.text=${meta.text ? 'exists' : 'missing'}, chatMessage=${chatMessage ? 'found' : 'not found'}`);
                     }
                 }
 
@@ -538,7 +538,7 @@ async function queryAndMergeCollections(activeCollections, queryText, settings, 
 
             chunksForVisualizer.push(...collectionChunks);
         } catch (error) {
-            log.warn(`VectFox: Failed to query collection ${collectionId}:`, error.message);
+            log.warn(`VectTauri: Failed to query collection ${collectionId}:`, error.message);
             addTrace(debugData, 'vector_search', `Query failed for ${collectionId}`, {
                 error: error.message
             });
@@ -560,7 +560,7 @@ async function queryAndMergeCollections(activeCollections, queryText, settings, 
  *
  * @param {object[]} chunks Chunks from query results
  * @param {string[]} activeCollections Collections that were queried
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {object} debugData Debug tracking object
  * @returns {Promise<object[]>} Chunks with summaries expanded to parents
  */
@@ -661,7 +661,7 @@ async function expandSummaryChunks(chunks, activeCollections, settings, debugDat
                         });
                     } else {
                         // Parent not found - keep the summary chunk as fallback
-                        log.warn(`VectFox: Parent chunk ${parentHash} not found for summary ${summaryChunk.hash}, using summary text`);
+                        log.warn(`VectTauri: Parent chunk ${parentHash} not found for summary ${summaryChunk.hash}, using summary text`);
                         expandedChunks.push(summaryChunk);
 
                         recordChunkFate(debugData, summaryChunk.hash, 'summary_expansion', 'passed',
@@ -678,7 +678,7 @@ async function expandSummaryChunks(chunks, activeCollections, settings, debugDat
                 }
             }
         } catch (error) {
-            log.warn(`VectFox: Failed to expand summaries from ${collectionId}:`, error.message);
+            log.warn(`VectTauri: Failed to expand summaries from ${collectionId}:`, error.message);
             // Keep summaries as-is on error
             for (const { summaryChunk } of parentInfos) {
                 expandedChunks.push(summaryChunk);
@@ -733,7 +733,7 @@ function applyThresholdFilter(chunks, threshold, debugData) {
  * Stage 6: Apply chunk-level conditions
  * @param {object[]} chunks Chunks to filter
  * @param {object[]} chat Current chat messages
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {object} debugData Debug tracking object
  * @returns {Promise<object[]>} Chunks that passed conditions
  */
@@ -784,7 +784,7 @@ async function applyConditionsStage(chunks, chat, settings, debugData) {
  * - Processes explicit chunk links (soft boost / hard include)
  * @param {object[]} chunks Chunks to process
  * @param {string[]} activeCollections Active collection IDs (unused, kept for call-site compatibility)
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {object} debugData Debug tracking object
  * @returns {Promise<object[]>} Processed chunks with links applied
  */
@@ -851,7 +851,7 @@ async function applyGroupsAndLinksStage(chunks, activeCollections, settings, deb
  * Forced chunks are marked forceLinked and given a top score so they survive to injection.
  * @param {number[]} missingHashes Force-link target hashes not present in results
  * @param {Map<number,string>} targetCollection parseInt(hash) -> collectionId
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @returns {Promise<object[]>} Chunk objects ready to inject
  */
 async function fetchForceLinkedChunks(missingHashes, targetCollection, settings) {
@@ -876,7 +876,7 @@ async function fetchForceLinkedChunks(missingHashes, targetCollection, settings)
             for (const hash of hashes) {
                 const meta = lookup.get(String(hash));
                 if (!meta) {
-                    log.warn(`VectFox: Force-linked target ${hash} not found in ${collectionId}`);
+                    log.warn(`VectTauri: Force-linked target ${hash} not found in ${collectionId}`);
                     continue;
                 }
                 fetched.push({
@@ -892,7 +892,7 @@ async function fetchForceLinkedChunks(missingHashes, targetCollection, settings)
                 });
             }
         } catch (error) {
-            log.warn(`VectFox: Failed to fetch force-linked chunks from ${collectionId}:`, error.message);
+            log.warn(`VectTauri: Failed to fetch force-linked chunks from ${collectionId}:`, error.message);
         }
     }
     return fetched;
@@ -903,7 +903,7 @@ async function fetchForceLinkedChunks(missingHashes, targetCollection, settings)
  * Only checks against recent messages within the context window, not entire chat history.
  * @param {object[]} chunks Chunks to deduplicate
  * @param {object[]} chat Current chat messages
- * @param {object} settings VECTFOX settings (uses deduplication_depth)
+ * @param {object} settings VECTTAURI settings (uses deduplication_depth)
  * @param {object} debugData Debug tracking object
  * @returns {{toInject: object[], skipped: object[]}} Chunks to inject and skipped duplicates
  */
@@ -923,8 +923,8 @@ function deduplicateChunks(chunks, chat, settings, debugData) {
         ? chat.slice(-deduplicationDepth)
         : chat;
 
-    log.verbose(`[VECTFOX Dedup] Building hash set from ${recentMessages.length} recent messages (depth: ${deduplicationDepth})`);
-    log.verbose(`[VECTFOX Dedup] Total chat length: ${chat.length}, checking duplicates in last ${recentMessages.length} messages`);
+    log.verbose(`[VECTTAURI Dedup] Building hash set from ${recentMessages.length} recent messages (depth: ${deduplicationDepth})`);
+    log.verbose(`[VECTTAURI Dedup] Total chat length: ${chat.length}, checking duplicates in last ${recentMessages.length} messages`);
 
     // Build set of hashes currently in chat context
     const currentChatHashes = new Set();
@@ -950,7 +950,7 @@ function deduplicateChunks(chunks, chat, settings, debugData) {
         }
     });
 
-    log.verbose(`[VECTFOX Dedup] Built hash set with ${currentChatHashes.size} unique message hashes from recent context`);
+    log.verbose(`[VECTTAURI Dedup] Built hash set with ${currentChatHashes.size} unique message hashes from recent context`);
 
     const toInject = [];
     const skipped = [];
@@ -960,7 +960,7 @@ function deduplicateChunks(chunks, chat, settings, debugData) {
 
         if (isInChat) {
             const matchedMsg = chatHashMap.get(chunk.hash);
-            log.trace(`[VECTFOX Dedup] ❌ SKIPPING chunk (hash: ${chunk.hash})`);
+            log.trace(`[VECTTAURI Dedup] ❌ SKIPPING chunk (hash: ${chunk.hash})`);
             log.trace(`  Chunk text: "${chunk.text?.substring(0, 80)}..."`);
             log.trace(`  Matches chat message #${matchedMsg.index} from ${matchedMsg.name}: "${matchedMsg.preview}..."`);
             log.trace(`  Score: ${chunk.score?.toFixed(4)}, Collection: ${chunk.collectionId}`);
@@ -971,7 +971,7 @@ function deduplicateChunks(chunks, chat, settings, debugData) {
                 { score: chunk.score }
             );
         } else {
-            log.trace(`[VECTFOX Dedup] ✅ KEEPING chunk (hash: ${chunk.hash}, score: ${chunk.score?.toFixed(4)})`);
+            log.trace(`[VECTTAURI Dedup] ✅ KEEPING chunk (hash: ${chunk.hash}, score: ${chunk.score?.toFixed(4)})`);
             log.trace(`  Text: "${chunk.text?.substring(0, 80)}..."`);
 
             toInject.push(chunk);
@@ -988,7 +988,7 @@ function deduplicateChunks(chunks, chat, settings, debugData) {
         skippedDuplicates: skipped.length
     });
 
-    log.verbose(`[VECTFOX Dedup] FINAL: ${toInject.length} will inject, ${skipped.length} skipped as duplicates`);
+    log.verbose(`[VECTTAURI Dedup] FINAL: ${toInject.length} will inject, ${skipped.length} skipped as duplicates`);
 
     return { toInject, skipped };
 }
@@ -1001,7 +1001,7 @@ function deduplicateChunks(chunks, chat, settings, debugData) {
  * 3. Chunk wrapper (innermost, per-chunk)
  *
  * @param {object[]} chunks Chunks to inject
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @returns {string} Formatted injection text
  */
 function buildNestedInjectionText(chunks, settings) {
@@ -1087,7 +1087,7 @@ function buildNestedInjectionText(chunks, settings) {
  * Resolves the effective injection position for a chunk using cascade:
  * chunk → collection → global
  * @param {object} chunk Chunk with collectionId
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @returns {{position: number, depth: number}} Resolved position and depth
  */
 function resolveChunkInjectionPosition(chunk, settings) {
@@ -1108,7 +1108,7 @@ function resolveChunkInjectionPosition(chunk, settings) {
  * Groups chunks by their resolved position+depth and creates separate injections.
  *
  * @param {object[]} chunksToInject Chunks to inject
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {object} debugData Debug tracking object
  * @returns {{verified: boolean, text: string}} Injection result
  */
@@ -1116,7 +1116,7 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
     const injectionDebug = log.domainEnabled('injection');
     // Control print: Log chunks QUEUED for injection (not yet injected)
     if (injectionDebug) {
-        log.domain('injection', 'trace', `[VECTFOX Injection Control] Preparing to inject ${chunksToInject.length} chunks`);
+        log.domain('injection', 'trace', `[VECTTAURI Injection Control] Preparing to inject ${chunksToInject.length} chunks`);
         log.domain('injection', 'trace', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         let emptyTextCount = 0;
         chunksToInject.forEach((chunk, idx) => {
@@ -1133,7 +1133,7 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
             log.domain('injection', 'trace', '      ─────────────────────────────────────────────────────────────────');
         });
         if (emptyTextCount > 0) {
-            log.warn(`[VECTFOX Injection Control] ⚠️ WARNING: ${emptyTextCount}/${chunksToInject.length} chunks have empty or placeholder text!`);
+            log.warn(`[VECTTAURI Injection Control] ⚠️ WARNING: ${emptyTextCount}/${chunksToInject.length} chunks have empty or placeholder text!`);
         }
         log.domain('injection', 'trace', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
@@ -1157,8 +1157,8 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
         const insertedText = buildNestedInjectionText(group.chunks, settings);
 
         if (injectionDebug) {
-            log.domain('injection', 'trace', `[VECTFOX Injection Control] Single position injection: position="${group.position}", depth=${group.depth}, chunks=${group.chunks.length}, textLength=${insertedText.length}`);
-            log.domain('injection', 'trace', `[VECTFOX Injection Control] Injection text preview: "${insertedText.substring(0, 200)}${insertedText.length > 200 ? '...' : ''}"`); 
+            log.domain('injection', 'trace', `[VECTTAURI Injection Control] Single position injection: position="${group.position}", depth=${group.depth}, chunks=${group.chunks.length}, textLength=${insertedText.length}`);
+            log.domain('injection', 'trace', `[VECTTAURI Injection Control] Injection text preview: "${insertedText.substring(0, 200)}${insertedText.length > 200 ? '...' : ''}"`); 
         }
 
         setExtensionPrompt(EXTENSION_PROMPT_TAG, insertedText, group.position, group.depth, false);
@@ -1168,8 +1168,8 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
         const injectionVerified = verifiedPrompt && verifiedPrompt.value === insertedText;
 
         if (injectionDebug) {
-            log.domain('injection', 'trace', `[VECTFOX Injection Control] Injection verification: ${injectionVerified ? '✓ PASSED' : '✗ FAILED'}`);
-            log.domain('injection', 'trace', `[VECTFOX Injection Control] extension_prompts[${EXTENSION_PROMPT_TAG}]:`, {
+            log.domain('injection', 'trace', `[VECTTAURI Injection Control] Injection verification: ${injectionVerified ? '✓ PASSED' : '✗ FAILED'}`);
+            log.domain('injection', 'trace', `[VECTTAURI Injection Control] extension_prompts[${EXTENSION_PROMPT_TAG}]:`, {
                 exists: !!verifiedPrompt,
                 valueLength: verifiedPrompt?.value?.length,
                 position: verifiedPrompt?.position,
@@ -1179,7 +1179,7 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
         }
 
         if (!injectionVerified) {
-            log.warn('VectFox: ⚠️ Injection verification failed!', {
+            log.warn('VectTauri: ⚠️ Injection verification failed!', {
                 expected: insertedText.substring(0, 100) + '...',
                 actual: verifiedPrompt?.value?.substring(0, 100) + '...',
                 promptExists: !!verifiedPrompt
@@ -1198,7 +1198,7 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
     }
 
     // Multiple injection positions - create separate extension prompts for each
-    if (injectionDebug) log.domain('injection', 'trace', `[VECTFOX Injection Control] Multiple position injection: ${positionGroups.size} different positions`);
+    if (injectionDebug) log.domain('injection', 'trace', `[VECTTAURI Injection Control] Multiple position injection: ${positionGroups.size} different positions`);
 
     // Clear the main tag first (will be unused when multi-position)
     setExtensionPrompt(EXTENSION_PROMPT_TAG, '', settings.position, settings.depth, false);
@@ -1213,7 +1213,7 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
         const groupText = buildNestedInjectionText(group.chunks, groupSettings);
 
         if (injectionDebug) {
-            log.domain('injection', 'trace', `[VECTFOX Injection Control] Position group ${groupIndex + 1}/${positionGroups.size}: key="${key}", chunks=${group.chunks.length}, textLength=${groupText.length}`);
+            log.domain('injection', 'trace', `[VECTTAURI Injection Control] Position group ${groupIndex + 1}/${positionGroups.size}: key="${key}", chunks=${group.chunks.length}, textLength=${groupText.length}`);
             group.chunks.forEach((chunk, idx) => {
                 log.domain('injection', 'trace', `    [${idx + 1}/${group.chunks.length}] Hash: ${chunk.hash}, Score: ${chunk.score?.toFixed(4)}`);
             });
@@ -1228,10 +1228,10 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
         const verifiedPrompt = extension_prompts[tag];
         const verified = verifiedPrompt && verifiedPrompt.value === groupText;
 
-        if (injectionDebug) log.domain('injection', 'trace', `[VECTFOX Injection Control] Position group ${groupIndex + 1} verification: ${verified ? '✓ PASSED' : '✗ FAILED'}`);
+        if (injectionDebug) log.domain('injection', 'trace', `[VECTTAURI Injection Control] Position group ${groupIndex + 1} verification: ${verified ? '✓ PASSED' : '✗ FAILED'}`);
 
         if (!verified) {
-            log.warn(`VectFox: ⚠️ Injection verification failed for position ${key}`, {
+            log.warn(`VectTauri: ⚠️ Injection verification failed for position ${key}`, {
                 tag,
                 expected: groupText.substring(0, 100) + '...',
                 actual: verifiedPrompt?.value?.substring(0, 100) + '...'
@@ -1253,7 +1253,7 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
         groupIndex++;
     }
 
-    if (injectionDebug) log.domain('injection', 'trace', `[VECTFOX Injection Control] Injection complete: ${allVerified ? '✓ All verified' : '✗ Some failed'}, ${allTexts.length} groups`);
+    if (injectionDebug) log.domain('injection', 'trace', `[VECTTAURI Injection Control] Injection complete: ${allVerified ? '✓ All verified' : '✗ Some failed'}, ${allTexts.length} groups`);
 
     return {
         verified: allVerified,
@@ -1269,11 +1269,11 @@ function injectChunksIntoPrompt(chunksToInject, settings, debugData) {
  * Empty every prompt block the generation interceptor owns: the chunk block, its
  * per-position variants, EventBase memory and Summarizer Injection. ST keeps an
  * extension prompt until it is overwritten, so a block that is not cleared keeps
- * reaching the model on every later generation — including turns VectFox skips.
+ * reaching the model on every later generation — including turns VectTauri skips.
  * The lorebook block is not included: the GENERATION_STARTED handler owns it and
  * fills it before the interceptor runs (see clearLorebookPrompt).
  *
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  */
 export function clearInterceptorPrompts(settings) {
     setExtensionPrompt(EXTENSION_PROMPT_TAG, '', settings.position, settings.depth, false);
@@ -1293,14 +1293,14 @@ export function clearInterceptorPrompts(settings) {
  * enabled collections like lorebooks, documents, character files, etc.
  *
  * @param {object[]} chat Current chat messages
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {string} type Generation type
  */
 export async function rearrangeChat(chat, settings, type, { dryRun = false, testMessage = null } = {}) {
     try {
         // === EARLY EXITS ===
         if (!dryRun && type === 'quiet') {
-            log.trace('VectFox: Skipping quiet prompt');
+            log.trace('VectTauri: Skipping quiet prompt');
             return;
         }
 
@@ -1313,22 +1313,22 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
 
         // Master switch: inject nothing into live generation when disabled. The dry-run
         // query tester stays functional so users can still inspect retrieval while
-        // VectFox is off.
-        if (!dryRun && !isVectFoxEnabled(settings)) {
-            log.trace('VectFox: master switch OFF — skipping retrieval/injection');
+        // VectTauri is off.
+        if (!dryRun && !isVectTauriEnabled(settings)) {
+            log.trace('VectTauri: master switch OFF — skipping retrieval/injection');
             return;
         }
 
-        log.lifecycle(`🐰 VectFox: rearrangeChat called (type: ${type}, chat length: ${chat?.length || 0}${dryRun ? ', dryRun=true' : ''})`);
+        log.lifecycle(`🐰 VectTauri: rearrangeChat called (type: ${type}, chat length: ${chat?.length || 0}${dryRun ? ', dryRun=true' : ''})`);
 
         if (!getCurrentChatId() || !Array.isArray(chat)) {
-            log.trace('VectFox: No chat selected');
+            log.trace('VectTauri: No chat selected');
             return dryRun ? { injectionText: null, chunkCount: 0 } : undefined;
         }
 
         const minChatLength = settings.min_chat_length ?? 0;
         if (!dryRun && minChatLength > 0 && chat.length < minChatLength) {
-            log.warn(`⚠️ VectFox: Not enough messages to inject chunks (${chat.length} < ${minChatLength})`);
+            log.warn(`⚠️ VectTauri: Not enough messages to inject chunks (${chat.length} < ${minChatLength})`);
             log.lifecycle(`   💡 You need at least ${minChatLength} messages before chunk injection starts`);
             return;
         }
@@ -1386,7 +1386,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
                 const { applyGhosting } = await import('./summarizer-injection.js');
                 applyGhosting(chat, settings);
             } catch (error) {
-                log.error('VectFox Ghost: prompt wipe error (non-fatal):', error);
+                log.error('VectTauri Ghost: prompt wipe error (non-fatal):', error);
             }
         } // end if (!dryRun) EventBase block
 
@@ -1396,19 +1396,19 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         const canQueryWI = settings.enabled_world_info;
 
         if (!hasCollections && !canQueryWI) {
-            log.trace('[VECTFOX ChunkBase] No enabled ChunkBase collections and World Info disabled — skipping non-chat chunk injection (this is normal if you only use EventBase).');
+            log.trace('[VECTTAURI ChunkBase] No enabled ChunkBase collections and World Info disabled — skipping non-chat chunk injection (this is normal if you only use EventBase).');
             return dryRun ? { injectionText: null, chunkCount: 0, noCollections: true } : undefined;
         }
         if (hasCollections) {
-            log.verbose(`VectFox: Will query ${collectionsToQuery.length} collections:`, collectionsToQuery);
+            log.verbose(`VectTauri: Will query ${collectionsToQuery.length} collections:`, collectionsToQuery);
         } else {
-            log.verbose('VectFox: No ChunkBase collections enabled (lorebooks are handled by the Lorebook WI pipeline)');
+            log.verbose('VectTauri: No ChunkBase collections enabled (lorebooks are handled by the Lorebook WI pipeline)');
         }
 
         // === STAGE 2: Build search query ===
         const queryText = testMessage || buildSearchQuery(chat, settings);
         if (queryText.length === 0) {
-            log.trace('VectFox: No text to query');
+            log.trace('VectTauri: No text to query');
             return dryRun ? { injectionText: null, chunkCount: 0 } : undefined;
         }
 
@@ -1419,7 +1419,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
             baseWeight: settings.keyword_boost_base_weight || 1.5
         });
         const queryKeywordTexts = queryKeywords.map(kw => kw.text.toLowerCase());
-        log.trace(`VectFox: Extracted ${queryKeywords.length} keywords from query:`, queryKeywordTexts);
+        log.trace(`VectTauri: Extracted ${queryKeywords.length} keywords from query:`, queryKeywordTexts);
 
         // === STAGE 3: Filter by activation conditions ===
         let activeCollections = [];
@@ -1440,7 +1440,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         const preEmptyFilter = activeCollections.length;
         activeCollections = activeCollections.filter(key => !isCollectionEmpty(key));
         if (activeCollections.length < preEmptyFilter) {
-            log.verbose(`VectFox: Skipped ${preEmptyFilter - activeCollections.length} empty collection(s) from retrieval`);
+            log.verbose(`VectTauri: Skipped ${preEmptyFilter - activeCollections.length} empty collection(s) from retrieval`);
         }
 
         // Allow WI-only mode even if no regular collections pass filters.
@@ -1452,11 +1452,11 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         // EventBase injection happens on its own path (eventbase-workflow.js)
         // and is unaffected by this branch.
         if (activeCollections.length === 0 && !canQueryWI) {
-            log.trace('[VECTFOX ChunkBase] No active Standard/ChunkBase collections and World Info disabled — skipping non-chat chunk injection (this is normal if you only use EventBase).');
+            log.trace('[VECTTAURI ChunkBase] No active Standard/ChunkBase collections and World Info disabled — skipping non-chat chunk injection (this is normal if you only use EventBase).');
             return dryRun ? { injectionText: null, chunkCount: 0, noActive: true } : undefined;
         }
         if (activeCollections.length > 0) {
-            log.verbose(`✅ VectFox: ${activeCollections.length} collections passed activation filters:`, activeCollections);
+            log.verbose(`✅ VectTauri: ${activeCollections.length} collections passed activation filters:`, activeCollections);
         }
 
         // === INITIALIZE DEBUG DATA ===
@@ -1489,7 +1489,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         // We suppress the ChunkBase popups when activeCollections is empty (WI-only mode)
         // — the "0 results" message would just be misleading noise.
         if (activeCollections.length > 0 && settings.retrieval_popup_on_start) {
-            toastr.info(`Retrieving context from ${activeCollections.length} collection(s)...`, 'VectFox Retrieval');
+            toastr.info(`Retrieving context from ${activeCollections.length} collection(s)...`, 'VectTauri Retrieval');
         }
 
         // Same contract as EventBase above (core/bounded-retrieval.js): on failure
@@ -1506,7 +1506,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         );
 
         if (activeCollections.length > 0 && settings.retrieval_popup_on_result) {
-            toastr.success(`Retrieved ${chunks.length} result(s) from backend`, 'VectFox Retrieval');
+            toastr.success(`Retrieved ${chunks.length} result(s) from backend`, 'VectTauri Retrieval');
         }
 
         // === STAGE 4.3: Boost chunks with matching query keywords ===
@@ -1545,7 +1545,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
             }
 
             if (keywordMatchCount > 0) {
-                log.verbose(`VectFox: Boosted ${keywordMatchCount}/${chunks.length} chunks with matching keywords to 100% score`);
+                log.verbose(`VectTauri: Boosted ${keywordMatchCount}/${chunks.length} chunks with matching keywords to 100% score`);
                 debugData.stages.afterKeywordBoost = [...chunks];
                 debugData.stats.keywordBoosted = keywordMatchCount;
                 addTrace(debugData, 'keyword_boost', `Boosted ${keywordMatchCount} chunks with keyword matches`, {
@@ -1553,11 +1553,11 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
                     boostedCount: keywordMatchCount
                 });
             } else {
-                log.verbose(`VectFox: No chunks matched query keywords, all ${chunks.length} chunks keep original scores`);
+                log.verbose(`VectTauri: No chunks matched query keywords, all ${chunks.length} chunks keep original scores`);
             }
         }
 
-        log.verbose(`VectFox: Retrieved ${chunks.length} total chunks from ${activeCollections.length} collections`);
+        log.verbose(`VectTauri: Retrieved ${chunks.length} total chunks from ${activeCollections.length} collections`);
 
         debugData.stages.initial = [...chunks];
         debugData.stats.retrievedFromVector = chunks.length;
@@ -1567,7 +1567,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         chunks = await expandSummaryChunks(chunks, activeCollections, settings, debugData);
         if (chunks.length !== chunksBeforeExpansion || chunks.some(c => c.expandedFromSummary)) {
             const expandedCount = chunks.filter(c => c.expandedFromSummary).length;
-            log.verbose(`VectFox: Expanded ${expandedCount} summary chunks to parent text`);
+            log.verbose(`VectTauri: Expanded ${expandedCount} summary chunks to parent text`);
             debugData.stages.afterSummaryExpansion = [...chunks];
             debugData.stats.summariesExpanded = expandedCount;
         }
@@ -1588,32 +1588,32 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         debugData.stats.afterGroups = chunks.length;
 
         // Store for legacy visualizer
-        window.VectFox_LastSearch = {
+        window.VectTauri_LastSearch = {
             chunks: chunks,
             query: queryText,
             timestamp: Date.now(),
             settings: { threshold: settings.score_threshold, topK: (settings.top_k ?? settings.insert) }
         };
-        log.verbose(`VectFox: Stored ${chunks.length} chunks for visualizer`);
+        log.verbose(`VectTauri: Stored ${chunks.length} chunks for visualizer`);
 
         // === STAGE 9: Deduplicate ===
-        log.verbose(`[VECTFOX Deduplication] Starting with ${chunks.length} chunks before deduplication`);
-        log.verbose(`[VECTFOX Deduplication] Current chat has ${chat.length} messages`);
+        log.verbose(`[VECTTAURI Deduplication] Starting with ${chunks.length} chunks before deduplication`);
+        log.verbose(`[VECTTAURI Deduplication] Current chat has ${chat.length} messages`);
 
         const { toInject: chunksToInject, skipped: skippedDuplicates } = deduplicateChunks(chunks, chat, settings, debugData);
 
-        log.verbose(`[VECTFOX Deduplication] After deduplication: ${chunksToInject.length} to inject, ${skippedDuplicates.length} skipped`);
+        log.verbose(`[VECTTAURI Deduplication] After deduplication: ${chunksToInject.length} to inject, ${skippedDuplicates.length} skipped`);
         if (skippedDuplicates.length > 0) {
-            log.verbose(`[VECTFOX Deduplication] Skipped chunks (already in chat):`);
+            log.verbose(`[VECTTAURI Deduplication] Skipped chunks (already in chat):`);
             skippedDuplicates.forEach((chunk, idx) => {
                 log.trace(`  [${idx + 1}] Hash: ${chunk.hash}, Score: ${chunk.score?.toFixed(4)}, Text: "${chunk.text?.substring(0, 80)}..."`);
             });
         }
 
         if (chunksToInject.length === 0) {
-            log.lifecycle('ℹ️ VectFox: All retrieved chunks already in context, nothing to inject');
+            log.lifecycle('ℹ️ VectTauri: All retrieved chunks already in context, nothing to inject');
             log.verbose(`   ${skippedDuplicates.length} chunks were skipped (already in current chat)`);
-            log.lifecycle('[VectFox] Injection blocked: All retrieved chunks are already present in the current chat context. Adjust temporal decay or query depth if you want older messages.');
+            log.lifecycle('[VectTauri] Injection blocked: All retrieved chunks are already present in the current chat context. Adjust temporal decay or query depth if you want older messages.');
             debugData.stages.injected = [];
             debugData.stats.actuallyInjected = 0;
             debugData.stats.skippedDuplicates = skippedDuplicates.length;
@@ -1625,7 +1625,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
             return dryRun ? { injectionText: null, chunkCount: 0, allDuplicates: true } : undefined;
         }
 
-        log.verbose(`[VECTFOX Deduplication] ✅ ${chunksToInject.length} chunks will proceed to injection`);
+        log.verbose(`[VECTTAURI Deduplication] ✅ ${chunksToInject.length} chunks will proceed to injection`);
 
         // === STAGE 10: Inject into prompt (or return dry-run result) ===
         if (dryRun) {
@@ -1636,7 +1636,7 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
 
         const injection = injectChunksIntoPrompt(chunksToInject, settings, debugData);
 
-        log.lifecycle(`\n✅ VectFox: Successfully injected ${chunksToInject.length} chunk(s) into prompt`);
+        log.lifecycle(`\n✅ VectTauri: Successfully injected ${chunksToInject.length} chunk(s) into prompt`);
         log.verbose(`   Verification: ${injection.verified ? '✓ PASSED' : '✗ FAILED'}`);
         log.verbose(`   Total characters injected: ${injection.text.length}\n`);
 
@@ -1664,17 +1664,17 @@ export async function rearrangeChat(chat, settings, type, { dryRun = false, test
         });
 
         setLastSearchDebug(debugData);
-        log.lifecycle(`VectFox: ✅ Injected ${chunksToInject.length} chunks (${skippedDuplicates.length} skipped - already in context)`);
+        log.lifecycle(`VectTauri: ✅ Injected ${chunksToInject.length} chunks (${skippedDuplicates.length} skipped - already in context)`);
 
     } catch (error) {
-        toastr.error(`Generation interceptor aborted: ${error.message}`, 'VectFox');
-        log.error('VectFox: Failed to rearrange chat', error);
+        toastr.error(`Generation interceptor aborted: ${error.message}`, 'VectTauri');
+        log.error('VectTauri: Failed to rearrange chat', error);
     }
 }
 
 /**
  * Vectorizes entire chat
- * @param {object} settings VECTFOX settings
+ * @param {object} settings VECTTAURI settings
  * @param {number} batchSize Batch size
  */
 export async function vectorizeAll(settings, batchSize, abortSignal = null, {
@@ -1698,7 +1698,7 @@ export async function vectorizeAll(settings, batchSize, abortSignal = null, {
                 `Backend "${backendName}" is not available. Check your settings or start the backend service.`,
                 'Vectorization aborted'
             );
-            log.error(`VectFox: Backend ${backendName} failed health check before vectorization`);
+            log.error(`VectTauri: Backend ${backendName} failed health check before vectorization`);
             return;
         }
 
@@ -1749,24 +1749,24 @@ export async function vectorizeAll(settings, batchSize, abortSignal = null, {
             toastr.warning(
                 `EventBase: extracted ${result.eventsExtracted} events from ${result.windowsProcessed} windows, `
                 + `but ${unfinishedWindows} window(s) produced nothing. They were not stored and will be retried next run — see the console.`,
-                'VectFox',
+                'VectTauri',
             );
-            log.warn(`VectFox: Vectorization finished with gaps — ${result.eventsExtracted} events, ${result.windowsProcessed} windows processed, ${unfinishedWindows} unfinished`);
+            log.warn(`VectTauri: Vectorization finished with gaps — ${result.eventsExtracted} events, ${result.windowsProcessed} windows processed, ${unfinishedWindows} unfinished`);
             return;
         }
 
         progressTracker.complete(true, `EventBase: extracted ${result.eventsExtracted} events from ${result.windowsProcessed} windows`);
-        toastr.success(`EventBase: extracted ${result.eventsExtracted} events across ${result.windowsProcessed} windows`, 'VectFox');
-        log.lifecycle(`VectFox: ✅ Vectorization complete — ${result.eventsExtracted} events, ${result.windowsProcessed} windows processed, ${result.windowsSkipped} skipped`);
+        toastr.success(`EventBase: extracted ${result.eventsExtracted} events across ${result.windowsProcessed} windows`, 'VectTauri');
+        log.lifecycle(`VectTauri: ✅ Vectorization complete — ${result.eventsExtracted} events, ${result.windowsProcessed} windows processed, ${result.windowsSkipped} skipped`);
     } catch (error) {
-        log.error('VectFox: Failed to vectorize all', error);
+        log.error('VectTauri: Failed to vectorize all', error);
         progressTracker.addError(error.message);
         progressTracker.complete(false, 'Vectorization failed');
         const { isInvalidModelConfigError, notifyInvalidModel } = await import('./model-config-notifier.js');
         if (isInvalidModelConfigError(error)) {
             notifyInvalidModel(error.message);
         } else {
-            toastr.error(`Vectorization failed: ${error.message}`, 'VectFox');
+            toastr.error(`Vectorization failed: ${error.message}`, 'VectTauri');
         }
     }
 }

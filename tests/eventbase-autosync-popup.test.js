@@ -8,7 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const state = vi.hoisted(() => ({ extensionSettings: { vectfox: {} }, points: [] }));
+const state = vi.hoisted(() => ({ extensionSettings: { vecttauri: {} }, points: [] }));
 
 vi.mock('../../../../../script.js', () => ({
     setExtensionPrompt: vi.fn(), extension_prompts: {}, getCurrentChatId: () => 'popup-chat', substituteParams: (s) => s,
@@ -17,7 +17,7 @@ vi.mock('../../../../../script.js', () => ({
 vi.mock('../../../../extensions.js', () => ({ extension_settings: state.extensionSettings, getContext: () => ({ chat: [] }) }));
 vi.mock('../core/collection-ids.js', () => ({
     getChatUUID: () => 'popup-uuid', parseRegistryKey: (k) => ({ collectionId: k }),
-    COLLECTION_PREFIXES: { VECTFOX_ARCHIVE_EVENT: 'vf_archiveevent_', VECTFOX_EVENTBASE: 'vf_eventbase_' },
+    COLLECTION_PREFIXES: { VECTTAURI_ARCHIVE_EVENT: 'vf_archiveevent_', VECTTAURI_EVENTBASE: 'vf_eventbase_' },
     buildRegistryKey: (id) => `qdrant:${id}`, buildEventBaseCollectionId: () => 'vf_eventbase_popup', getRegistryBackend: () => 'qdrant',
     buildChatSearchPatterns: () => [], matchesPatterns: () => false,
 }));
@@ -26,7 +26,7 @@ vi.mock('../core/core-vector-api.js', () => ({
     queryCollection: vi.fn(), insertVectorItems: vi.fn(), deleteVectorItems: vi.fn(), getAdditionalArgs: vi.fn(),
     getSavedHashes: async () => state.points.map((_, i) => i),
 }));
-vi.mock('../core/constants.js', () => ({ EVENTBASE_PROMPT_TAG: '3_vectfox_eventbase' }));
+vi.mock('../core/constants.js', () => ({ EVENTBASE_PROMPT_TAG: '3_vecttauri_eventbase' }));
 vi.mock('../core/eventbase-schema.js', () => ({
     EventBaseFatalError: class extends Error {}, EventBaseExtractionError: class extends Error {}, buildEmbedText: (e) => e.summary,
 }));
@@ -75,14 +75,14 @@ describe('auto-sync popup', () => {
     beforeEach(() => {
         globalThis.toastr = { info: vi.fn(), error: vi.fn(), success: vi.fn(), warning: vi.fn() };
         state.points.length = 0;
-        state.extensionSettings.vectfox = {};
+        state.extensionSettings.vecttauri = {};
     });
 
     // Live case: marker stamped at 450 on a 452-message chat. The quick-exit misses
     // (window 448-449 was never extracted, it predates the marker) but the marker
     // filter leaves nothing to do.
     it('stays hidden when the start-marker filter leaves no window to extract', async () => {
-        state.extensionSettings.vectfox.eventbase_autosync_start_marker = { 'marker-uuid': 450 };
+        state.extensionSettings.vecttauri.eventbase_autosync_start_marker = { 'marker-uuid': 450 };
 
         const result = await autoSync(buildChat(452), 'marker-uuid');
 

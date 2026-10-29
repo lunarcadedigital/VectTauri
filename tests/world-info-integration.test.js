@@ -12,7 +12,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // /core/ files import via "../../../../extensions.js". The jsdom directive
 // was removed because it broke vite's import-analysis pre-pass for these mocks.
 vi.mock('../../../../extensions.js', () => ({
-    extension_settings: { vectfox: {} },
+    extension_settings: { vecttauri: {} },
     getContext: vi.fn(() => ({
         chat: [],
         groupId: null,
@@ -73,10 +73,10 @@ const _testState = vi.hoisted(() => ({
 }));
 
 vi.mock('../core/collection-loader.js', () => ({
-    // getCollectionListing: synthesize entries from settings.vectfox_collection_registry.
+    // getCollectionListing: synthesize entries from settings.vecttauri_collection_registry.
     // sourceName and enabled come from _testState (tests set them in beforeEach).
     getCollectionListing: vi.fn((settings) => {
-        const registry = settings?.vectfox_collection_registry || [];
+        const registry = settings?.vecttauri_collection_registry || [];
         return registry.map(key => ({
             registryKey: key,
             collectionId: key.startsWith('vf_') ? key : `vf_${key}`,
@@ -89,15 +89,15 @@ vi.mock('../core/collection-loader.js', () => ({
     }),
     // getCollectionRegistry: production reads extension_settings (no args).
     // The world-info-integration.js source was updated to honor a passed-in
-    // settings.vectfox_collection_registry override, so most tests work via
+    // settings.vecttauri_collection_registry override, so most tests work via
     // that. _testState.registry stays as the fallback for tests that call
     // helpers without explicit settings.
     getCollectionRegistry: vi.fn(() => _testState.registry),
 }));
 
 vi.mock('../core/constants.js', () => ({
-    EXTENSION_PROMPT_TAG: 'vectfox_world_info',
-    LOREBOOK_PROMPT_TAG: 'vectfox_lorebook',
+    EXTENSION_PROMPT_TAG: 'vecttauri_world_info',
+    LOREBOOK_PROMPT_TAG: 'vecttauri_lorebook',
     // Reached via backends -> embedding-latency-warning -> retrieval-budget,
     // which derives its slow-embed log threshold from the retrieval budget.
     // All seven are required: retrieval-budget.js imports them by name, and a
@@ -177,7 +177,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -201,7 +201,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.6,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -226,7 +226,7 @@ describe('getSemanticWorldInfoEntries', () => {
             vector_backend: 'qdrant',
             hybrid_native_prefer: true,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -246,7 +246,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 5,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -270,7 +270,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -293,7 +293,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -316,7 +316,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['chat_history_123', 'vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['chat_history_123', 'vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -335,7 +335,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_disabled_T0', 'vf_lorebook_global_enabled_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_disabled_T0', 'vf_lorebook_global_enabled_T0'],
         };
 
         // Source reads enabled flag from entry.meta.enabled (set via getCollectionListing
@@ -360,7 +360,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_blocked_T0', 'vf_lorebook_global_allowed_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_blocked_T0', 'vf_lorebook_global_allowed_T0'],
         };
 
         // Only 'allowed' collection passes activation
@@ -382,7 +382,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockRejectedValue(new Error('Query failed'));
@@ -397,7 +397,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({ hashes: [], metadata: [] });
@@ -420,7 +420,7 @@ describe('getSemanticWorldInfoEntries', () => {
             world_info_query_depth: 2,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({ hashes: [], metadata: [] });
@@ -441,7 +441,7 @@ describe('getSemanticWorldInfoEntries', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         // Source reads sourceName from entry.meta.sourceName (set via getCollectionListing
@@ -475,7 +475,7 @@ describe('isLorebookVectorized', () => {
         // buildLorebookCollectionId, because collection IDs include backend+handle+
         // timestamp segments that can't be reconstructed from the name alone.
         const settings = {
-            vectfox_collection_registry: ['vf_lorebook_global_testbook_T0', 'other_collection'],
+            vecttauri_collection_registry: ['vf_lorebook_global_testbook_T0', 'other_collection'],
         };
 
         const result = isLorebookVectorized('testbook', settings);
@@ -486,7 +486,7 @@ describe('isLorebookVectorized', () => {
     it('should return false when lorebook is not in registry', () => {
         buildLorebookCollectionId.mockReturnValue('vf_lorebook_global_missing_T0');
         const settings = {
-            vectfox_collection_registry: ['vf_lorebook_global_other_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_other_T0'],
         };
 
         const result = isLorebookVectorized('missing', settings);
@@ -497,7 +497,7 @@ describe('isLorebookVectorized', () => {
     it('should return false when registry is empty', () => {
         buildLorebookCollectionId.mockReturnValue('vf_lorebook_global_test_T0');
         const settings = {
-            vectfox_collection_registry: [],
+            vecttauri_collection_registry: [],
         };
 
         const result = isLorebookVectorized('test', settings);
@@ -527,7 +527,7 @@ describe('getLorebooksVectorizationStatus', () => {
     it('should return Map with status for each lorebook', () => {
         buildLorebookCollectionId.mockImplementation((name) => `vf_lorebook_global_${name}`);
         const settings = {
-            vectfox_collection_registry: ['vf_lorebook_global_book1_T0', 'vf_lorebook_global_book3_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_book1_T0', 'vf_lorebook_global_book3_T0'],
         };
 
         const result = getLorebooksVectorizationStatus(['book1', 'book2', 'book3'], settings);
@@ -539,7 +539,7 @@ describe('getLorebooksVectorizationStatus', () => {
     });
 
     it('should return empty Map for empty input', () => {
-        const settings = { vectfox_collection_registry: [] };
+        const settings = { vecttauri_collection_registry: [] };
         const result = getLorebooksVectorizationStatus([], settings);
 
         expect(result).toBeInstanceOf(Map);
@@ -548,7 +548,7 @@ describe('getLorebooksVectorizationStatus', () => {
 
     it('should handle all false when registry is empty', () => {
         buildLorebookCollectionId.mockImplementation((name) => `vf_lorebook_global_${name}`);
-        const settings = { vectfox_collection_registry: [] };
+        const settings = { vecttauri_collection_registry: [] };
 
         const result = getLorebooksVectorizationStatus(['book1', 'book2'], settings);
 
@@ -586,7 +586,7 @@ describe('getLorebookVectorStats', () => {
         isCollectionEnabled.mockReturnValue(true);
 
         // Pass registry in settings (source now honors caller-supplied registry)
-        const settings = { vectfox_collection_registry: ['vf_lorebook_global_test_T0'] };
+        const settings = { vecttauri_collection_registry: ['vf_lorebook_global_test_T0'] };
         const result = await getLorebookVectorStats('test', settings);
 
         expect(result).toEqual({
@@ -606,7 +606,7 @@ describe('getLorebookVectorStats', () => {
         });
         isCollectionEnabled.mockReturnValue(false);
 
-        const settings = { vectfox_collection_registry: ['vf_lorebook_global_test_T0'] };
+        const settings = { vecttauri_collection_registry: ['vf_lorebook_global_test_T0'] };
         const result = await getLorebookVectorStats('test', settings);
 
         expect(result.chunkCount).toBe(0);
@@ -630,7 +630,7 @@ describe('enhanceWorldInfoEntriesUI', () => {
 
     it('should return entries unchanged when lorebook is not vectorized', () => {
         buildLorebookCollectionId.mockReturnValue('vf_lorebook_global_test_T0');
-        const settings = { vectfox_collection_registry: [] };
+        const settings = { vecttauri_collection_registry: [] };
         const entries = [
             { uid: 1, content: 'Entry 1' },
             { uid: 2, content: 'Entry 2' },
@@ -644,7 +644,7 @@ describe('enhanceWorldInfoEntriesUI', () => {
 
     it('should add vector status when lorebook is vectorized', () => {
         buildLorebookCollectionId.mockReturnValue('vf_lorebook_global_test_T0');
-        const settings = { vectfox_collection_registry: ['vf_lorebook_global_test_T0'] };
+        const settings = { vecttauri_collection_registry: ['vf_lorebook_global_test_T0'] };
         const entries = [
             { uid: 1, content: 'Entry 1' },
             { uid: 2, content: 'Entry 2' },
@@ -663,7 +663,7 @@ describe('enhanceWorldInfoEntriesUI', () => {
 
     it('should preserve original entry properties', () => {
         buildLorebookCollectionId.mockReturnValue('vf_lorebook_global_test_T0');
-        const settings = { vectfox_collection_registry: ['vf_lorebook_global_test_T0'] };
+        const settings = { vecttauri_collection_registry: ['vf_lorebook_global_test_T0'] };
         const entries = [
             { uid: 1, content: 'Entry 1', customField: 'custom' },
         ];
@@ -677,7 +677,7 @@ describe('enhanceWorldInfoEntriesUI', () => {
 
     it('should handle empty entries array', () => {
         buildLorebookCollectionId.mockReturnValue('vf_lorebook_global_test_T0');
-        const settings = { vectfox_collection_registry: ['vf_lorebook_global_test_T0'] };
+        const settings = { vecttauri_collection_registry: ['vf_lorebook_global_test_T0'] };
 
         const result = enhanceWorldInfoEntriesUI('test', [], settings);
 
@@ -701,15 +701,15 @@ describe('initializeWorldInfoIntegration', () => {
         delete globalThis.window;
     });
 
-    it('should expose functions on window.VectFox_WorldInfo', () => {
+    it('should expose functions on window.VectTauri_WorldInfo', () => {
         initializeWorldInfoIntegration();
 
-        expect(window.VectFox_WorldInfo).toBeDefined();
-        expect(window.VectFox_WorldInfo.getSemanticEntries).toBe(getSemanticWorldInfoEntries);
-        expect(window.VectFox_WorldInfo.isLorebookVectorized).toBe(isLorebookVectorized);
-        expect(window.VectFox_WorldInfo.getVectorizationStatus).toBe(getLorebooksVectorizationStatus);
-        expect(window.VectFox_WorldInfo.getVectorStats).toBe(getLorebookVectorStats);
-        expect(window.VectFox_WorldInfo.enhanceEntriesUI).toBe(enhanceWorldInfoEntriesUI);
+        expect(window.VectTauri_WorldInfo).toBeDefined();
+        expect(window.VectTauri_WorldInfo.getSemanticEntries).toBe(getSemanticWorldInfoEntries);
+        expect(window.VectTauri_WorldInfo.isLorebookVectorized).toBe(isLorebookVectorized);
+        expect(window.VectTauri_WorldInfo.getVectorizationStatus).toBe(getLorebooksVectorizationStatus);
+        expect(window.VectTauri_WorldInfo.getVectorStats).toBe(getLorebookVectorStats);
+        expect(window.VectTauri_WorldInfo.enhanceEntriesUI).toBe(enhanceWorldInfoEntriesUI);
     });
 });
 
@@ -718,44 +718,44 @@ describe('initializeWorldInfoIntegration', () => {
 // ============================================================================
 
 describe('GENERATION_STARTED lorebook handler', () => {
-    let savedVectfoxSettings;
+    let savedVecttauriSettings;
     let handleGenerationStarted;
 
     beforeEach(() => {
         vi.clearAllMocks();
         globalThis.window = {};
-        savedVectfoxSettings = extension_settings.vectfox;
+        savedVecttauriSettings = extension_settings.vecttauri;
         initializeWorldInfoIntegration();
         handleGenerationStarted = eventSource.on.mock.calls
             .find(([eventType]) => eventType === 'generation_started')[1];
     });
 
     afterEach(() => {
-        extension_settings.vectfox = savedVectfoxSettings;
+        extension_settings.vecttauri = savedVecttauriSettings;
         delete globalThis.window;
     });
 
     it('clears last turn\'s lorebook block when Semantic WI is off', async () => {
-        extension_settings.vectfox = { enabled_world_info: false, position: 1, depth: 4 };
+        extension_settings.vecttauri = { enabled_world_info: false, position: 1, depth: 4 };
         await handleGenerationStarted('normal', {}, false);
 
         expect(setExtensionPrompt).toHaveBeenCalledTimes(1);
-        expect(setExtensionPrompt).toHaveBeenCalledWith('vectfox_lorebook', '', 1, 4, false);
+        expect(setExtensionPrompt).toHaveBeenCalledWith('vecttauri_lorebook', '', 1, 4, false);
         expect(queryCollection).not.toHaveBeenCalled();
     });
 
     it('clears last turn\'s lorebook block and retrieves nothing when the master switch is off', async () => {
-        extension_settings.vectfox = { enabled: false, enabled_world_info: true, position: 1, depth: 4 };
+        extension_settings.vecttauri = { enabled: false, enabled_world_info: true, position: 1, depth: 4 };
         await handleGenerationStarted('normal', {}, false);
 
         expect(setExtensionPrompt).toHaveBeenCalledTimes(1);
-        expect(setExtensionPrompt).toHaveBeenCalledWith('vectfox_lorebook', '', 1, 4, false);
+        expect(setExtensionPrompt).toHaveBeenCalledWith('vecttauri_lorebook', '', 1, 4, false);
         expect(getContext).not.toHaveBeenCalled();
         expect(queryCollection).not.toHaveBeenCalled();
     });
 
     it('leaves the prompt alone on a dry run', async () => {
-        extension_settings.vectfox = { enabled_world_info: true, position: 1, depth: 4 };
+        extension_settings.vecttauri = { enabled_world_info: true, position: 1, depth: 4 };
         await handleGenerationStarted('normal', {}, true);
 
         expect(setExtensionPrompt).not.toHaveBeenCalled();
@@ -780,7 +780,7 @@ describe('Edge Cases', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -812,7 +812,7 @@ describe('Edge Cases', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -830,7 +830,7 @@ describe('Edge Cases', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -849,7 +849,7 @@ describe('Edge Cases', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -868,7 +868,7 @@ describe('Edge Cases', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: ['vf_lorebook_global_test_T0'],
+            vecttauri_collection_registry: ['vf_lorebook_global_test_T0'],
         };
 
         queryCollection.mockResolvedValue({
@@ -887,7 +887,7 @@ describe('Edge Cases', () => {
             enabled_world_info: true,
             world_info_threshold: 0.3,
             world_info_top_k: 3,
-            vectfox_collection_registry: [
+            vecttauri_collection_registry: [
                 'vf_lorebook_global_book1_T0',
                 'vf_lorebook_global_book2_T0',
             ],

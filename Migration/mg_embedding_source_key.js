@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VECTFOX MIGRATION — embedding source key (Phase B)
+ * VECTTAURI MIGRATION — embedding source key (Phase B)
  * ============================================================================
  * Renames the single highest-churn connection key: `source` → `embedding_provider`.
  *
@@ -33,7 +33,7 @@ export const EMBEDDING_SOURCE_RENAME = Object.freeze({
  * Rename `source` → `embedding_provider`. Idempotent: copies the old key to the
  * new name (only if the new name isn't already set), then removes the old key.
  *
- * @param {object} settings - extension_settings.vectfox
+ * @param {object} settings - extension_settings.vecttauri
  * @returns {{ migrated: number, keys: string[] }} count + which old keys were moved
  */
 export function migration_embedding_source_key(settings) {

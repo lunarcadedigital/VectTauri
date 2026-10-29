@@ -19,7 +19,7 @@ vi.mock('../../../../../script.js', () => ({
 // Mock extension_settings
 vi.mock('../../../../extensions.js', () => ({
     extension_settings: {
-        VectFox: {
+        VectTauri: {
             vector_backend: 'standard',
         },
     },

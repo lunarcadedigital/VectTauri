@@ -24,10 +24,10 @@ const KNOWN_BACKENDS = ['standard', 'vectra', 'qdrant'];
  * Find the storage backend a collection lives in.
  *
  * Tries, in order:
- *   1. Registry-key prefix:  "qdrant:VectFox_..."  → "qdrant"
+ *   1. Registry-key prefix:  "qdrant:VectTauri_..."  → "qdrant"
  *   2. Embedded backend tag in new-style names — collection IDs built via
  *      collection-ids.js include the backend as the first segment after the
- *      type prefix, e.g. "VectFox_eventbase_standard_..." → "standard".
+ *      type prefix, e.g. "VectTauri_eventbase_standard_..." → "standard".
  *   3. null (caller falls back to user's active backend).
  *
  * This matters because the DB Browser searches across mixed-backend collections.
@@ -37,11 +37,11 @@ function resolveCollectionBackend(collectionId) {
     if (fromRegistry) return fromRegistry;
 
     const TYPE_PREFIXES = [
-        COLLECTION_PREFIXES.VECTFOX_EVENTBASE,
-        COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT,
-        COLLECTION_PREFIXES.VECTFOX_LOREBOOK,
-        COLLECTION_PREFIXES.VECTFOX_CHARACTER,
-        COLLECTION_PREFIXES.VECTFOX_DOCUMENT,
+        COLLECTION_PREFIXES.VECTTAURI_EVENTBASE,
+        COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT,
+        COLLECTION_PREFIXES.VECTTAURI_LOREBOOK,
+        COLLECTION_PREFIXES.VECTTAURI_CHARACTER,
+        COLLECTION_PREFIXES.VECTTAURI_DOCUMENT,
     ];
     for (const prefix of TYPE_PREFIXES) {
         if (collectionId.startsWith(prefix)) {
@@ -62,7 +62,7 @@ export const DEFAULT_RRF_K = 60;
  * @param {string} collectionId - Collection to search
  * @param {string} searchText - Query text
  * @param {number} topK - Number of results to return
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {object} options - Hybrid search options
  * @returns {Promise<{hashes: number[], metadata: object[]}>}
  */
@@ -126,7 +126,7 @@ export async function hybridSearch(collectionId, searchText, topK, settings, opt
  * @param {string} collectionId - Collection to search
  * @param {string} searchText - Query text
  * @param {number} topK - Number of results to return
- * @param {object} settings - VectFox settings
+ * @param {object} settings - VectTauri settings
  * @param {object} options - Fusion options
  * @returns {Promise<{hashes: number[], metadata: object[]}>}
  */

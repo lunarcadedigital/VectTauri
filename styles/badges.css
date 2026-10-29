@@ -1,10 +1,10 @@
 /* ============================================================================
- * VECTFOX BADGE STYLES
+ * VECTTAURI BADGE STYLES
  * ============================================================================
  * Badge color system (ROYGBIV), status badges, activation badges
  *
- * @author Kritblade
- * @version 3.3.1
+ * @author Lunarcade Digital
+ * @version 1.0.0
  * ============================================================================ */
 
 /* ==========================================================================
@@ -19,39 +19,39 @@
  * ========================================================================== */
 
 /* Scope badges - INDIGO → VIOLET spectrum */
-.vectfox-badge-global {
+.vecttauri-badge-global {
     color: #c4b5fd;  /* Violet */
     border-color: #c4b5fd;
     background: color-mix(in srgb, #c4b5fd 8%, transparent);
 }
 
-.vectfox-badge-character {
+.vecttauri-badge-character {
     color: #a5b4fc;  /* Indigo */
     border-color: #a5b4fc;
     background: color-mix(in srgb, #a5b4fc 8%, transparent);
 }
 
-.vectfox-badge-chat {
+.vecttauri-badge-chat {
     color: #e879f9;  /* Magenta/Pink (beyond violet) */
     border-color: #e879f9;
     background: color-mix(in srgb, #e879f9 8%, transparent);
 }
 
 /* Status badges */
-.vectfox-badge-success {
+.vecttauri-badge-success {
     color: #4ade80;  /* Green */
     border-color: #4ade80;
     background: color-mix(in srgb, #4ade80 8%, transparent);
 }
 
-.vectfox-badge-muted {
+.vecttauri-badge-muted {
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 50%, transparent);
     border-color: color-mix(in srgb, var(--SmartThemeBodyColor) 30%, transparent);
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
 }
 
 /* Technical badges - BLUE → GREEN spectrum (monospace) */
-.vectfox-badge-source {
+.vecttauri-badge-source {
     color: #60a5fa;  /* Blue */
     border-color: #60a5fa;
     background: color-mix(in srgb, #60a5fa 8%, transparent);
@@ -60,7 +60,7 @@
     letter-spacing: 0.5px;
 }
 
-.vectfox-badge-backend {
+.vecttauri-badge-backend {
     color: #34d399;  /* Emerald/Green */
     border-color: #34d399;
     background: color-mix(in srgb, #34d399 8%, transparent);
@@ -69,7 +69,7 @@
     letter-spacing: 0.5px;
 }
 
-.vectfox-badge-model {
+.vecttauri-badge-model {
     color: #a78bfa;  /* Purple/Violet */
     border-color: #a78bfa;
     background: color-mix(in srgb, #a78bfa 8%, transparent);
@@ -79,7 +79,7 @@
     cursor: pointer;
 }
 
-.vectfox-badge-model:hover {
+.vecttauri-badge-model:hover {
     background: color-mix(in srgb, #a78bfa 15%, transparent);
 }
 
@@ -87,26 +87,26 @@
  * ACTIVATION BADGES (Triggers, Conditions, Always Active) - ROYGBIV STYLE
  * ============================================================================ */
 
-.vectfox-badge-triggers {
+.vecttauri-badge-triggers {
     color: #fb923c;  /* Orange */
     border-color: #fb923c;
     background: color-mix(in srgb, #fb923c 8%, transparent);
 }
 
-.vectfox-badge-conditions {
+.vecttauri-badge-conditions {
     color: #38bdf8;  /* Sky Blue */
     border-color: #38bdf8;
     background: color-mix(in srgb, #38bdf8 8%, transparent);
 }
 
-.vectfox-badge-always {
+.vecttauri-badge-always {
     color: #fde047;  /* Yellow */
     border-color: #fde047;
     background: color-mix(in srgb, #fde047 8%, transparent);
 }
 
 /* Decay badge - Red/Orange family */
-.vectfox-badge-decay {
+.vecttauri-badge-decay {
     color: #f97316;  /* Orange */
     border-color: #f97316;
     background: color-mix(in srgb, #f97316 8%, transparent);
@@ -114,22 +114,22 @@
     padding: 2px 6px;
 }
 
-.vectfox-badge-decay-custom {
+.vecttauri-badge-decay-custom {
     color: #ef4444;  /* Red - custom override */
     border-color: #ef4444;
     background: color-mix(in srgb, #ef4444 8%, transparent);
 }
 
 /* Settings button styling (renamed from activation) */
-.vectfox-action-activation.vectfox-has-settings {
-    border-color: var(--vectfox-primary);
-    background: color-mix(in srgb, var(--vectfox-primary) 15%, var(--SmartThemeBlurTintColor));
+.vecttauri-action-activation.vecttauri-has-settings {
+    border-color: var(--vecttauri-primary);
+    background: color-mix(in srgb, var(--vecttauri-primary) 15%, var(--SmartThemeBlurTintColor));
 }
 
 /* Activation button styling (legacy) */
-.vectfox-action-activation.vectfox-has-activation {
-    border-color: var(--vectfox-warning);
-    background: color-mix(in srgb, var(--vectfox-warning) 10%, var(--SmartThemeBlurTintColor));
+.vecttauri-action-activation.vecttauri-has-activation {
+    border-color: var(--vecttauri-warning);
+    background: color-mix(in srgb, var(--vecttauri-warning) 10%, var(--SmartThemeBlurTintColor));
 }
 
 

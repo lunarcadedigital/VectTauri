@@ -52,7 +52,7 @@ function _pluginBackendName(settings) {
  * Returns null on failure so callers can fall back to local-IDF behavior.
  *
  * @param {string} collectionId
- * @param {object} settings - VectFox settings (uses .source, .model, .vector_backend)
+ * @param {object} settings - VectTauri settings (uses .source, .model, .vector_backend)
  * @returns {Promise<{totalDocs: number, documentFrequencies: Map<string, number>, avgDocLength: number} | null>}
  */
 export async function getCorpusStats(collectionId, settings) {

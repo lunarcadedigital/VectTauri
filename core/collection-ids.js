@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * VECTFOX COLLECTION ID UTILITIES
+ * VECTTAURI COLLECTION ID UTILITIES
  * ============================================================================
  * Single source of truth for all collection ID operations:
  * - Building/generating collection IDs
@@ -19,22 +19,22 @@ import { log } from './log.js';
 // CONSTANTS
 // ============================================================================
 
-/** Prefix for new VectFox format */
+/** Prefix for new VectTauri format */
 export const VF_PREFIX = 'vf';
 
 /** Internal system collection IDs that must never participate in retrieval */
 export const INTERNAL_COLLECTION_IDS = Object.freeze([
-    '__vectfox_health_check__',
+    '__vecttauri_health_check__',
 ]);
 
 /** All known collection prefixes for new collections. */
 export const COLLECTION_PREFIXES = {
-    // VectFox formats
-    VECTFOX_LOREBOOK: 'vf_lorebook_',
-    VECTFOX_CHARACTER: 'vf_character_',
-    VECTFOX_DOCUMENT: 'vf_document_',
-    VECTFOX_ARCHIVE_EVENT: 'vf_archiveevent_',
-    VECTFOX_EVENTBASE: 'vf_eventbase_',
+    // VectTauri formats
+    VECTTAURI_LOREBOOK: 'vf_lorebook_',
+    VECTTAURI_CHARACTER: 'vf_character_',
+    VECTTAURI_DOCUMENT: 'vf_document_',
+    VECTTAURI_ARCHIVE_EVENT: 'vf_archiveevent_',
+    VECTTAURI_EVENTBASE: 'vf_eventbase_',
 };
 
 /** Collection types */
@@ -91,7 +91,7 @@ export function normalizeBackendForId(backend) {
 }
 
 /**
- * Parse the backend segment out of a VectFox collection ID.
+ * Parse the backend segment out of a VectTauri collection ID.
  *
  * Collection IDs follow the shape:
  *   vf_{contentType}_{backend}_{handle}_{name}_{timestamp}
@@ -99,7 +99,7 @@ export function normalizeBackendForId(backend) {
  * Strips any registry-key prefix (`qdrant:`, `vectra:`, `standard:`) before
  * parsing so callers can pass either form.
  *
- * Returns null when the ID doesn't match any known VectFox shape — caller
+ * Returns null when the ID doesn't match any known VectTauri shape — caller
  * should fall back to global settings in that case rather than guessing.
  *
  * @param {string} collectionId - bare or registry-keyed ID
@@ -119,7 +119,7 @@ export function getBackendFromCollectionId(collectionId) {
 /**
  * Replace the backend segment in a collection ID so it matches a target backend.
  * Returns the original ID unchanged if:
- *   - The ID doesn't match a known VectFox prefix
+ *   - The ID doesn't match a known VectTauri prefix
  *   - There's no backend segment to replace (legacy format)
  *   - The current backend already equals the target (no-op)
  *
@@ -290,7 +290,7 @@ export function getChatUUID() {
     // Fallback: use chatId (less ideal but works for old chats)
     const chatId = getCurrentChatId();
     if (chatId) {
-        log.warn('VectFox: chat_metadata.integrity not found, falling back to chatId');
+        log.warn('VectTauri: chat_metadata.integrity not found, falling back to chatId');
         return chatId;
     }
     return null;
@@ -382,9 +382,9 @@ export function buildLorebookCollectionId(lorebookName, backend, timestamp) {
     const normalizedBackend = normalizeBackendForId(backend);
     const ts = timestamp || Date.now();
     if (normalizedBackend) {
-        return `${COLLECTION_PREFIXES.VECTFOX_LOREBOOK}${normalizedBackend}_${handle}_${sanitizedName}_${ts}`;
+        return `${COLLECTION_PREFIXES.VECTTAURI_LOREBOOK}${normalizedBackend}_${handle}_${sanitizedName}_${ts}`;
     }
-    return `${COLLECTION_PREFIXES.VECTFOX_LOREBOOK}${handle}_${sanitizedName}_${ts}`;
+    return `${COLLECTION_PREFIXES.VECTTAURI_LOREBOOK}${handle}_${sanitizedName}_${ts}`;
 }
 
 /**
@@ -402,9 +402,9 @@ export function buildCharacterCollectionId(characterName, backend, timestamp) {
     const normalizedBackend = normalizeBackendForId(backend);
     const ts = timestamp || Date.now();
     if (normalizedBackend) {
-        return `${COLLECTION_PREFIXES.VECTFOX_CHARACTER}${normalizedBackend}_${handle}_${sanitizedName}_${ts}`;
+        return `${COLLECTION_PREFIXES.VECTTAURI_CHARACTER}${normalizedBackend}_${handle}_${sanitizedName}_${ts}`;
     }
-    return `${COLLECTION_PREFIXES.VECTFOX_CHARACTER}${handle}_${sanitizedName}_${ts}`;
+    return `${COLLECTION_PREFIXES.VECTTAURI_CHARACTER}${handle}_${sanitizedName}_${ts}`;
 }
 
 /**
@@ -422,9 +422,9 @@ export function buildDocumentCollectionId(documentName, backend, timestamp) {
     const normalizedBackend = normalizeBackendForId(backend);
     const ts = timestamp || Date.now();
     if (normalizedBackend) {
-        return `${COLLECTION_PREFIXES.VECTFOX_DOCUMENT}${normalizedBackend}_${handle}_${sanitizedName}_${ts}`;
+        return `${COLLECTION_PREFIXES.VECTTAURI_DOCUMENT}${normalizedBackend}_${handle}_${sanitizedName}_${ts}`;
     }
-    return `${COLLECTION_PREFIXES.VECTFOX_DOCUMENT}${handle}_${sanitizedName}_${ts}`;
+    return `${COLLECTION_PREFIXES.VECTTAURI_DOCUMENT}${handle}_${sanitizedName}_${ts}`;
 }
 
 /**
@@ -447,10 +447,10 @@ export function buildEventBaseCollectionId(chatUUID, backend) {
 
     const normalizedBackend = normalizeBackendForId(backend);
     if (normalizedBackend) {
-        return `${COLLECTION_PREFIXES.VECTFOX_EVENTBASE}${normalizedBackend}_${sanitizedHandle}_${sanitizedChar}_${uuid}`;
+        return `${COLLECTION_PREFIXES.VECTTAURI_EVENTBASE}${normalizedBackend}_${sanitizedHandle}_${sanitizedChar}_${uuid}`;
     }
 
-    return `${COLLECTION_PREFIXES.VECTFOX_EVENTBASE}${sanitizedHandle}_${sanitizedChar}_${uuid}`;
+    return `${COLLECTION_PREFIXES.VECTTAURI_EVENTBASE}${sanitizedHandle}_${sanitizedChar}_${uuid}`;
 }
 
 /**
@@ -476,9 +476,9 @@ export function buildArchiveEventCollectionId({ filenameCharName, archiveUUID, b
 
     const normalizedBackend = normalizeBackendForId(backend);
     if (normalizedBackend) {
-        return `${COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT}${normalizedBackend}_${sanitizedHandle}_${sanitizedChar}_${archiveUUID}`;
+        return `${COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT}${normalizedBackend}_${sanitizedHandle}_${sanitizedChar}_${archiveUUID}`;
     }
-    return `${COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT}${sanitizedHandle}_${sanitizedChar}_${archiveUUID}`;
+    return `${COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT}${sanitizedHandle}_${sanitizedChar}_${archiveUUID}`;
 }
 
 // ============================================================================
@@ -508,58 +508,58 @@ export function parseCollectionId(collectionId) {
         };
     }
 
-    // VectFox lorebook format: vf_lorebook_*
-    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTFOX_LOREBOOK)) {
+    // VectTauri lorebook format: vf_lorebook_*
+    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTTAURI_LOREBOOK)) {
         return {
             type: COLLECTION_TYPES.LOREBOOK,
-            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTFOX_LOREBOOK, ''),
+            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTTAURI_LOREBOOK, ''),
             scope: COLLECTION_SCOPES.CHARACTER,
-            format: 'vectfox',
+            format: 'vecttauri',
         };
     }
 
-    // VectFox character format: vf_character_*
-    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTFOX_CHARACTER)) {
+    // VectTauri character format: vf_character_*
+    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTTAURI_CHARACTER)) {
         return {
             type: COLLECTION_TYPES.CHARACTER,
-            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTFOX_CHARACTER, ''),
+            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTTAURI_CHARACTER, ''),
             scope: COLLECTION_SCOPES.CHARACTER,
-            format: 'vectfox',
+            format: 'vecttauri',
         };
     }
 
-    // VectFox document format: vf_document_*
-    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTFOX_DOCUMENT)) {
+    // VectTauri document format: vf_document_*
+    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTTAURI_DOCUMENT)) {
         return {
             type: COLLECTION_TYPES.DOCUMENT,
-            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTFOX_DOCUMENT, ''),
+            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTTAURI_DOCUMENT, ''),
             scope: COLLECTION_SCOPES.CHARACTER,
-            format: 'vectfox',
+            format: 'vecttauri',
         };
     }
 
-    // VectFox eventbase format: vf_eventbase_*
-    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTFOX_EVENTBASE)) {
+    // VectTauri eventbase format: vf_eventbase_*
+    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTTAURI_EVENTBASE)) {
         return {
             type: COLLECTION_TYPES.CHAT,
-            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTFOX_EVENTBASE, ''),
+            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTTAURI_EVENTBASE, ''),
             scope: COLLECTION_SCOPES.CHAT,
-            format: 'vectfox',
+            format: 'vecttauri',
         };
     }
 
-    // VectFox archive event format: vf_archiveevent_*
+    // VectTauri archive event format: vf_archiveevent_*
     // Scope is 'chat' to match getEffectiveScope's documented behavior — archive
     // event collections hold chat-shaped events and belong to the chat scope.
     // Returning 'global' here (the pre-2026-05-24 value) silently produced
     // 'character' downstream after getEffectiveScope's reject-and-default,
     // which was the actual scope bug for archive events.
-    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT)) {
+    if (collectionId.startsWith(COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT)) {
         return {
             type: COLLECTION_TYPES.ARCHIVE_EVENT,
-            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTFOX_ARCHIVE_EVENT, ''),
+            rawId: collectionId.replace(COLLECTION_PREFIXES.VECTTAURI_ARCHIVE_EVENT, ''),
             scope: COLLECTION_SCOPES.CHAT,
-            format: 'vectfox',
+            format: 'vecttauri',
         };
     }
 
