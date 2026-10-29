@@ -15,7 +15,7 @@ import { getModelField, getModelFromSettings, getProviderConfig, resolveProvider
 import { unregisterCollection } from '../core/collection-loader.js';
 import { reciprocalRankFusion, weightedCombination } from '../core/hybrid-search.js';
 import { applyKeywordBoost, extractTextKeywords, extractLorebookKeywords } from '../core/keyword-boost.js';
-import { getPluginUrl } from '../utils/similharity-url.js';
+import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
 
 const CHAT_NOT_APPLICABLE_MESSAGE = 'Not applicable (EventBase mode — chat is not stored as a chunk collection)';
 
@@ -64,7 +64,7 @@ function isDiagnosticTestCollection(id) {
 export async function sweepLeftoverTestCollections(settings) {
     const sweptIds = [];
     try {
-        const response = await fetch(getPluginUrl('/api/plugins/similharity/collections'), {
+        const response = await similharityFetch('/api/plugins/similharity/collections', {
             method: 'GET',
             headers: getRequestHeaders(),
         });
@@ -173,7 +173,7 @@ function getPluginProviderParams(settings) {
  */
 async function isPluginInstalled() {
     try {
-        const response = await fetch(getPluginUrl('/api/plugins/similharity/health'), {
+        const response = await similharityFetch('/api/plugins/similharity/health', {
             method: 'GET',
             headers: getRequestHeaders(),
         });
@@ -201,7 +201,7 @@ export async function testEmbeddingGeneration(settings) {
         const testText = 'This is a test message for embedding generation.';
 
         // Use the dedicated get-embedding endpoint which doesn't store anything
-        const response = await fetch(getPluginUrl('/api/plugins/similharity/get-embedding'), {
+        const response = await similharityFetch('/api/plugins/similharity/get-embedding', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -272,7 +272,7 @@ export async function testVectorStorage(settings) {
         const backend = settings.vector_backend || 'standard';
         const backendType = backend === 'standard' ? 'vectra' : backend;
 
-        const insertResponse = await fetch(getPluginUrl('/api/plugins/similharity/chunks/insert'), {
+        const insertResponse = await similharityFetch('/api/plugins/similharity/chunks/insert', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -622,7 +622,7 @@ export async function testPluginEmbeddingGeneration(settings) {
         const testText = 'Plugin embedding generation test';
 
         // Try to insert WITHOUT providing a vector - the plugin must generate it
-        const insertResponse = await fetch(getPluginUrl('/api/plugins/similharity/chunks/insert'), {
+        const insertResponse = await similharityFetch('/api/plugins/similharity/chunks/insert', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({
@@ -652,7 +652,7 @@ export async function testPluginEmbeddingGeneration(settings) {
         }
 
         // Verify the vector was stored by querying
-        const queryResponse = await fetch(getPluginUrl('/api/plugins/similharity/chunks/query'), {
+        const queryResponse = await similharityFetch('/api/plugins/similharity/chunks/query', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({

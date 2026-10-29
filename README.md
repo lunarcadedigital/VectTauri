@@ -32,9 +32,21 @@ VectTauri brings full RAG (Retrieval-Augmented Generation) memory to TauriTavern
    ```
 5. Click **Install**
 
-### Step 2: Setup Similharity Bridge on Termux
+### Step 2: Choose a Similharity Mode
 
-This is the key difference from SillyTavern installs — the Similharity plugin runs as an **external HTTPS server** on Termux.
+VectTauri supports three transports for the Similharity layer. Open **VectTauri Settings → Similharity Mode**:
+
+| Mode | What it does | Best for |
+|------|--------------|----------|
+| **Auto** (default) | Built-in inside TauriTavern, external bridge when a Bridge URL is set, native plugin on desktop SillyTavern | Everyone |
+| **Built-in** | Vectors go through TauriTavern's native on-device vector API (Rust + redb + candle embeddings); rich metadata (importance, keywords, conditions) is stored in the TT per-chat store. **No server, no network, zero setup.** | Most TauriTavern users |
+| **External Bridge** | Requests go to a Similharity bridge server over HTTP(S) | Large collections (10k+ chunks), Qdrant users |
+
+> **Note on the external bridge:** Android WebView blocks self-signed HTTPS certificates and (in release builds) plain HTTP to non-loopback hosts. If you use the bridge mode, serve plain HTTP on a loopback/LAN address and run a TauriTavern build with cleartext enabled (`configure-mobile-http.sh enable android`).
+
+### Step 3 (Bridge mode only): Setup Similharity Bridge on Termux
+
+This is the key difference from SillyTavern installs — the Similharity plugin runs as an **external HTTPS server** on Termux. Skip this if you use Built-in mode.
 
 #### 2a. Install Dependencies
 
