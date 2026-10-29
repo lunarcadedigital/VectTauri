@@ -6,7 +6,7 @@
  * Default: https://localhost:8443
  */
 
-import { extension_settings } from "../../../extensions.js";
+import { extension_settings } from "../../../../extensions.js";
 
 export function getSimilharityBaseUrl() {
     const url = extension_settings?.vectfox?.similharity_url || "";

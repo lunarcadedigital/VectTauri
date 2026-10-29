@@ -61,7 +61,7 @@ vi.mock('../../../../secrets.js', () => ({
 vi.mock('../core/collection-loader.js', () => ({
     checkPluginAvailable: vi.fn(async () => {
         try {
-            const r = await fetch(getPluginUrl('/api/plugins/similharity/health');
+            const r = await fetch(getPluginUrl('/api/plugins/similharity/health'));
             return !!r?.ok;
         } catch {
             return false;

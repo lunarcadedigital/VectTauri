@@ -6,7 +6,7 @@
 
 **Languages:** [English](README.md) | [繁體中文](README_ZH.md) | **日本語** | [한국어](README_KR.md)
 
-![](assets/20260514_163417_vectfox.jpg)
+![](assets/20260514_163417_vecttauri.jpg)
 
 ---
 
