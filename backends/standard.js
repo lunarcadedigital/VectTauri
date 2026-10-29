@@ -1003,7 +1003,7 @@ export class StandardBackend extends VectorBackend {
                 collectionId: collectionId,
                 source: settings.embedding_provider || 'transformers',
                 model: getModelFromSettings(settings),
-            }), {
+            })), {
                 headers: getRequestHeaders(),
             });
 

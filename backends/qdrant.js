@@ -680,7 +680,7 @@ export class QdrantBackend extends VectorBackend {
             collectionId: actualCollectionId, // Use separate collection per content type
             source: settings.embedding_provider || 'transformers',
             model: getModelFromSettings(settings),
-        }), {
+        })), {
             headers: getRequestHeaders(),
         });
 
