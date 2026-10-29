@@ -371,4 +371,56 @@ describe('builtin shim hybrid keyword boost', () => {
             globalThis.fetch = realFetch;
         }
     });
+
+    it('forwards provider fields (apiUrl) to the native insert for URL-based sources', async () => {
+        // TT's Rust backend validates apiUrl for vllm/ollama/llamacpp sources;
+        // dropping it produced "Bad request: apiUrl is required" mid-vectorization.
+        const nativeBodies = [];
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async (url, init) => {
+            if (String(url).includes('/api/vector/insert')) {
+                nativeBodies.push(JSON.parse(init.body));
+                return { ok: true, status: 200, json: async () => ({}), text: async () => '' };
+            }
+            return { ok: true, status: 200, json: async () => ({}), text: async () => '' };
+        };
+        try {
+            const r = await post(`${H}/chunks/insert`, {
+                backend: 'vectra', collectionId: 'c-url', source: 'vllm', model: 'my-model',
+                apiUrl: 'http://192.168.88.251:8000/v1',
+                items: [{ hash: 'u1', text: 'chunk', index: 0, vector: [1], metadata: {} }],
+            });
+            expect(r.ok).toBe(true);
+            expect(nativeBodies).toHaveLength(1);
+            expect(nativeBodies[0].source).toBe('vllm');
+            expect(nativeBodies[0].apiUrl).toBe('http://192.168.88.251:8000/v1');
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+
+    it('forwards apiUrl to the native query for URL-based sources', async () => {
+        const nativeBodies = [];
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async (url, init) => {
+            if (String(url).includes('/api/vector/query')) {
+                nativeBodies.push(JSON.parse(init.body));
+                return { ok: true, status: 200, json: async () => ({ hashes: [] }), text: async () => '' };
+            }
+            return { ok: true, status: 200, json: async () => ({}), text: async () => '' };
+        };
+        try {
+            await post(`${H}/chunks/insert`, {
+                collectionId: 'c-url-q', source: 'vllm', model: 'my-model', apiUrl: 'http://host:8000/v1',
+                items: [{ hash: 'q1', text: 'chunk', index: 0, vector: [1], metadata: {} }],
+            });
+            await post(`${H}/chunks/query`, {
+                collectionId: 'c-url-q', topK: 5, threshold: 0,
+                searchText: 'hello', source: 'vllm', model: 'my-model', apiUrl: 'http://host:8000/v1',
+            });
+            expect(nativeBodies[nativeBodies.length - 1].apiUrl).toBe('http://host:8000/v1');
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
 });

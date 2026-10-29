@@ -94,6 +94,27 @@ async function updateRegistryOnInsert(collectionId, model, source) {
 // Native /api/vector/* bridge (works in both ST and TauriTavern)
 // ---------------------------------------------------------------------------
 
+/**
+ * Provider fields that the native /api/vector/* routes understand. The plugin
+ * contract spreads extra fields (backend, source, model, provider URLs); only
+ * these are meaningful to the TT backend — forward them verbatim so URL-based
+ * sources (vllm/ollama/llamacpp/koboldcpp) satisfy its "apiUrl is required"
+ * validation.
+ */
+const NATIVE_PROVIDER_FIELDS = [
+    'source', 'model', 'apiUrl', 'keep', 'extrasUrl', 'extrasKey', 'api',
+    'vertexai_auth_mode', 'vertexai_region', 'vertexai_express_project_id',
+    'workers_ai_account_id', 'siliconflow_endpoint', 'embeddings', 'is_query',
+];
+
+function nativeBody(body) {
+    const out = {};
+    for (const field of NATIVE_PROVIDER_FIELDS) {
+        if (body?.[field] !== undefined) out[field] = body[field];
+    }
+    return out;
+}
+
 async function nativeVector(endpoint, body) {
     const response = await fetch(`/api/vector/${endpoint}`, {
         method: 'POST',
@@ -123,11 +144,11 @@ async function handleInsert(body) {
     }
 
     try {
-        // Native insert stores {hash, text, index} (+ vector under transformers).
+        // Native insert stores {hash, text, index} and embeds server-side for
+        // remote sources — forward provider fields (apiUrl etc.) verbatim.
         await nativeVector('insert', {
+            ...nativeBody(body),
             collectionId,
-            source: source || 'transformers',
-            model,
             items: items.map(it => ({ hash: it.hash, text: it.text || '', index: it.index ?? 0 })),
         });
 
@@ -247,13 +268,12 @@ async function handleQuery(body) {
             }
             results.sort((a, b) => b.score - a.score);
         } else if (searchText) {
-            // Native query embeds searchText on-device and returns hashes/scores.
+            // Native query embeds searchText on-device/server-side and returns hashes/scores.
             // Overfetch so keyword-boosted items below the cut can resurface.
             const overfetch = getOverfetchAmount(topK);
             const native = await nativeVector('query', {
+                ...nativeBody(body),
                 collectionId,
-                source: source || 'transformers',
-                model,
                 searchText,
                 topK: overfetch,
                 threshold,
