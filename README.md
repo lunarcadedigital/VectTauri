@@ -286,3 +286,20 @@ MIT License — Based on [VectFox](https://github.com/KritBlade/VectFox) by Krit
 - **[KritBlade](https://github.com/KritBlade)** — Original VectFox & Similharity plugin
 - **[Darkatse](https://github.com/Darkatse)** — TauriTavern
 - **Lunarcade Digital** — TauriTavern adaptation
+
+---
+
+## Contributors
+
+| Name | Division | Role |
+|------|----------|------|
+| Fajar Nugroho | Qa | Quality assurance & testing |
+| Ayu Pratiwi | Web | Web development |
+| Agus Pratama | Asset | 2D assets & visuals |
+| Dewi Lestari | Architect | System architecture |
+| Nina Salsabila | Research | Tech research & analysis |
+| Ahmad Fauzi | Release | Release & CI pipeline |
+| Gilang Permadi | Web | Web integration & optimization |
+| Raka Wiraguna | Design | UI/UX design |
+| Sari Dewi | Archive | Documentation & archival |
+| Dimas Pratama | Fixing | Bug fixes & patching |
