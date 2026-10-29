@@ -27,8 +27,29 @@ vi.mock('../core/collection-loader.js', () => ({
     getDetectedPluginVersion: vi.fn(() => null),
 }));
 
+// network-startup now probes the transport to detect the built-in shim before
+// running the floor check. Default the probe to "external plugin" (the shim is
+// NOT answering) so the legacy floor tests keep exercising the warn paths; the
+// built-in skip itself gets its own test below.
+vi.mock('../utils/similharity-url.js', () => ({
+    similharityFetch: vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({ success: false, error: 'no route' }),
+    })),
+}));
+
+// Host modules required when the test dynamically imports the real shim.
+vi.mock('../../../../../script.js', () => ({
+    getRequestHeaders: vi.fn(() => ({ 'Content-Type': 'application/json' })),
+}));
+vi.mock('../../../../extensions.js', () => ({
+    extension_settings: { vecttauri: {} },
+}));
+
 import { checkSimilharityVersion } from '../core/network-startup.js';
 import { checkPluginAvailable, getDetectedPluginVersion } from '../core/collection-loader.js';
+import { similharityFetch } from '../utils/similharity-url.js';
 import { log } from '../core/log.js';
 
 /** Concatenated text of every toastr.warning call, for substring assertions. */
@@ -111,7 +132,6 @@ describe('checkSimilharityVersion', () => {
     });
 
     it('compares numerically, not lexically — 3.10.0 is newer than 3.3.1', async () => {
-        // String comparison would rank '3.10.0' < '3.3.1' and nag an up-to-date user.
         getDetectedPluginVersion.mockReturnValue('3.10.0');
 
         await checkSimilharityVersion();
@@ -125,5 +145,19 @@ describe('checkSimilharityVersion', () => {
 
         await expect(checkSimilharityVersion()).resolves.toBeUndefined();
         expect(log.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the floor check entirely when the built-in shim is the transport', async () => {
+        // The builtin probe returns the shim's signature body — the shim always
+        // reports version "1.0.0-builtin", which must NOT trip the floor warning.
+        const { builtinFetch } = await import('../utils/builtin-similharity.js');
+        similharityFetch.mockImplementation((path, init) => builtinFetch(path, init));
+        getDetectedPluginVersion.mockReturnValue('1.0.0-builtin');
+        checkPluginAvailable.mockResolvedValue(true);
+
+        await checkSimilharityVersion();
+
+        expect(globalThis.toastr.warning).not.toHaveBeenCalled();
+        expect(log.warn).not.toHaveBeenCalled();
     });
 });

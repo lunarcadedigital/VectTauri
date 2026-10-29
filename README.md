@@ -19,8 +19,10 @@ VectTauri brings full RAG (Retrieval-Augmented Generation) memory to TauriTavern
 ## 📋 Requirements
 
 - **TauriTavern** (Android/desktop) — [Download](https://github.com/Darkatse/TauriTavern)
+- **An Embedding Model** — powers vectorization and retrieval. Default: **Transformers (Local)**, running fully on-device with no setup. Optional API providers (Ollama, OpenRouter, vLLM) can be selected in **VectTauri Settings → Embedding Provider**. Important: all vectors in a collection must come from the same model — switching models requires re-vectorizing.
+- **An LLM for Summarization / EventBase** — EventBase event extraction and summaries need a chat model. Choose between **OpenRouter**, **vLLM**, or **any Custom OpenAI-compatible endpoint** (OpenAI, LiteLLM, siliconflow, proxies) in **VectTauri Settings → LLM Summarization & EventBase Extraction** — with Base URL, API key, and a model picker that fetches the model list from your endpoint.
 
-That's it. Everything runs on-device.
+Everything else runs on-device.
 
 ---
 
@@ -35,7 +37,7 @@ That's it. Everything runs on-device.
    ```
 5. Click **Install** and open **VectTauri Settings**
 
-The **Similharity Mode** defaults to **Auto**: inside TauriTavern it uses the built-in on-device engine automatically. You can switch between **Auto** and **Built-in** under **VectTauri Settings → Similharity Mode**.
+The extension needs no transport configuration: the Similharity layer runs entirely in-app through the built-in engine. Set up the **Embedding Provider** and **LLM for Summarization** (see Requirements above), then:
 
 ### Getting started
 

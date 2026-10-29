@@ -45,8 +45,26 @@ import {
     checkPluginAvailable,
     getDetectedPluginVersion,
 } from './collection-loader.js';
+import { similharityFetch } from '../utils/similharity-url.js';
 import AsyncUtils from '../utils/async-utils.js';
 import { log } from './log.js';
+
+/**
+ * True when the built-in shim is the active transport. The plugin contract is
+ * then served in-WebView (utils/builtin-similharity.js) — there is no external
+ * plugin to update, so the cross-repo version floor does not apply. Probing a
+ * fixed builtin-only route keeps this decoupled from any settings shape.
+ * @returns {Promise<boolean>}
+ */
+async function isBuiltinTransport() {
+    try {
+        const response = await similharityFetch('/api/plugins/similharity/health', { method: 'GET' });
+        const data = await response.json().catch(() => ({}));
+        return data?.plugin === 'similharity-builtin';
+    } catch {
+        return false;
+    }
+}
 
 /**
  * D5: Cross-repo version floor — warn ONLY when the installed similharity is OLDER
@@ -93,6 +111,12 @@ const PLUGIN_UPDATE_INSTRUCTIONS = 'Restart SillyTavern so it can auto-update th
  */
 export async function checkSimilharityVersion() {
     try {
+        // Built-in transport: no external plugin exists to update, so the
+        // version floor does not apply. (The shim's version string is
+        // "x.y.z-builtin", which must never reach the comparison below —
+        // "1.0.0" would parse as far below the floor.)
+        if (await isBuiltinTransport()) return;
+
         // No plugin installed is a supported setup, not something to warn about.
         if (!(await checkPluginAvailable())) return;
 
