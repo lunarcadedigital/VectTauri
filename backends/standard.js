@@ -467,7 +467,7 @@ export class StandardBackend extends VectorBackend {
                 log.warn(`VectTauri DEBUG: ⚠️ insert body exceeds 500 KB — dumping first 1000 chars: ${bodyJson.slice(0, 1000)}`);
             }
 
-            const response = await fetch(endpoint, {
+            const response = await similharityFetch(endpoint, {
                 method: 'POST',
                 headers: getRequestHeaders(),
                 signal: abortSignal

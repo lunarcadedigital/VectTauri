@@ -22,6 +22,7 @@ import {
   checkPluginAvailable,
 } from "../core/collection-loader.js";
 import { COLLECTION_PREFIXES } from "../core/collection-ids.js";
+import { similharityFetch } from "../utils/similharity-url.js";
 import {
   purgeVectorIndex,
   queryMultipleCollections,
@@ -1351,7 +1352,7 @@ async function openChunkVisualizer(collection) {
 
       log.verbose("VECTTAURI DB Browser: Requesting chunks with:", requestBody);
 
-      const response = await fetch("/api/plugins/similharity/chunks/list", {
+      const response = await similharityFetch("/api/plugins/similharity/chunks/list", {
         method: "POST",
         headers: getRequestHeaders(),
         body: JSON.stringify(requestBody),
@@ -3053,7 +3054,7 @@ async function scanKeywords() {
 
     for (const collection of collectionsToScan) {
       try {
-        const response = await fetch("/api/plugins/similharity/chunks/list", {
+        const response = await similharityFetch("/api/plugins/similharity/chunks/list", {
           method: "POST",
           headers: getRequestHeaders(),
           body: JSON.stringify({
