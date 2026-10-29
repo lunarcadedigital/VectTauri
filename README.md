@@ -274,3 +274,24 @@ MIT License — Based on [VectFox](https://github.com/KritBlade/VectFox) by Krit
 - **[KritBlade](https://github.com/KritBlade)** — Original VectFox & Similharity plugin
 - **[Darkatse](https://github.com/Darkatse)** — TauriTavern
 - **Lunarcade Digital** — TauriTavern adaptation
+
+---
+
+## Contributors
+
+| Agent | Name | Email | Role |
+|---|---|---|---|
+| `main` | **Arief Wicaksana** | arief.wicaksana@lunarcadedigital.com | General Manager (Swarm Orchestrator) |
+| `division_research` | **Dimas Purnomo** | dimas.purnomo@lunarcadedigital.com | Chief Research Officer |
+| `division_architect` | **Eko Prasetyo** | eko.prasetyo@lunarcadedigital.com | Chief Enterprise Architect |
+| `division_designer` | **Rina Kusuma** | rina.kusuma@lunarcadedigital.com | Chief Design Officer |
+| `division_android` | **Dani Ramdani** | dani.ramdani@lunarcadedigital.com | Android Engineering Director |
+| `division_web` | **Ayu Pratiwi** | ayu.pratiwi@lunarcadedigital.com | Web Systems Commander |
+| `division_desktop` | **Fajar Nugroho** | fajar.nugroho@lunarcadedigital.com | Desktop Engineering Director |
+| `division_fixing` | **Reza Aditya** | reza.aditya@lunarcadedigital.com | Head of Maintenance & Patching |
+| `division_qa` | **Prasetyo Hadi** | prasetyo.hadi@lunarcadedigital.com | Quality Gatekeeper |
+| `division_release` | **Hadi Sucipto** | hadi.sucipto@lunarcadedigital.com | Head of DevOps & Release |
+| `division_marketing` | **Aji Santosa** | aji.santosa@lunarcadedigital.com | Chief Marketing Officer |
+| `division_asset` | **Raka Wiraguna** | raka.wiraguna@lunarcadedigital.com | Asset Director (2D Visual) |
+| `division_audio` | **Bayu Nadiswara** | bayu.nadiswara@lunarcadedigital.com | Audio Director |
+| `division_archive` | **Slamet Riyadi** | slamet.riyadi@lunarcadedigital.com | Chief Knowledge Officer |
