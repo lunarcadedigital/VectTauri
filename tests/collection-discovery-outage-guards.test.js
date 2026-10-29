@@ -41,6 +41,14 @@ vi.mock('../core/log.js', () => ({
     log: { lifecycle: vi.fn(), verbose: vi.fn(), trace: vi.fn(), warn: vi.fn(), error: vi.fn(), enabled: () => false },
 }));
 
+// The built-in shim is the only transport in production, but this test drives
+// discovery through a fetch stub (/health, /collections). Forward the transport
+// to globalThis.fetch so the stub keeps working.
+vi.mock('../utils/similharity-url.js', () => ({
+    getPluginUrl: (path) => path,
+    similharityFetch: (path, init) => globalThis.fetch(path, init),
+}));
+
 import { extension_settings } from '../../../../extensions.js';
 import { saveSettingsDebounced } from '../../../../../script.js';
 import { getSavedHashes } from '../core/core-vector-api.js';

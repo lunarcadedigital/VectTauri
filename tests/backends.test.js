@@ -106,6 +106,16 @@ import { QdrantBackend } from '../backends/qdrant.js';
 import { VectorBackend } from '../backends/backend-interface.js';
 import { getPluginUrl } from '../utils/similharity-url.js';
 
+
+// The built-in shim is the only transport in production, but these tests pin
+// the plugin wire contract (URL + init) by mocking globalThis.fetch. Mock the
+// transport module so similharityFetch forwards to globalThis.fetch â€” keeping
+// every existing fetchMock assertion meaningful without network.
+vi.mock('../utils/similharity-url.js', () => ({
+    getPluginUrl: (path) => path,
+    similharityFetch: (path, init) => globalThis.fetch(path, init),
+}));
+
 // =============================================================================
 // TEST UTILITIES
 // =============================================================================
@@ -705,8 +715,8 @@ describe('QdrantBackend', () => {
 
     describe('hybridQuery', () => {
         // Call order per hybridQuery: sentinel-metadata fetch (tokenizer-lock
-        // check) → /get-embedding (embed ONCE, vector reused by both queries) →
-        // dense /chunks/query (cosine-gate lookup, fired in parallel) →
+        // check) â†’ /get-embedding (embed ONCE, vector reused by both queries) â†’
+        // dense /chunks/query (cosine-gate lookup, fired in parallel) â†’
         // /chunks/hybrid-query. The dense fetch lands before the hybrid fetch
         // because its promise is created first.
         it('should call hybrid endpoint with options and report cosine as the score', async () => {
@@ -731,7 +741,7 @@ describe('QdrantBackend', () => {
                 expect.any(Object)
             );
             expect(result.metadata[0].hybridSearch).toBe(true);
-            // score is the cosine from the dense lookup — thresholds downstream
+            // score is the cosine from the dense lookup â€” thresholds downstream
             // gate on similarity; the rank-derived RRF value moves to fusionScore.
             expect(result.metadata[0].score).toBeCloseTo(0.87, 5);
             expect(result.metadata[0].fusionScore).toBeCloseTo(0.016, 5);
@@ -741,7 +751,7 @@ describe('QdrantBackend', () => {
             // Degradation for the hybrid path belongs to core/hybrid-search.js and
             // lives there ONCE. This method used to retry vector-only on its own
             // before that catch ran, so a single failure cost three HTTP calls
-            // (hybrid-query → this retry → hybrid-search's client-side query) and
+            // (hybrid-query â†’ this retry â†’ hybrid-search's client-side query) and
             // still handed the caller an empty set it could not tell apart from
             // "no match". See GitHub issue #11.
             fetchMock

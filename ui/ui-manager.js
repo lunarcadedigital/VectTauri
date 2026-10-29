@@ -191,31 +191,6 @@ export function renderSettings(containerId, settings, callbacks) {
                                     ⚠ Qdrant requires the Similharity server plugin, which is not installed. Install the plugin to use this backend, or switch to Standard.
                                 </small>
 
-                                <!-- Similharity Transport Mode -->
-                                <div style="margin-bottom: 12px;">
-                                    <label for="VectTauri_similharity_mode">
-                                        <small>Similharity Mode:</small>
-                                    </label>
-                                    <select id="VectTauri_similharity_mode" class="vecttauri-input">
-                                        <option value="auto">Auto (recommended)</option>
-                                        <option value="builtin">Built-in (TauriTavern, no server needed)</option>
-                                        <option value="bridge">External Bridge (Termux / Qdrant)</option>
-                                    </select>
-                                    <small id="VectTauri_similharity_mode_hint" style="color: #888; font-size: 0.85em; display: block; margin-top: 4px;"></small>
-                                </div>
-
-                                <!-- Similharity Bridge URL -->
-                                <div style="margin-bottom: 12px;">
-                                    <label for="VectTauri_similharity_url">
-                                        <small>Similharity Bridge URL (TauriTavern/Termux):</small>
-                                    </label>
-                                    <input type="text" id="VectTauri_similharity_url" class="vecttauri-input" placeholder="https://192.168.1.100:8443" />
-                                    <small style="color: #888; font-size: 0.85em;">
-                                        URL bridge server Similharity yang berjalan di Termux. 
-                                        Kosongkan jika plugin terinstall langsung di SillyTavern.
-                                    </small>
-                                </div>
-
                                 <!-- Qdrant Settings (shown only when Qdrant backend is selected) -->
                                 <div id="VectTauri_qdrant_settings" style="display: none;">
                                     <label class="checkbox_label">
@@ -3560,41 +3535,6 @@ function bindSettingsEvents(settings, callbacks) {
 
     // Initial state only — no health reset, no backend init, no toast.
     applyQdrantModeVisibility(settings.qdrant_use_cloud || false);
-
-    // Similharity transport mode (auto / builtin / bridge)
-    function updateSimilharityModeHint() {
-        const mode = settings.similharity_mode || 'auto';
-        const $hint = $('#VectTauri_similharity_mode_hint');
-        if (mode === 'builtin') {
-            $hint.text('Vectors and metadata are stored on-device (native vector API + TT store). No server needed.');
-        } else if (mode === 'bridge') {
-            $hint.text('Requests go to the external bridge URL below. Requires a running Similharity bridge.');
-        } else {
-            $hint.text('Auto: built-in inside TauriTavern, external bridge when a bridge URL is set, native plugin on desktop SillyTavern.');
-        }
-    }
-
-    $('#VectTauri_similharity_mode')
-        .val(settings.similharity_mode || 'auto')
-        .on('change', function() {
-            settings.similharity_mode = String($(this).val());
-            Object.assign(extension_settings.vecttauri, settings);
-            saveSettingsDebounced();
-            updateSimilharityModeHint();
-            // Mode affects plugin availability (builtin is always "up") —
-            // clear the cached probe so the backend gating re-evaluates.
-            import('../core/collection-loader.js').then(m => m.resetPluginAvailableCache?.());
-        });
-    updateSimilharityModeHint();
-
-    // Similharity Bridge URL
-    $('#VectTauri_similharity_url')
-        .val(settings.similharity_url || '')
-        .on('input', function() {
-            settings.similharity_url = String($(this).val()).trim();
-            Object.assign(extension_settings.vecttauri, settings);
-            saveSettingsDebounced();
-        });
 
     // Qdrant settings
     $('#VectTauri_qdrant_host')

@@ -94,6 +94,14 @@ vi.mock('../core/collection-metadata.js', () => ({
     isCollectionLockedToCharacter: vi.fn(() => false),
 }));
 
+// The built-in shim is the only transport in production, but these tests pin
+// the plugin wire contract via their fetch router. Forward the transport to
+// globalThis.fetch so every routed URL assertion stays meaningful.
+vi.mock('../utils/similharity-url.js', () => ({
+    getPluginUrl: (path) => path,
+    similharityFetch: (path, init) => globalThis.fetch(path, init),
+}));
+
 vi.mock('../core/lorebook-rename-detector.js', () => ({
     detectLorebookRenames: vi.fn(async () => []),
     showLorebookRenameModal: vi.fn(),

@@ -63,7 +63,6 @@ const defaultSettings = {
     // Core vector settings
     embedding_provider: 'transformers', // embedding provider selection (was `source` pre-Phase-B)
     vector_backend: 'qdrant', // Backend: 'standard' (ST Vectra) | 'qdrant'
-    similharity_url: '', // Similharity bridge URL (e.g. https://192.168.1.100:8443)
     qdrant_host: '127.0.0.1',
     qdrant_port: 6333,
     qdrant_url: '',
@@ -574,6 +573,11 @@ jQuery(async () => {
     if (!extension_settings.vecttauri) {
         extension_settings.vecttauri = defaultSettings;
     }
+
+    // Remove obsolete transport settings (pre-1.1.1 multi-mode: bridge URL /
+    // mode preference). The built-in shim is the only transport now.
+    delete extension_settings.vecttauri.similharity_url;
+    delete extension_settings.vecttauri.similharity_mode;
 
     // Merge saved settings with defaults
     settings = {
