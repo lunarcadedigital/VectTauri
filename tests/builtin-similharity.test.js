@@ -423,4 +423,30 @@ describe('builtin shim hybrid keyword boost', () => {
             globalThis.fetch = realFetch;
         }
     });
+
+    it('treats a successful native insert with an EMPTY body as success (TT empty_response)', async () => {
+        // TT answers successful insert/delete/purge with Response(null). Parsing
+        // that as JSON threw SyntaxError, which the shim reported as a 500 —
+        // turning successful writes into "insert failed after 3 retries".
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async () => ({
+            ok: true,
+            status: 200,
+            // Mimic a Response(null) body: empty text, and json() that throws.
+            text: async () => '',
+            json: async () => { throw new SyntaxError('Unexpected end of input'); },
+        });
+        try {
+            const r = await post(`${H}/chunks/insert`, {
+                collectionId: 'c-empty', source: 'ollama', model: 'embeddinggemma', apiUrl: 'http://127.0.0.1:11434',
+                items: [{ hash: 'e1', text: 'chunk', index: 0, vector: [1], metadata: {} }],
+            });
+            expect(r.ok).toBe(true);
+            const data = await r.json();
+            expect(data.success).toBe(true);
+            expect(data.inserted).toBe(1);
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
 });

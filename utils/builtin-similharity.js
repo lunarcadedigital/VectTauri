@@ -121,11 +121,23 @@ async function nativeVector(endpoint, body) {
         headers: getRequestHeaders(),
         body: JSON.stringify(body ?? {}),
     });
+    const raw = await response.text().catch(() => '');
     if (!response.ok) {
-        const errBody = await response.text().catch(() => '(no body)');
-        throw new Error(`/api/vector/${endpoint} failed: ${response.status} ${errBody.slice(0, 200)}`);
+        const errBody = raw.slice(0, 200) || '(no body)';
+        throw new Error(`/api/vector/${endpoint} failed: ${response.status} ${errBody}`);
     }
-    return response.json();
+    // TT answers SUCCESSFUL insert/delete/purge with an EMPTY body
+    // (Response(null) via empty_response()). Blindly calling .json() there
+    // throws SyntaxError ("Unexpected end of input" on older Android WebViews),
+    // which this shim then reported as a 500 — turning successful writes into
+    // "insert failed after 3 retries" mid-vectorization.
+    if (!raw.trim()) return {};
+    try {
+        return JSON.parse(raw);
+    } catch (e) {
+        log.warn(`[builtin] /api/vector/${endpoint} returned a non-JSON 200 body (${e.message}); treating as empty`);
+        return {};
+    }
 }
 
 // ---------------------------------------------------------------------------
