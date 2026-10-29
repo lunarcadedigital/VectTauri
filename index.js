@@ -48,7 +48,7 @@ import { initializeDatabaseBrowser } from './ui/database-browser.js';
 import { initializeWorldInfoIntegration } from './core/world-info-integration.js';
 import { refreshWorldInfoEntryDepthCache } from './core/summarizer-injection.js';
 import { CJK_TOKENIZER_MODES, setCjkTokenizerMode, ensureJiebaTokenizerLoaded, ensureJiebaTwLoaded } from './core/bm25-scorer.js';
-import { getPluginUrl } from './utils/similharity-url.js';
+import { getPluginUrl, similharityFetch } from './utils/similharity-url.js';
 
 // SillyTavern display label — NOT the settings key. For settings, use 'vecttauri' (lowercase).
 const MODULE_NAME = 'VectTauri';
@@ -495,7 +495,7 @@ async function onPurgeClick() {
         const { getRequestHeaders } = await import('../../../../script.js');
 
         // 1. Delete entire vectors folder
-        await fetch(getPluginUrl('/api/plugins/similharity/purge-all'), {
+        await similharityFetch('/api/plugins/similharity/purge-all', {
             method: 'POST',
             headers: getRequestHeaders(),
         });

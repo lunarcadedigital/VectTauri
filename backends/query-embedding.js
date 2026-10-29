@@ -14,7 +14,7 @@ import { getModelFromSettings } from '../core/providers.js';
 import { throwIfModelConfigError } from '../core/model-http-errors.js';
 import { warnIfEmbeddingSlow } from '../core/embedding-latency-warning.js';
 import { log } from '../core/log.js';
-import { getPluginUrl } from '../utils/similharity-url.js';
+import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
 
 /**
  * @param {string} searchText - Query text to embed
@@ -26,7 +26,7 @@ export async function fetchQueryEmbedding(searchText, settings, providerParams) 
     const source = settings.embedding_provider || 'transformers';
     const model = getModelFromSettings(settings);
     const tStart = performance.now();
-    const response = await fetch(getPluginUrl('/api/plugins/similharity/get-embedding'), {
+    const response = await similharityFetch('/api/plugins/similharity/get-embedding', {
         method: 'POST',
         headers: getRequestHeaders(),
         body: JSON.stringify({ text: searchText, source, model, ...providerParams }),

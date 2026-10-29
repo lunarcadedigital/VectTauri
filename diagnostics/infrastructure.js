@@ -24,7 +24,7 @@ import {
     getUrlProviders,
     resolveProviderApiUrl
 } from '../core/providers.js';
-import { getPluginUrl } from '../utils/similharity-url.js';
+import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
 
 /**
  * Helper: Get provider-specific body parameters for Similharity plugin requests
@@ -173,7 +173,7 @@ export async function checkBackendEndpoints(settings) {
  */
 export async function checkServerPlugin() {
     try {
-        const response = await fetch(getPluginUrl('/api/plugins/similharity/health'), {
+        const response = await similharityFetch('/api/plugins/similharity/health', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -226,7 +226,7 @@ export async function checkPluginEndpoints() {
 
     // First check if plugin is available
     try {
-        const healthResponse = await fetch(getPluginUrl('/api/plugins/similharity/health'), {
+        const healthResponse = await similharityFetch('/api/plugins/similharity/health', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -365,7 +365,7 @@ export async function checkQdrantBackend(settings) {
             apiKey: null,
         };
 
-        const initResponse = await fetch(getPluginUrl('/api/plugins/similharity/backend/init/qdrant'), {
+        const initResponse = await similharityFetch('/api/plugins/similharity/backend/init/qdrant', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify(initConfig)
@@ -395,7 +395,7 @@ export async function checkQdrantBackend(settings) {
 
     // Then check health
     try {
-        const healthResponse = await fetch(getPluginUrl('/api/plugins/similharity/backend/health/qdrant'), {
+        const healthResponse = await similharityFetch('/api/plugins/similharity/backend/health/qdrant', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -469,7 +469,7 @@ export async function checkQdrantDimensionMatch(settings) {
 
     try {
         // Get collection info from Qdrant
-        const infoResponse = await fetch(getPluginUrl('/api/plugins/similharity/backend/qdrant/collection-info'), {
+        const infoResponse = await similharityFetch('/api/plugins/similharity/backend/qdrant/collection-info', {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -496,7 +496,7 @@ export async function checkQdrantDimensionMatch(settings) {
         }
 
         // Get current embedding dimension by generating a test embedding
-        const testResponse = await fetch(getPluginUrl('/api/plugins/similharity/get-embedding'), {
+        const testResponse = await similharityFetch('/api/plugins/similharity/get-embedding', {
             method: 'POST',
             headers: getRequestHeaders(),
             body: JSON.stringify({

@@ -40,7 +40,7 @@ import {
     sanitizeHandleId,
     sanitizeNameSegment,
 } from './collection-ids.js';
-import { getPluginUrl } from '../utils/similharity-url.js';
+import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
 
 // Plugin detection state. `pluginAvailable` is the settled result; `pluginProbeInFlight`
 // holds the promise for a probe that has started but not finished, so concurrent callers
@@ -569,7 +569,7 @@ export async function checkPluginAvailable() {
 
     pluginProbeInFlight = (async () => {
         try {
-            const response = await fetch(getPluginUrl('/api/plugins/similharity/health'), {
+            const response = await similharityFetch('/api/plugins/similharity/health', {
                 method: 'GET',
                 headers: getRequestHeaders()
             });
@@ -643,7 +643,7 @@ async function discoverViaPlugin(settings) {
         log.trace('🔍 VectTauri: Requesting collection discovery from plugin...');
 
         // Plugin now scans ALL sources, not just the current one
-        const response = await fetch(getPluginUrl(`/api/plugins/similharity/collections`), {
+        const response = await similharityFetch(`/api/plugins/similharity/collections`, {
             method: 'GET',
             headers: getRequestHeaders()
         });
@@ -847,7 +847,7 @@ export async function cleanupCorruptedCollections() {
     };
 
     try {
-        const response = await fetch(getPluginUrl('/api/plugins/similharity/collections'), {
+        const response = await similharityFetch('/api/plugins/similharity/collections', {
             method: 'GET',
             headers: getRequestHeaders(),
         });
@@ -895,7 +895,7 @@ export async function cleanupCorruptedCollections() {
 
         for (const target of targets) {
             try {
-                const purgeResp = await fetch(getPluginUrl('/api/plugins/similharity/chunks/purge'), {
+                const purgeResp = await similharityFetch('/api/plugins/similharity/chunks/purge', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify({

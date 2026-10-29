@@ -60,7 +60,7 @@ import {
     resolveAgenticMaxTokens,
 } from '../core/retrieval-budget.js';
 import { log } from '../core/log.js';
-import { getPluginUrl } from '../utils/similharity-url.js';
+import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
 
 /**
  * Renders the VectTauri settings UI
@@ -190,6 +190,19 @@ export function renderSettings(containerId, settings, callbacks) {
                                 <small id="VectTauri_qdrant_plugin_error" class="VectTauri_hint" style="display:none; color:#e04a4a; font-weight:600; margin-top:-8px; margin-bottom:16px; line-height:1.5;">
                                     ⚠ Qdrant requires the Similharity server plugin, which is not installed. Install the plugin to use this backend, or switch to Standard.
                                 </small>
+
+                                <!-- Similharity Transport Mode -->
+                                <div style="margin-bottom: 12px;">
+                                    <label for="VectTauri_similharity_mode">
+                                        <small>Similharity Mode:</small>
+                                    </label>
+                                    <select id="VectTauri_similharity_mode" class="vecttauri-input">
+                                        <option value="auto">Auto (recommended)</option>
+                                        <option value="builtin">Built-in (TauriTavern, no server needed)</option>
+                                        <option value="bridge">External Bridge (Termux / Qdrant)</option>
+                                    </select>
+                                    <small id="VectTauri_similharity_mode_hint" style="color: #888; font-size: 0.85em; display: block; margin-top: 4px;"></small>
+                                </div>
 
                                 <!-- Similharity Bridge URL -->
                                 <div style="margin-bottom: 12px;">
@@ -3548,6 +3561,32 @@ function bindSettingsEvents(settings, callbacks) {
     // Initial state only — no health reset, no backend init, no toast.
     applyQdrantModeVisibility(settings.qdrant_use_cloud || false);
 
+    // Similharity transport mode (auto / builtin / bridge)
+    function updateSimilharityModeHint() {
+        const mode = settings.similharity_mode || 'auto';
+        const $hint = $('#VectTauri_similharity_mode_hint');
+        if (mode === 'builtin') {
+            $hint.text('Vectors and metadata are stored on-device (native vector API + TT store). No server needed.');
+        } else if (mode === 'bridge') {
+            $hint.text('Requests go to the external bridge URL below. Requires a running Similharity bridge.');
+        } else {
+            $hint.text('Auto: built-in inside TauriTavern, external bridge when a bridge URL is set, native plugin on desktop SillyTavern.');
+        }
+    }
+
+    $('#VectTauri_similharity_mode')
+        .val(settings.similharity_mode || 'auto')
+        .on('change', function() {
+            settings.similharity_mode = String($(this).val());
+            Object.assign(extension_settings.vecttauri, settings);
+            saveSettingsDebounced();
+            updateSimilharityModeHint();
+            // Mode affects plugin availability (builtin is always "up") —
+            // clear the cached probe so the backend gating re-evaluates.
+            import('../core/collection-loader.js').then(m => m.resetPluginAvailableCache?.());
+        });
+    updateSimilharityModeHint();
+
     // Similharity Bridge URL
     $('#VectTauri_similharity_url')
         .val(settings.similharity_url || '')
@@ -5936,7 +5975,7 @@ async function showQdrantDimensionFixDialog() {
             toastr.info('Purging Qdrant collection...');
             try {
                 const { getRequestHeaders } = await import('../../../../../script.js');
-                const response = await fetch(getPluginUrl('/api/plugins/similharity/backend/qdrant/purge-collection'), {
+                const response = await similharityFetch('/api/plugins/similharity/backend/qdrant/purge-collection', {
                     method: 'POST',
                     headers: getRequestHeaders(),
                     body: JSON.stringify({ collectionName: 'VectTauri_main' })

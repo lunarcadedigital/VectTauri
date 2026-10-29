@@ -112,7 +112,7 @@ import { extension_settings } from '../../../../extensions.js';
 import { SECRET_KEYS, secret_state, writeSecret, readSecretState } from '../../../../secrets.js';
 import { saveSettings } from '../../../../../script.js';
 import { log } from './log.js';
-import { getPluginUrl } from '../utils/similharity-url.js';
+import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
 
 // ─── Internal helpers ───────────────────────────────────────────────────
 
@@ -238,7 +238,7 @@ export async function fetchQdrantApiKeyPresence() {
         if (!(await checkPluginAvailable())) {
             return { set: false, masked: '' };
         }
-        const response = await fetch(getPluginUrl('/api/plugins/similharity/qdrant/key-status'), {
+        const response = await similharityFetch('/api/plugins/similharity/qdrant/key-status', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -479,7 +479,7 @@ export async function migrateLegacyApiKeys() {
             // Plugin is up; now capability-probe the specific endpoint to confirm
             // it's new enough to support the secret_state Qdrant slot.
             try {
-                const probe = await fetch(getPluginUrl('/api/plugins/similharity/qdrant/key-status'), {
+                const probe = await similharityFetch('/api/plugins/similharity/qdrant/key-status', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                 });
