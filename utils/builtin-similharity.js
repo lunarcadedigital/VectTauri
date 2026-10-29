@@ -15,12 +15,17 @@
 
 import { getRequestHeaders } from '../../../../../script.js';
 import { log } from '../core/log.js';
+import { applyKeywordBoosts, getOverfetchAmount } from '../core/keyword-boost.js';
 import {
     storeSetJson,
     storeGetJson,
     storeDeleteJson,
     storeListKeys,
     storeDropNamespace,
+    globalSetJson,
+    globalGetJson,
+    globalDeleteJson,
+    globalListKeys,
 } from './builtin-store.js';
 
 export const BUILTIN_PLUGIN_VERSION = '1.0.0-builtin';
@@ -62,15 +67,16 @@ function chunkNamespace(collectionId) {
 
 /**
  * Reads the collection registry entry (model info, counts, timestamps).
- * The registry is global (not chat-scoped), so it lives in the settings
- * fallback tree via a dedicated namespace.
+ * The registry is GLOBAL (visible from every chat), so it always lives in
+ * extension_settings via the global* store functions — TT's store.* is
+ * per-chat and would hide collections created in other chats.
  */
 async function getRegistryEntry(collectionId) {
-    return (await storeGetJson(REGISTRY_NS, collectionId)) ?? null;
+    return (await globalGetJson(REGISTRY_NS, collectionId)) ?? null;
 }
 
 async function setRegistryEntry(collectionId, entry) {
-    await storeSetJson(REGISTRY_NS, collectionId, entry);
+    await globalSetJson(REGISTRY_NS, collectionId, entry);
 }
 
 async function updateRegistryOnInsert(collectionId, model, source) {
@@ -203,10 +209,13 @@ function cosine(a, b) {
  * Body: { backend, collectionId, topK, threshold, source, model, queryVector?, searchText? }
  * Returns { success, results: [{hash, score, text, metadata}] }.
  *
- * Strategy: prefer the caller's pre-computed queryVector; score against stored
- * vectors client-side. When only searchText is available, fall back to the
- * native query endpoint (which embeds on-device in TauriTavern), then enrich
- * with stored metadata.
+ * Strategy (hybrid, client-side):
+ *  1. Dense scoring — cosine against stored vectors (queryVector) or via the
+ *     native on-device embedding query (searchText).
+ *  2. Keyword boost — the same additive keyword-boost math used by bridge mode
+ *     (core/keyword-boost.js): chunk keywords matched against the query text
+ *     lift their score, with diminishing returns and a per-keyword cap.
+ *  3. Merge + rank — boosted scores re-sorted before the topK cut.
  */
 async function handleQuery(body) {
     const { collectionId, topK = 10, threshold = 0, queryVector, searchText, source, model } = body ?? {};
@@ -239,12 +248,14 @@ async function handleQuery(body) {
             results.sort((a, b) => b.score - a.score);
         } else if (searchText) {
             // Native query embeds searchText on-device and returns hashes/scores.
+            // Overfetch so keyword-boosted items below the cut can resurface.
+            const overfetch = getOverfetchAmount(topK);
             const native = await nativeVector('query', {
                 collectionId,
                 source: source || 'transformers',
                 model,
                 searchText,
-                topK,
+                topK: overfetch,
                 threshold,
             });
             const nativeResults = Array.isArray(native) ? native : (native.results ?? native.hashes ?? []);
@@ -262,6 +273,17 @@ async function handleQuery(body) {
             }
         } else {
             return fail(400, 'chunks/query: queryVector or searchText is required');
+        }
+
+        // Hybrid stage: keyword boost against the query text, then topK cut.
+        const queryText = searchText || body?.query || '';
+        if (queryText && results.length > 0) {
+            try {
+                results = applyKeywordBoosts(results, queryText, topK);
+            } catch (boostErr) {
+                // Boost is an enhancement — a failure must not break retrieval.
+                log.warn(`[builtin] keyword boost skipped: ${boostErr.message}`);
+            }
         }
 
         results = results.slice(0, topK);
@@ -301,7 +323,7 @@ async function handlePurge(body) {
     try {
         await nativeVector('purge', { collectionId, source: source || 'transformers', model });
         await storeDropNamespace(chunkNamespace(collectionId));
-        await storeDeleteJson(REGISTRY_NS, collectionId);
+        await globalDeleteJson(REGISTRY_NS, collectionId);
         return ok({ success: true });
     } catch (e) {
         return fail(500, e.message);
@@ -314,11 +336,13 @@ async function handlePurge(body) {
 async function handlePurgeAll() {
     try {
         await nativeVector('purge-all', {});
-        const regKeys = await storeListKeys(REGISTRY_NS);
+        const regKeys = await globalListKeys(REGISTRY_NS);
         for (const collectionId of regKeys) {
             await storeDropNamespace(chunkNamespace(collectionId));
         }
-        await storeDropNamespace(REGISTRY_NS);
+        for (const id of regKeys) {
+            await globalDeleteJson(REGISTRY_NS, id);
+        }
         return ok({ success: true });
     } catch (e) {
         return fail(500, e.message);
@@ -388,7 +412,7 @@ async function handleCollectionMetadata(body) {
  */
 async function handleCollections() {
     try {
-        const ids = await storeListKeys(REGISTRY_NS);
+        const ids = await globalListKeys(REGISTRY_NS);
         const collections = [];
         for (const id of ids) {
             const reg = await getRegistryEntry(id);

@@ -10,13 +10,17 @@
  * installs keep working.
  *
  * Data layout:
- *   - Chunk metadata:      namespace `chunkmeta::<collectionId>`, key = hash
- *   - Collection registry: namespace `__registry`, key = collectionId
+ *   - Chunk metadata (per-chat): namespace `chunkmeta::<collectionId>`, key = hash
+ *     → TT store.* in TauriTavern, settings fallback elsewhere.
+ *   - Collection registry (global/cross-chat): namespace `__vecttauri_registry`
+ *     → always settings-backed (TT store is per-chat, registry must be visible
+ *     from every chat) via the global* functions.
  */
 
 import { extension_settings } from "../../../../extensions.js";
 
 const SETTINGS_FALLBACK_KEY = 'builtinStores';
+const GLOBAL_SETTINGS_KEY = 'builtinGlobal';
 
 /** @type {object|null} Lazily-resolved TauriTavern chat API handle */
 let ttApi = null;
@@ -144,4 +148,62 @@ export async function storeDropNamespace(namespace) {
     for (const key of keys) {
         await storeDeleteJson(namespace, key);
     }
+}
+
+// ---------------------------------------------------------------------------
+// Global (cross-chat) storage — settings-backed everywhere
+// ---------------------------------------------------------------------------
+// TT's store.* is per-chat, so anything that must be visible from every chat
+// (collection registry, per-collection model info) lives in
+// extension_settings.vecttauri instead. Small JSON values only.
+
+function getGlobalTree() {
+    if (!extension_settings.vecttauri) extension_settings.vecttauri = {};
+    if (!extension_settings.vecttauri[GLOBAL_SETTINGS_KEY]) {
+        extension_settings.vecttauri[GLOBAL_SETTINGS_KEY] = {};
+    }
+    return extension_settings.vecttauri[GLOBAL_SETTINGS_KEY];
+}
+
+/**
+ * Writes a JSON value to global (cross-chat) storage.
+ * @param {string} namespace
+ * @param {string} key
+ * @param {*} value
+ * @returns {Promise<void>}
+ */
+export async function globalSetJson(namespace, key, value) {
+    const tree = getGlobalTree();
+    if (!tree[namespace]) tree[namespace] = {};
+    tree[namespace][key] = value;
+}
+
+/**
+ * Reads a JSON value from global (cross-chat) storage.
+ * @param {string} namespace
+ * @param {string} key
+ * @returns {Promise<*|null>}
+ */
+export async function globalGetJson(namespace, key) {
+    return getGlobalTree()[namespace]?.[key] ?? null;
+}
+
+/**
+ * Deletes a key from global (cross-chat) storage.
+ * @param {string} namespace
+ * @param {string} key
+ * @returns {Promise<void>}
+ */
+export async function globalDeleteJson(namespace, key) {
+    const tree = getGlobalTree();
+    if (tree[namespace]) delete tree[namespace][key];
+}
+
+/**
+ * Lists keys in a global namespace.
+ * @param {string} namespace
+ * @returns {Promise<string[]>}
+ */
+export async function globalListKeys(namespace) {
+    return Object.keys(getGlobalTree()[namespace] ?? {});
 }

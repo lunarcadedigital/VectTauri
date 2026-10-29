@@ -249,3 +249,126 @@ describe('builtin shim chunks contract', () => {
         expect(r.status).toBe(501);
     });
 });
+
+describe('builtin shim cross-chat scoping', () => {
+    beforeEach(() => {
+        resetBuiltinStoreProbe();
+    });
+
+    it('registry is global: collections registered in one chat context are listed from another', async () => {
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
+        try {
+            // Register a collection (registry writes go to extension_settings — global).
+            await post(`${H}/chunks/insert`, {
+                collectionId: 'vf_chat_A_1', source: 'transformers', model: 'm',
+                items: [{ hash: 'x1', text: 't', index: 0, vector: [0], metadata: {} }],
+            });
+
+            // Simulate switching chats: chunk metadata store is per-chat in TT,
+            // but the registry namespace must survive the switch. Verify the
+            // registry data physically lives in extension_settings (global).
+            const { extension_settings } = await import('../../../../extensions.js');
+            const globalTree = extension_settings.vecttauri.builtinGlobal;
+            expect(globalTree.__vecttauri_registry.vf_chat_A_1).toBeTruthy();
+
+            // Collections listing reads the global registry, not a chat store.
+            const r = await builtinFetch(`${H}/collections`, { method: 'GET' });
+            const data = await r.json();
+            const entry = data.collections.find(c => c.id === 'vf_chat_A_1');
+            expect(entry).toBeTruthy();
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+
+    it('chunk metadata is keyed per collection, so distinct chats never mix', async () => {
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
+        try {
+            await post(`${H}/chunks/insert`, {
+                collectionId: 'vf_chat_A_1', source: 'transformers', model: 'm',
+                items: [{ hash: 'onlyA', text: 'chat A chunk', index: 0, vector: [1], metadata: {} }],
+            });
+            await post(`${H}/chunks/insert`, {
+                collectionId: 'vf_chat_B_2', source: 'transformers', model: 'm',
+                items: [{ hash: 'onlyB', text: 'chat B chunk', index: 0, vector: [1], metadata: {} }],
+            });
+
+            const listA = await post(`${H}/chunks/list`, { collectionId: 'vf_chat_A_1' });
+            const a = (await listA.json()).items.map(i => i.hash);
+            expect(a).toContain('onlyA');
+            expect(a).not.toContain('onlyB');
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+});
+
+describe('builtin shim hybrid keyword boost', () => {
+    beforeEach(() => {
+        resetBuiltinStoreProbe();
+    });
+
+    it('keyword match lifts a weaker dense result above a stronger one', async () => {
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
+        try {
+            // Unit vectors chosen so dense scores are 0.9 and 0.85 pre-boost.
+            await post(`${H}/chunks/insert`, {
+                collectionId: 'c-hybrid', source: 'transformers', model: 'm',
+                items: [
+                    {
+                        // Dense winner (0.9), but no keyword overlap with the query.
+                        hash: 'dense-win', text: 'the weather was pleasant', index: 0,
+                        vector: [0.9, 0.43589], metadata: { importance: 100, keywords: ['weather'] },
+                    },
+                    {
+                        // Dense runner-up (0.85); one keyword match → 1.15x boost
+                        // (1 + 0.5 contribution × 0.3 single-match scale) → 0.9775.
+                        hash: 'kw-win', text: 'a dragon attacked the village', index: 1,
+                        vector: [0.85, 0.52678], metadata: { importance: 100, keywords: ['dragon'] },
+                    },
+                ],
+            });
+
+            const r = await post(`${H}/chunks/query`, {
+                collectionId: 'c-hybrid', topK: 2, threshold: 0,
+                queryVector: [1, 0], searchText: 'dragon attack on the village',
+            });
+            const data = await r.json();
+            expect(data.success).toBe(true);
+            expect(data.results[0].hash).toBe('kw-win');
+            expect(data.results[0].keywordBoosted).toBe(true);
+            expect(data.results[0].originalScore).toBeCloseTo(0.85, 2);
+            expect(data.results[0].score).toBeGreaterThan(data.results[1].score);
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+
+    it('query without searchText skips boosting (pure dense)', async () => {
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
+        try {
+            await post(`${H}/chunks/insert`, {
+                collectionId: 'c-pure', source: 'transformers', model: 'm',
+                items: [
+                    { hash: 'a', text: 'alpha', index: 0, vector: [1, 0], metadata: { keywords: ['alpha'] } },
+                    { hash: 'b', text: 'beta', index: 1, vector: [0.9, 0.1], metadata: { keywords: [] } },
+                ],
+            });
+
+            const r = await post(`${H}/chunks/query`, {
+                collectionId: 'c-pure', topK: 2, threshold: 0, queryVector: [1, 0],
+            });
+            const data = await r.json();
+            for (const res of data.results) {
+                expect(res.keywordBoosted).toBeFalsy();
+                expect(res.originalScore).toBeUndefined();
+            }
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+});
