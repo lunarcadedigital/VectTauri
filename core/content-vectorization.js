@@ -12,7 +12,7 @@
 
 import { getContentType, getContentTypeDefaults, hasFeature } from './content-types.js';
 import { chunkText } from './chunking.js';
-import { applyLlmConfigMirrorFallback } from '../utils/llm-config-store.js';
+import { applyLlmConfigMirrorFallback, resolveLlmEffectiveSettings } from '../utils/llm-config-store.js';
 import { insertVectorItems, purgeVectorIndex, getSavedHashes } from './core-vector-api.js';
 import { isConnectionError } from './model-config-notifier.js';
 import { setCollectionMeta, setCollectionLock, setCollectionCharacterLock, saveChunkMetadata } from './collection-metadata.js';
@@ -53,13 +53,9 @@ import { log } from './log.js';
  * @returns {object} merged settings — globals first, overrides win
  */
 export function resolveEffectiveSettings(callerSettings) {
-    // LLM config mirror fallback (2026-10-29): on mobile, the debounced
-    // settings save can lag behind a "fill config → hit Vectorize" flow and
-    // the user hit "model is not set" despite having just configured
-    // everything. The synchronous mirror wins for empty LLM connection
-    // fields only — non-empty globals always keep priority.
-    const merged = { ...(extension_settings.vecttauri || {}), ...(callerSettings || {}) };
-    return applyLlmConfigMirrorFallback(merged);
+    // Delegates to the canonical implementation in llm-config-store.js —
+    // mirror fallback for empty LLM fields only; non-empty globals win.
+    return resolveLlmEffectiveSettings(callerSettings);
 }
 
 /**

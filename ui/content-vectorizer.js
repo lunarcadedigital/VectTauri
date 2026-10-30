@@ -3024,7 +3024,14 @@ async function _runEventBaseBackfill({ resetCaches = false } = {}) {
         const { runEventBaseIngestion, countUnfinishedWindows } = await import('../core/eventbase-workflow.js');
         const { chunkText } = await import('../core/chunking.js');
         const context = getContext();
-        const settings = extension_settings.vecttauri || {};
+        // MUST go through resolveEffectiveSettings — the LLM dispatch inside the
+        // workflow (extractEvents → provider switch) reads chat_provider from the
+        // object we pass here. Raw extension_settings can be stale (debounced save
+        // not yet flushed) while the UI-side mirror already holds 'custom', which
+        // produced "OpenRouter API key not found" on a Custom-provider setup.
+        // See 2026-10-30 bug report; upstream VectFox is unaffected because it
+        // has no mirror layer (always one source of truth).
+        const settings = resolveEffectiveSettings(extension_settings.vecttauri || {});
         const source = getSourceData();
 
         // Vectorize button = fresh start. Drop BOTH "already-extracted" caches for

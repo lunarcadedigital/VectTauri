@@ -14,6 +14,7 @@
 import { setExtensionPrompt, extension_prompts, getCurrentChatId, substituteParams } from '../../../../../script.js';
 import { extension_settings, getContext } from '../../../../extensions.js';
 import { getChatUUID, parseRegistryKey, COLLECTION_PREFIXES, buildRegistryKey } from './collection-ids.js';
+import { resolveLlmEffectiveSettings } from '../utils/llm-config-store.js';
 import { getCollectionRegistry } from './collection-loader.js';
 import { queryCollection } from './core-vector-api.js';
 import { EVENTBASE_PROMPT_TAG } from './constants.js';
@@ -116,8 +117,16 @@ export function countUnfinishedWindows(result) {
     return (result?.windowsTimedOut || 0) + (result?.windowsFailed || 0);
 }
 
-export async function runEventBaseIngestion({ messages, chatUUID, settings, abortSignal = null, progressPlan = null, collectionIdOverride = null, parallelWindows = 3, isAutoSync = false, suppressAutoSyncPopup = false, skipTipFallback = false, windowSizeOverride = undefined, windowOverlapOverride = undefined }) {
+export async function runEventBaseIngestion({ messages, chatUUID, settings: rawSettings, abortSignal = null, progressPlan = null, collectionIdOverride = null, parallelWindows = 3, isAutoSync = false, suppressAutoSyncPopup = false, skipTipFallback = false, windowSizeOverride = undefined, windowOverlapOverride = undefined }) {
     const uuid = chatUUID || getChatUUID();
+
+    // Single source of truth for LLM dispatch (2026-10-30): the provider switch
+    // inside extractEvents reads chat_provider off THIS object. Callers pass
+    // varying shapes (raw extension_settings, merged UI settings) — normalize
+    // through resolveLlmEffectiveSettings so the mirror fallback applies uniformly
+    // and a stale debounced save can never dispatch Custom-configured setups to
+    // the OpenRouter key check ("OpenRouter API key not found" bug report).
+    const settings = resolveLlmEffectiveSettings(rawSettings);
 
     // Resolve the write target. Precedence:
     //   1. Explicit override (archive uploads pass a fixed ID; auto-sync passes the

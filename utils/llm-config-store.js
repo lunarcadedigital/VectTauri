@@ -21,6 +21,8 @@
 
 const MIRROR_KEY = 'vecttauri_llm_config_mirror_v1';
 
+import { extension_settings } from '../../../../extensions.js';
+
 /** Fields mirrored. Keep in sync with index.js defaultSettings chat_* keys. */
 const MIRRORED_FIELDS = Object.freeze([
     'chat_provider',
@@ -173,4 +175,31 @@ export function applyLlmConfigMirrorFallback(base) {
         }
     }
     return out;
+}
+
+/**
+ * Canonical effective-settings resolution for every LLM dispatch path.
+ *
+ * Merges the global VECTTAURI settings under the caller's settings, then
+ * applies the mirror as an empty-field fallback. Call this at the ENTRY POINT
+ * of any LLM-consuming flow (EventBase ingestion, summarizer, reformat,
+ * agent mode) — never read extension_settings.vecttauri directly there, or a
+ * stale debounced save dispatches Custom-configured setups to the wrong
+ * provider (2026-10-30 "OpenRouter API key not found" bug).
+ *
+ * Lives here (not in content-vectorization.js) so low-level modules can use
+ * it without creating an import cycle.
+ *
+ * @param {object} [callerSettings] - caller-scoped overrides (may be undefined)
+ * @returns {object} merged settings, mirror-fallback applied
+ */
+export function resolveLlmEffectiveSettings(callerSettings) {
+    let globals = {};
+    try {
+        globals = extension_settings?.vecttauri || {};
+    } catch {
+        globals = {};
+    }
+    const merged = { ...globals, ...(callerSettings || {}) };
+    return applyLlmConfigMirrorFallback(merged);
 }
