@@ -23,39 +23,69 @@ const SETTINGS_FALLBACK_KEY = 'builtinStores';
 const GLOBAL_SETTINGS_KEY = 'builtinGlobal';
 
 /** @type {object|null} Lazily-resolved TauriTavern chat API handle */
-let ttApi = null;
 /** @type {boolean|null} tri-state: null = not probed yet */
 let ttProbeAttempted = false;
 
 /**
- * Resolves the TauriTavern chat API handle once per session.
- * The handle is chat-scoped: callers must key namespaces by collectionId and
- * accept that metadata lives per chat (global registry goes to settings).
- * @returns {object|null} The TauriTavern chat API, or null outside TT.
+ * Resolves the TauriTavern chat-store handle once per session.
+ *
+ * TT exposes `window.__TAURITAVERN__.api.chat` — per ExtensionDEV.md it may be
+ * a chat-API object OR an async factory returning a handle, and the store
+ * methods (`setJson/getJson/listKeys/deleteJson`) live on `handle.store`.
+ * Ponytail rule: never trust the shape — resolve it, verify the methods
+ * actually exist, and on ANY mismatch return null so callers fall back to the
+ * settings tree. A wrong-but-truthy handle here previously crashed vectorize
+ * with "Cannot read properties of undefined (reading 'getJson')".
+ * @returns {Promise<object|null>} A verified store handle, or null.
  */
-function getTTApi() {
-    if (ttProbeAttempted) return ttApi;
-    ttProbeAttempted = true;
+async function getTTStore() {
     try {
-        ttApi = window?.__TAURITAVERN__?.api?.chat ?? null;
+        const root = window?.__TAURITAVERN__?.api;
+        if (!root) return null;
+
+        let handle = root.chat;
+        if (typeof handle === 'function') {
+            handle = await handle();
+        }
+        const store = handle?.store;
+        if (store && typeof store.setJson === 'function' && typeof store.getJson === 'function') {
+            return store;
+        }
+        return null;
     } catch {
-        ttApi = null;
+        return null;
     }
-    return ttApi;
+}
+
+/** @type {object|null} resolved store handle (null = not resolved or unavailable) */
+let ttStore = null;
+/** @type {Promise<object|null>|null} in-flight resolution */
+let ttStorePromise = null;
+
+/**
+ * Awaits the verified store handle (single-flight).
+ * @returns {Promise<object|null>}
+ */
+async function ttStoreOrFallback() {
+    if (ttStore) return ttStore;
+    if (!ttStorePromise) {
+        ttStorePromise = getTTStore().then(s => { ttStore = s; return s; });
+    }
+    return ttStorePromise;
 }
 
 /** Test hook: forces re-probe of the TT environment. */
 export function resetBuiltinStoreProbe() {
-    ttApi = null;
-    ttProbeAttempted = false;
+    ttStore = null;
+    ttStorePromise = null;
 }
 
 /**
  * True when the built-in store is backed by TauriTavern's persistent KV.
  * @returns {boolean}
  */
-export function isTTBacked() {
-    return getTTApi() !== null;
+export async function isTTBacked() {
+    return (await ttStoreOrFallback()) !== null;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,9 +112,9 @@ function getFallbackTree() {
  * @returns {Promise<void>}
  */
 export async function storeSetJson(namespace, key, value) {
-    const tt = getTTApi();
-    if (tt) {
-        await tt.store.setJson({ namespace, key, value });
+    const store = await ttStoreOrFallback();
+    if (store) {
+        await store.setJson({ namespace, key, value });
         return;
     }
     const tree = getFallbackTree();
@@ -99,9 +129,9 @@ export async function storeSetJson(namespace, key, value) {
  * @returns {Promise<*|null>} The stored value, or null when absent.
  */
 export async function storeGetJson(namespace, key) {
-    const tt = getTTApi();
-    if (tt) {
-        const v = await tt.store.getJson({ namespace, key });
+    const store = await ttStoreOrFallback();
+    if (store) {
+        const v = await store.getJson({ namespace, key });
         return v ?? null;
     }
     return getFallbackTree()[namespace]?.[key] ?? null;
@@ -114,9 +144,9 @@ export async function storeGetJson(namespace, key) {
  * @returns {Promise<void>}
  */
 export async function storeDeleteJson(namespace, key) {
-    const tt = getTTApi();
-    if (tt) {
-        await tt.store.deleteJson({ namespace, key });
+    const store = await ttStoreOrFallback();
+    if (store) {
+        await store.deleteJson({ namespace, key });
         return;
     }
     const tree = getFallbackTree();
@@ -129,9 +159,9 @@ export async function storeDeleteJson(namespace, key) {
  * @returns {Promise<string[]>}
  */
 export async function storeListKeys(namespace) {
-    const tt = getTTApi();
-    if (tt) {
-        const res = await tt.store.listKeys({ namespace });
+    const store = await ttStoreOrFallback();
+    if (store) {
+        const res = await store.listKeys({ namespace });
         return Array.isArray(res) ? res : [];
     }
     return Object.keys(getFallbackTree()[namespace] ?? {});
