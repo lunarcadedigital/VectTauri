@@ -21,7 +21,6 @@ import { extension_settings } from "../../../../extensions.js";
 
 const SETTINGS_FALLBACK_KEY = 'builtinStores';
 const GLOBAL_SETTINGS_KEY = 'builtinGlobal';
-
 /** @type {object|null} Lazily-resolved TauriTavern chat API handle */
 /** @type {boolean|null} tri-state: null = not probed yet */
 let ttProbeAttempted = false;
@@ -98,6 +97,69 @@ export async function isTTBacked() {
 }
 
 // ---------------------------------------------------------------------------
+// Component sanitization — TT store contract (file_extension_store_repository.rs)
+// ---------------------------------------------------------------------------
+// TT validates BOTH namespace and key against [A-Za-z0-9_.-] with no leading
+// dot (validate_component). Collection IDs routinely contain ':' and other
+// characters (vf_eventbase:<char>:<uuid>), so raw use of them as a namespace
+// fails with "Invalid extension store namespace". Sanitize at THIS single
+// choke point — every caller (shim, registry, DB browser) goes through these
+// functions, so no call site needs to remember the rule.
+
+/**
+ * Sanitizes a namespace or key to TT's store component contract.
+ *
+ * Scheme (strictly self-delimiting, injective):
+ *  - ASCII disallowed char → `%XX` (exactly 2 hex digits)
+ *  - Non-ASCII char        → `%uXXXX` (exactly 4 hex digits, code point)
+ *  - Literal `%` in input  → `%25`
+ * The `%u` prefix vs `%XX` distinction makes decoding unambiguous (a `%`
+ * followed by `u` + 4 hex is a code-point escape; `%` + 2 hex + non-hex or
+ * end is a byte escape), so round-tripping is exact.
+ * NOT idempotent (like all %-encodings) — storeDropNamespace decodes
+ * listKeys output before deleting. Read/write/delete always sanitize the
+ * RAW key, so lookups always agree.
+ * @param {string} raw
+ * @returns {string}
+ */
+export function sanitizeStoreComponent(raw) {
+    let value = String(raw ?? '');
+    value = value.trim();
+    if (!value) return '_empty';
+    let out = '';
+    for (const ch of value) {
+        if (/[A-Za-z0-9_.-]/.test(ch)) {
+            out += ch;
+        } else if (ch.charCodeAt(0) <= 0xff) {
+            out += `%${ch.charCodeAt(0).toString(16).padStart(2, '0')}`;
+        } else {
+            out += `%u${ch.codePointAt(0).toString(16).padStart(4, '0')}`;
+        }
+    }
+    if (out.startsWith('.')) out = `_${out}`;
+    return out;
+}
+
+/**
+ * Reverses sanitizeStoreComponent exactly (used to turn listKeys output back
+ * into raw keys before passing them to delete/get — those re-sanitize
+ * internally). Grammar: %uXXXX (code point) or %XX (byte); `%` not followed
+ * by either grammar is kept literally (cannot occur in our own output).
+ * @param {string} encoded
+ * @returns {string}
+ */
+export function unescapeStoreComponent(encoded) {
+    // Fixed-length grammar, no lookahead needed: our encoder always emits
+    // exactly %uXXXX or %XX, and a literal '%' can never appear un-escaped in
+    // its output (it becomes %25). Alternation order matters only for
+    // %u... — %XX must not steal the 'u': match %u first.
+    return String(encoded ?? '').replace(/%u([0-9a-f]{4})|%([0-9a-f]{2})/gi, (match, cp, byte) => {
+        if (cp !== undefined) return String.fromCodePoint(parseInt(cp, 16));
+        return String.fromCharCode(parseInt(byte, 16));
+    });
+}
+
+// ---------------------------------------------------------------------------
 // Settings fallback (non-TT environments)
 // ---------------------------------------------------------------------------
 
@@ -121,6 +183,8 @@ function getFallbackTree() {
  * @returns {Promise<void>}
  */
 export async function storeSetJson(namespace, key, value) {
+    namespace = sanitizeStoreComponent(namespace);
+    key = sanitizeStoreComponent(key);
     const store = await ttStoreOrFallback();
     if (store) {
         await store.setJson({ namespace, key, value });
@@ -138,6 +202,8 @@ export async function storeSetJson(namespace, key, value) {
  * @returns {Promise<*|null>} The stored value, or null when absent.
  */
 export async function storeGetJson(namespace, key) {
+    namespace = sanitizeStoreComponent(namespace);
+    key = sanitizeStoreComponent(key);
     const store = await ttStoreOrFallback();
     if (store) {
         // Prefer tryGetJson (global store shape): returns {found, value} and
@@ -166,6 +232,8 @@ export async function storeGetJson(namespace, key) {
  * @returns {Promise<void>}
  */
 export async function storeDeleteJson(namespace, key) {
+    namespace = sanitizeStoreComponent(namespace);
+    key = sanitizeStoreComponent(key);
     const store = await ttStoreOrFallback();
     if (store) {
         await store.deleteJson({ namespace, key });
@@ -181,6 +249,7 @@ export async function storeDeleteJson(namespace, key) {
  * @returns {Promise<string[]>}
  */
 export async function storeListKeys(namespace) {
+    namespace = sanitizeStoreComponent(namespace);
     const store = await ttStoreOrFallback();
     if (store) {
         const res = await store.listKeys({ namespace });
@@ -196,9 +265,13 @@ export async function storeListKeys(namespace) {
  * @returns {Promise<void>}
  */
 export async function storeDropNamespace(namespace) {
-    const keys = await storeListKeys(namespace);
-    for (const key of keys) {
-        await storeDeleteJson(namespace, key);
+    // NOTE: no sanitize here — storeListKeys/storeDeleteJson sanitize the raw
+    // namespace themselves, and pre-sanitizing would double-encode (%3a → %253a)
+    // and read/delete a namespace that was never written.
+    const encodedKeys = await storeListKeys(namespace);
+    for (const encoded of encodedKeys) {
+        const rawKey = unescapeStoreComponent(encoded);
+        await storeDeleteJson(namespace, rawKey);
     }
 }
 
