@@ -27,34 +27,43 @@ const GLOBAL_SETTINGS_KEY = 'builtinGlobal';
 let ttProbeAttempted = false;
 
 /**
- * Resolves the TauriTavern chat-store handle once per session.
+ * Resolves the TT GLOBAL extension store handle once per session.
  *
- * TT exposes `window.__TAURITAVERN__.api.chat` — per ExtensionDEV.md it may be
- * a chat-API object OR an async factory returning a handle, and the store
- * methods (`setJson/getJson/listKeys/deleteJson`) live on `handle.store`.
- * Ponytail rule: never trust the shape — resolve it, verify the methods
- * actually exist, and on ANY mismatch return null so callers fall back to the
- * settings tree. A wrong-but-truthy handle here previously crashed vectorize
- * with "Cannot read properties of undefined (reading 'getJson')".
+ * Correct store per types.d.ts (2026-10-30): `window.__TAURITAVERN__.api`
+ * is TauriTavernHostApi → **`api.extension.store`** is the GLOBAL
+ * extension KV (TauriTavernExtensionStoreApi — setJson/getJson/tryGetJson/
+ * listKeys/deleteJson, table-aware). Collections live in the native redb
+ * vector store which is GLOBAL, so chunk metadata must be global too —
+ * storing it in the per-chat `api.chat→handle.store` made Database Browser
+ * "View chunks" read from a different scope than insert wrote to
+ * ("No chunks found in this collection" bug).
+ *
+ * Ponytail rules: resolve whatever shape is present (api.chat may be a
+ * factory), verify the methods exist, and on ANY mismatch return null so
+ * callers fall back to the settings tree. Preference order:
+ *   1. api.extension.store  (global — correct)
+ *   2. api.chat() handle     (per-chat — legacy fallback, still better
+ *                             than losing data to the settings tree)
  * @returns {Promise<object|null>} A verified store handle, or null.
  */
 async function getTTStore() {
+    const candidates = [];
     try {
         const root = window?.__TAURITAVERN__?.api;
         if (!root) return null;
-
-        let handle = root.chat;
-        if (typeof handle === 'function') {
-            handle = await handle();
-        }
-        const store = handle?.store;
-        if (store && typeof store.setJson === 'function' && typeof store.getJson === 'function') {
-            return store;
-        }
-        return null;
+        if (root.extension?.store) candidates.push(root.extension.store);
+        let chatHandle = root.chat;
+        if (typeof chatHandle === 'function') chatHandle = await chatHandle();
+        if (chatHandle?.store) candidates.push(chatHandle.store);
     } catch {
         return null;
     }
+    for (const store of candidates) {
+        if (store && typeof store.setJson === 'function' && typeof store.getJson === 'function') {
+            return store;
+        }
+    }
+    return null;
 }
 
 /** @type {object|null} resolved store handle (null = not resolved or unavailable) */
@@ -131,8 +140,21 @@ export async function storeSetJson(namespace, key, value) {
 export async function storeGetJson(namespace, key) {
     const store = await ttStoreOrFallback();
     if (store) {
-        const v = await store.getJson({ namespace, key });
-        return v ?? null;
+        // Prefer tryGetJson (global store shape): returns {found, value} and
+        // never throws for a missing key. getJson on the same store may throw
+        // or reject for absent keys depending on the backend table.
+        if (typeof store.tryGetJson === 'function') {
+            try {
+                const res = await store.tryGetJson({ namespace, key });
+                return res?.found ? (res.value ?? null) : null;
+            } catch { /* fall through to getJson */ }
+        }
+        try {
+            const v = await store.getJson({ namespace, key });
+            return v ?? null;
+        } catch {
+            return null; // missing key — treated as absent, not an error
+        }
     }
     return getFallbackTree()[namespace]?.[key] ?? null;
 }
