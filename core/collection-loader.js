@@ -36,6 +36,7 @@ import {
     parseRegistryKey,
     COLLECTION_PREFIXES,
     getRegistryBackend,
+    getBackendFromCollectionId,
     buildRegistryKey,
     sanitizeHandleId,
     sanitizeNameSegment,
@@ -677,7 +678,7 @@ async function discoverViaPlugin(settings) {
             let emptyCount = 0;
             const emptyList = [];
             for (const collection of data.collections) {
-                const backend = collection.backend || 'standard';
+                let backend = collection.backend || 'standard';
 
                 // Strip backend prefix from collection.id if it's already there
                 // Some backends (like Qdrant) may return IDs with backend prefix
@@ -685,6 +686,17 @@ async function discoverViaPlugin(settings) {
                 if (collectionId.startsWith(`${backend}:`)) {
                     collectionId = collectionId.substring(backend.length + 1);
                     log.trace(`   🔧 Stripped backend prefix from collection ID: ${collection.id} → ${collectionId}`);
+                }
+
+                // The builtin shim reports `backend: "builtin"` because it is a
+                // transport, not a storage backend. Map it to the collection's ACTUAL
+                // storage backend (parsed from the ID) so the registry key stays
+                // "vectra:vf_…"/"qdrant:vf_…". A "builtin:" prefix is unknown to
+                // parseRegistryKey, which then leaves collection.id prefixed and
+                // backend empty — breaking auto-sync's write-target backend check and
+                // the persona ownership filter (the "still not initialized" LED).
+                if (backend === 'builtin') {
+                    backend = getRegistryBackend(getBackendFromCollectionId(collectionId) || 'standard');
                 }
 
                 // Skip corrupted/ST-native/internal IDs at discovery time

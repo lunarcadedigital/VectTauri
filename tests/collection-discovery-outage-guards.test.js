@@ -124,6 +124,27 @@ describe('discoverViaPlugin × qdrantScanned', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Builtin transport backend remap
+// ---------------------------------------------------------------------------
+describe('discoverViaPlugin × builtin transport backend', () => {
+    it('maps the shim "builtin" label to the collection storage backend (vectra)', async () => {
+        mockPluginFetch({
+            success: true,
+            qdrantScanned: true,
+            collections: [
+                { id: 'vf_eventbase_standard_testpersona_hero_1750000000000', backend: 'builtin', source: 'transformers', chunkCount: 3, model: '' },
+            ],
+        });
+
+        await discoverExistingCollections({ vector_backend: 'standard' });
+
+        const registry = getCollectionRegistry();
+        expect(registry).toContain('vectra:vf_eventbase_standard_testpersona_hero_1750000000000');
+        expect(registry.some((k) => k.startsWith('builtin:'))).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // Guard 2 — cleanupOrphanedMeta refuses the mass wipe
 // ---------------------------------------------------------------------------
 describe('cleanupOrphanedMeta outage refusal', () => {
