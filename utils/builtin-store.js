@@ -107,56 +107,51 @@ export async function isTTBacked() {
 // functions, so no call site needs to remember the rule.
 
 /**
- * Sanitizes a namespace or key to TT's store component contract.
+ * Sanitizes a namespace or key to TT's store component contract
+ * ([A-Za-z0-9_.-], no leading dot — file_extension_store_repository.rs).
  *
- * Scheme (strictly self-delimiting, injective):
- *  - ASCII disallowed char → `%XX` (exactly 2 hex digits)
- *  - Non-ASCII char        → `%uXXXX` (exactly 4 hex digits, code point)
- *  - Literal `%` in input  → `%25`
- * The `%u` prefix vs `%XX` distinction makes decoding unambiguous (a `%`
- * followed by `u` + 4 hex is a code-point escape; `%` + 2 hex + non-hex or
- * end is a byte escape), so round-tripping is exact.
- * NOT idempotent (like all %-encodings) — storeDropNamespace decodes
- * listKeys output before deleting. Read/write/delete always sanitize the
- * RAW key, so lookups always agree.
+ * The previous %-escaped scheme still emitted `%`, which TT itself REJECTS
+ * (it is not in [A-Za-z0-9_.-]) — so sanitized namespaces kept failing with
+ * "Invalid extension store namespace". Correction: use HEX ONLY.
+ *
+ * Rules (injective for the data this extension actually produces):
+ *  - already-valid components pass through unchanged;
+ *  - anything else becomes `hex_` + lowercase hex of its UTF-8 bytes, so the
+ *    output alphabet is pure [0-9a-f] (+ the 'hex_' prefix, whose 'h'/'x' are
+ *    NOT hex digits and therefore can never collide with a raw chunk hash key).
+ *    Namespaces in this codebase ALWAYS contain "::", so they ALWAYS take the
+ *    encoded branch and never collide with the raw branch.
  * @param {string} raw
  * @returns {string}
  */
 export function sanitizeStoreComponent(raw) {
-    let value = String(raw ?? '');
-    value = value.trim();
+    const value = String(raw ?? '').trim();
     if (!value) return '_empty';
-    let out = '';
-    for (const ch of value) {
-        if (/[A-Za-z0-9_.-]/.test(ch)) {
-            out += ch;
-        } else if (ch.charCodeAt(0) <= 0xff) {
-            out += `%${ch.charCodeAt(0).toString(16).padStart(2, '0')}`;
-        } else {
-            out += `%u${ch.codePointAt(0).toString(16).padStart(4, '0')}`;
-        }
+    if (/^[A-Za-z0-9_.-]+$/.test(value) && !value.startsWith('.')) {
+        return value;
     }
-    if (out.startsWith('.')) out = `_${out}`;
-    return out;
+    const bytes = new TextEncoder().encode(value);
+    let hex = '';
+    for (const b of bytes) hex += b.toString(16).padStart(2, '0');
+    return `hex_${hex}`;
 }
 
 /**
- * Reverses sanitizeStoreComponent exactly (used to turn listKeys output back
- * into raw keys before passing them to delete/get — those re-sanitize
- * internally). Grammar: %uXXXX (code point) or %XX (byte); `%` not followed
- * by either grammar is kept literally (cannot occur in our own output).
+ * Reverses sanitizeStoreComponent (used to turn listKeys output back into
+ * raw keys before passing them to delete/get — those re-sanitize internally).
  * @param {string} encoded
  * @returns {string}
  */
 export function unescapeStoreComponent(encoded) {
-    // Fixed-length grammar, no lookahead needed: our encoder always emits
-    // exactly %uXXXX or %XX, and a literal '%' can never appear un-escaped in
-    // its output (it becomes %25). Alternation order matters only for
-    // %u... — %XX must not steal the 'u': match %u first.
-    return String(encoded ?? '').replace(/%u([0-9a-f]{4})|%([0-9a-f]{2})/gi, (match, cp, byte) => {
-        if (cp !== undefined) return String.fromCodePoint(parseInt(cp, 16));
-        return String.fromCharCode(parseInt(byte, 16));
-    });
+    const value = String(encoded ?? '');
+    if (!value.startsWith('hex_')) return value;
+    const hex = value.slice(4);
+    if (hex.length % 2 !== 0 || !/^[0-9a-f]+$/.test(hex)) return value;
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    }
+    return new TextDecoder().decode(bytes);
 }
 
 // ---------------------------------------------------------------------------

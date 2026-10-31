@@ -28,13 +28,15 @@ describe('sanitizeStoreComponent — TT store contract [A-Za-z0-9_.-]', () => {
     it('passes through already-valid components unchanged', () => {
         expect(sanitizeStoreComponent('my-ext')).toBe('my-ext');
         expect(sanitizeStoreComponent('chunkmeta_.abc-123')).toBe('chunkmeta_.abc-123');
+        expect(sanitizeStoreComponent('aBcD.12-3_4')).toBe('aBcD.12-3_4');
     });
 
-    it('percent-encodes ":" and other disallowed ASCII', () => {
+    it('hex-encodes namespaces containing ":" into a %-FREE value', () => {
         const out = sanitizeStoreComponent('vf_eventbase:Seraphina:abc-123');
-        expect(out).toBe('vf_eventbase%3aSeraphina%3aabc-123'); // '_' is legal, ':' encoded
-        expect(out).toMatch(/^[A-Za-z0-9_.%-]+$/);
+        // The %-based encoder previously emitted '%', which TT itself rejects.
+        expect(out).not.toContain('%');
         expect(out).not.toContain(':');
+        expect(out).toMatch(/^hex_[0-9a-f]+$/);
     });
 
     it('never produces a leading dot', () => {
@@ -42,26 +44,23 @@ describe('sanitizeStoreComponent — TT store contract [A-Za-z0-9_.-]', () => {
         expect(sanitizeStoreComponent('..x').startsWith('.')).toBe(false);
     });
 
-    it('is injective: ":" and a literal "%3a" sanitize differently', () => {
-        const colon = sanitizeStoreComponent('a:b');
-        const literal = sanitizeStoreComponent('a%3ab');
-        expect(colon).toBe('a%3ab'); // ':' encoded
-        expect(literal).toBe('a%253ab'); // literal '%' encoded as %25
-        expect(colon).not.toBe(literal);
+    it('round-trips through unescapeStoreComponent exactly', () => {
+        for (const raw of [
+            'vf_eventbase:Seraphina:abc-123',
+            'chunkmeta::vf_chat_A_1',
+            'コレクション:名前',
+            'hash:with:colons',
+            'plain-valid_key.123',
+        ]) {
+            expect(unescapeStoreComponent(sanitizeStoreComponent(raw))).toBe(raw);
+        }
     });
 
-    it('round-trips through unescapeStoreComponent', () => {
-        const raw = 'vf_eventbase:Seraphina:abc-123';
-        expect(unescapeStoreComponent(sanitizeStoreComponent(raw))).toBe(raw);
-    });
-
-    it('encodes non-ASCII (CJK) deterministically', () => {
-        const raw = 'コレクション';
-        const out = sanitizeStoreComponent(raw);
-        expect(out).toMatch(/^[A-Za-z0-9_.%-]+$/);
-        expect(sanitizeStoreComponent(raw)).toBe(out); // deterministic
-        expect(unescapeStoreComponent(out)).toBe(raw); // reversible
-        expect(out).toContain('%'); // each CJK char becomes a %XX hex token
+    it('is injective: distinct ids never collapse to one encoded form', () => {
+        const a = sanitizeStoreComponent('vf_eventbase:A:123');
+        const b = sanitizeStoreComponent('vf_eventbase:B:123');
+        const c = sanitizeStoreComponent('vf_eventbase:A:124');
+        expect(new Set([a, b, c]).size).toBe(3);
     });
 
     it('maps empty/whitespace to a safe placeholder', () => {
@@ -81,8 +80,8 @@ describe('store functions sanitize transparently (write then list round-trip)', 
 
         const keys = await storeListKeys(ns);
         expect(keys.length).toBe(1);
-        expect(keys[0]).not.toContain(':'); // stored key is encoded
-        // and it decodes back to the raw key
+        expect(keys[0]).not.toContain(':');
+        expect(keys[0]).not.toContain('%');
         expect(unescapeStoreComponent(keys[0])).toBe('hash:with:colons');
     });
 });
