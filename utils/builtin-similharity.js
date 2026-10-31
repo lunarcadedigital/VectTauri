@@ -33,6 +33,18 @@ export const BUILTIN_PLUGIN_VERSION = '1.0.0-builtin';
 const CHUNK_NS_PREFIX = 'chunkmeta::';
 const REGISTRY_NS = '__vecttauri_registry';
 
+// Callers (Database Browser, export, delete) may hand the shim a collectionId in
+// registry-key form ("builtin:vf_eventbase_...", "vectra:vf_..."). The shim's
+// chunk namespaces and its own registry are ALWAYS keyed by the BARE collection ID
+// (the exact form insert used). Strip any leading backend label so list/query/
+// delete/purge/stats read the same namespace insert wrote — otherwise the prefixed
+// ID looks in a namespace that has no data and every route reports 0 chunks.
+const BACKEND_PREFIX_RE = /^(standard|vectra|qdrant|builtin):/i;
+
+function bareCollectionId(collectionId) {
+    return String(collectionId ?? '').replace(BACKEND_PREFIX_RE, '');
+}
+
 // ---------------------------------------------------------------------------
 // Response helper — mimics the subset of `fetch` Response consumers rely on:
 // ok / status / statusText / json() / text()
@@ -62,7 +74,7 @@ function fail(status, message) {
 // ---------------------------------------------------------------------------
 
 function chunkNamespace(collectionId) {
-    return CHUNK_NS_PREFIX + collectionId;
+    return CHUNK_NS_PREFIX + bareCollectionId(collectionId);
 }
 
 /**
@@ -72,11 +84,11 @@ function chunkNamespace(collectionId) {
  * per-chat and would hide collections created in other chats.
  */
 async function getRegistryEntry(collectionId) {
-    return (await globalGetJson(REGISTRY_NS, collectionId)) ?? null;
+    return (await globalGetJson(REGISTRY_NS, bareCollectionId(collectionId))) ?? null;
 }
 
 async function setRegistryEntry(collectionId, entry) {
-    await globalSetJson(REGISTRY_NS, collectionId, entry);
+    await globalSetJson(REGISTRY_NS, bareCollectionId(collectionId), entry);
 }
 
 async function updateRegistryOnInsert(collectionId, model, source) {
@@ -150,7 +162,8 @@ async function nativeVector(endpoint, body) {
  * Vectors go to the native API; rich metadata goes to the built-in store.
  */
 async function handleInsert(body) {
-    const { collectionId, items, source, model } = body ?? {};
+    const { items, source, model } = body ?? {};
+    const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId || !Array.isArray(items)) {
         return fail(400, 'chunks/insert: collectionId and items[] are required');
     }
@@ -193,7 +206,8 @@ async function handleInsert(body) {
  * Consumers accept {items|chunks|results: [...]}.
  */
 async function handleList(body) {
-    const { collectionId, offset = 0, limit = 100, includeVectors = false } = body ?? {};
+    const { offset = 0, limit = 100, includeVectors = false } = body ?? {};
+    const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId) return fail(400, 'chunks/list: collectionId is required');
 
     try {
@@ -251,7 +265,8 @@ function cosine(a, b) {
  *  3. Merge + rank — boosted scores re-sorted before the topK cut.
  */
 async function handleQuery(body) {
-    const { collectionId, topK = 10, threshold = 0, queryVector, searchText, source, model } = body ?? {};
+    const { topK = 10, threshold = 0, queryVector, searchText, source, model } = body ?? {};
+    const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId) return fail(400, 'chunks/query: collectionId is required');
 
     try {
@@ -330,7 +345,8 @@ async function handleQuery(body) {
  * POST /chunks/delete — native delete + drop stored metadata per hash.
  */
 async function handleDelete(body) {
-    const { collectionId, hashes, source, model } = body ?? {};
+    const { hashes, source, model } = body ?? {};
+    const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId || !Array.isArray(hashes)) {
         return fail(400, 'chunks/delete: collectionId and hashes[] are required');
     }
@@ -350,7 +366,8 @@ async function handleDelete(body) {
  * POST /chunks/purge — native purge + drop the whole metadata namespace.
  */
 async function handlePurge(body) {
-    const { collectionId, source, model } = body ?? {};
+    const { source, model } = body ?? {};
+    const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId) return fail(400, 'chunks/purge: collectionId is required');
     try {
         await nativeVector('purge', { collectionId, source: source || 'transformers', model });
@@ -386,7 +403,7 @@ async function handlePurgeAll() {
  * Consumers read `data.stats`.
  */
 async function handleStats(body) {
-    const { collectionId } = body ?? {};
+    const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId) return fail(400, 'chunks/stats: collectionId is required');
     try {
         const ns = chunkNamespace(collectionId);
@@ -418,7 +435,7 @@ async function handleStats(body) {
  * Consumers read fields like totalChunks / models.
  */
 async function handleCollectionMetadata(body) {
-    const { collectionId } = body ?? {};
+    const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId) return fail(400, 'collection-metadata: collectionId is required');
     try {
         const keys = await storeListKeys(chunkNamespace(collectionId));

@@ -130,6 +130,33 @@ describe('builtin shim chunks contract', () => {
         }
     });
 
+    it('strips a backend prefix so list/query read the same namespace insert wrote', async () => {
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
+        try {
+            const ins = await post(`${H}/chunks/insert`, {
+                backend: 'vectra', collectionId: 'vf_eventbase_standard_hero_abc123',
+                source: 'transformers', model: 'm',
+                items: [{ hash: 'h1', text: 'remembered', index: 0, vector: [1, 0], metadata: { importance: 120 } }],
+            });
+            expect(ins.ok).toBe(true);
+
+            // Read back via the registry-key form (with the "builtin:" backend prefix
+            // the Database Browser / export actually pass) — must hit the same namespace.
+            const list = await post(`${H}/chunks/list`, { backend: 'builtin', collectionId: 'builtin:vf_eventbase_standard_hero_abc123' });
+            const listData = await list.json();
+            expect(listData.total).toBe(1);
+            expect(listData.items[0].hash).toBe('h1');
+            expect(listData.items[0].metadata.importance).toBe(120);
+
+            const stats = await post(`${H}/chunks/stats`, { collectionId: 'vectra:vf_eventbase_standard_hero_abc123' });
+            const statsData = await stats.json();
+            expect(statsData.stats.chunkCount).toBe(1);
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+
     it('query scores client-side from queryVector and honors threshold + topK', async () => {
         const realFetch = globalThis.fetch;
         globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
