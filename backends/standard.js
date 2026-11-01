@@ -856,10 +856,20 @@ export class StandardBackend extends VectorBackend {
         // scan. Without discovery data, target the current provider and model.
         if (this.pluginAvailable) {
             const discoveredSources = Array.isArray(settings._discoveredSources) ? settings._discoveredSources : [];
-            const targets = discoveredSources.length > 0
+            let targets = discoveredSources.length > 0
                 ? discoveredSources.flatMap(({ source, models }) =>
                     (models || []).map(m => ({ source, model: m?.path ?? '' })))
-                : [{ source: settings.embedding_provider || 'transformers', model: getModelFromSettings(settings) }];
+                : [];
+            // Discovery can report a source folder with an EMPTY models list — the
+            // builtin shim does exactly that (it returns modelCount, not a models[]
+            // array). flatMap() then yields [], so `errors.length === targets.length`
+            // compares 0 === 0 and throws the useless "Failed to purge collection via
+            // plugin: " with no detail, and the collection can never be deleted. Fall
+            // back to one default target so the purge is actually attempted (the shim
+            // purges by collectionId and ignores source/model anyway).
+            if (targets.length === 0) {
+                targets = [{ source: settings.embedding_provider || 'transformers', model: getModelFromSettings(settings) }];
+            }
 
             const errors = [];
             for (const { source, model } of targets) {
