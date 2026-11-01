@@ -1445,7 +1445,15 @@ export async function queryActiveCollections(collectionIds, searchText, topK, th
  * @param {object} settings VectTauri settings object
  * @returns {Promise<boolean>} True if deleted, false if not
  */
+let _lastPurgeError = null;
+
+/** Reason the most recent purgeVectorIndex() call failed (null when it succeeded). */
+export function getLastPurgeError() {
+    return _lastPurgeError;
+}
+
 export async function purgeVectorIndex(collectionId, settings) {
+    _lastPurgeError = null;
     try {
         const backend = await getBackend(settings);
         await backend.purgeVectorIndex(collectionId, settings);
@@ -1456,6 +1464,7 @@ export async function purgeVectorIndex(collectionId, settings) {
     } catch (error) {
         // VEC-33: Invalidate health cache on operation error
         invalidateBackendHealth(settings?.vector_backend || 'standard', error);
+        _lastPurgeError = error?.message || String(error);
         log.error('VectTauri: Failed to purge', error);
         return false;
     }

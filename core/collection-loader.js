@@ -25,7 +25,7 @@ import {
     setCollectionMeta,
     isCollectionActiveForContext,
 } from './collection-metadata.js';
-import { purgeVectorIndex } from './core-vector-api.js';
+import { purgeVectorIndex, getLastPurgeError } from './core-vector-api.js';
 import { log } from './log.js';
 // Import from collection-ids.js - single source of truth for collection ID operations
 import {
@@ -308,7 +308,9 @@ export async function deleteCollection(collectionId, settings, registryKey = nul
         vectorsDeleted = true;
         log.verbose(`VectTauri: ✓ Deleted vectors for ${collectionId}`);
     } else {
-        errors.push('Vectors: purge failed (see console)');
+        // Keep the real reason: purgeVectorIndex logs the backend error; surface it
+        // here too so the toast is actionable instead of a bare "purge failed".
+        errors.push(`Vectors: purge failed for ${collectionId} — ${getLastPurgeError() || 'backend rejected the request'}`);
         log.warn(`VectTauri: ✗ Failed to delete vectors for ${collectionId}`);
     }
 

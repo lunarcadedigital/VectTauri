@@ -386,6 +386,45 @@ describe('postChatCompletion — error classification', () => {
         })));
         await expect(postChatCompletion(baseArgs())).rejects.toMatchObject({ kind: 'upstream_error' });
     });
+
+    // TauriTavern returns HTTP 200 for a failed upstream call: a synthetic
+    // completion whose id is "tauritavern-error-…" and whose content is the error
+    // text. VectTauri must not hand that text back as a model answer (that is what
+    // produced "JSON parse failed / Unable to find record array" on every window).
+    function ttErrorPayload({ content, status = 404 }) {
+        return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+                id: 'tauritavern-error-1793448852',
+                model: 'test/model',
+                choices: [{ message: { role: 'assistant', content }, finish_reason: 'stop' }],
+                usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+            }),
+        };
+    }
+
+    it('TauriTavern 200 error payload (id=tauritavern-error-…) with status 404 → kind:model_config (fatal)', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => ttErrorPayload({
+            content: '[API Error]\nCustom OpenAI endpoint failed with status 404: Request ditolak oleh provider model.',
+        })));
+        await expect(postChatCompletion(baseArgs())).rejects.toMatchObject({ kind: 'model_config', status: 404 });
+        expect(mockNotifyUpstreamRejection).toHaveBeenCalledTimes(1);
+    });
+
+    it('TauriTavern 200 error payload with 401 → kind:auth', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => ttErrorPayload({
+            content: '[API Error]\nunauthorized (status 401)',
+        })));
+        await expect(postChatCompletion(baseArgs())).rejects.toMatchObject({ kind: 'auth', status: 401 });
+    });
+
+    it('detects a bare "[API Error]" content even without the tauritavern id', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => okResponse({
+            content: '[API Error] Custom OpenAI endpoint failed with status 503: busy',
+        })));
+        await expect(postChatCompletion(baseArgs())).rejects.toMatchObject({ kind: 'upstream_error', status: 503 });
+    });
 });
 
 // ---------------------------------------------------------------------------

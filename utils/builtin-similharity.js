@@ -369,14 +369,27 @@ async function handlePurge(body) {
     const { source, model } = body ?? {};
     const collectionId = bareCollectionId(body?.collectionId);
     if (!collectionId) return fail(400, 'chunks/purge: collectionId is required');
+    // Always drop the local metadata + registry, even when the native vector purge
+    // fails. Previously a native failure aborted before the metadata was removed,
+    // so a half-deleted collection stayed in the Database Browser forever and every
+    // retry failed the same way ("Vectors: purge failed"). Report the native error
+    // as a warning instead of hiding it.
+    let nativeError = null;
     try {
         await nativeVector('purge', { collectionId, source: source || 'transformers', model });
+    } catch (e) {
+        nativeError = e?.message || String(e);
+    }
+    try {
         await storeDropNamespace(chunkNamespace(collectionId));
         await globalDeleteJson(REGISTRY_NS, collectionId);
-        return ok({ success: true });
     } catch (e) {
-        return fail(500, e.message);
+        return fail(500, `local purge failed: ${e?.message || e}`);
     }
+    if (nativeError) {
+        return ok({ success: true, warning: `native vector purge failed: ${nativeError}` });
+    }
+    return ok({ success: true });
 }
 
 /**

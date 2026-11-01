@@ -308,6 +308,34 @@ export async function postChatCompletion({
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content?.trim() || null;
 
+    // TauriTavern's /api/backends/chat-completions/generate answers with HTTP 200
+    // even when the upstream provider FAILED: it returns a synthetic completion
+    // whose `id` is "tauritavern-error-…" and whose message content is
+    // "[API Error] …". Reading that text as a real answer is what turned a 404
+    // provider rejection into "JSON parse failed … Unable to find record array"
+    // on every EventBase window (91 windows burned, 18 events, no clear cause).
+    // Detect the payload by its stable id (and the English "[API Error]" label as
+    // a non-TT fallback) and surface it as the error it actually is. A 404 means
+    // the model/endpoint is wrong for EVERY window, so classify it as a fatal
+    // model-config error instead of a per-window skip.
+    const isTtErrorPayload = typeof data?.id === 'string' && data.id.startsWith('tauritavern-error-');
+    const looksLikeApiErrorText = typeof content === 'string' && /^\s*\[API Error\]/i.test(content);
+    if (isTtErrorPayload || looksLikeApiErrorText) {
+        const text = (content || 'Provider rejected the request').replace(/\s+/g, ' ').trim();
+        const statusMatch = text.match(/\bstatus\s*[:=]?\s*(\d{3})\b/i) || text.match(/\b([45]\d{2})\b/);
+        const status = statusMatch ? Number(statusMatch[1]) : null;
+        if (shouldNotifyProviderFailure) {
+            notifyUpstreamRejection(contextLabel, model, text.slice(0, 300), Boolean(data?.quota_error));
+        }
+        const kind = (status === 401 || status === 403) ? 'auth'
+            : (status === 404) ? 'model_config'
+                : 'upstream_error';
+        throw new LlmCallError(
+            `${contextLabel}: ${label} rejected the request${status ? ` (HTTP ${status})` : ''} — ${text.slice(0, 300)}`,
+            { kind, status, provider },
+        );
+    }
+
     if (!content) {
         // Checked FIRST, ahead of the text classifiers below: this is a precise
         // structural test on the choice itself, whereas those match substrings

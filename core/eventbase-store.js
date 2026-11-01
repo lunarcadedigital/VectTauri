@@ -169,7 +169,12 @@ export async function ensureVectorizationTip(chatUUID, collectionId, settings) {
         }
         if (maxEnd < 0) return null;
         const tip = maxEnd + 1;
-        _vectorizationTipByUuid.set(chatUUID, tip);
+        // Persist the probe result (setVectorizationTip is monotonic in-memory AND
+        // persisted). Previously only the in-memory Map was written, so after a
+        // reload the tip was gone and the next resume re-probed — and when that
+        // probe's listChunks call failed or returned no metadata, resume silently
+        // restarted from message 1 even though the chunks were already stored.
+        setVectorizationTip(chatUUID, tip);
         return tip;
     } catch (err) {
         log.warn(`[EventBase VectorizationTip] probe failed for ${collectionId} — falling back to marker:`, err?.message || err);
