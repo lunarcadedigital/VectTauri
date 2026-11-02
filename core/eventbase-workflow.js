@@ -244,7 +244,12 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings: rawS
     const commitBoundary = isAutoSync ? getCommitBoundary(messages, settings) : messages.length;
     const committedMessages = commitBoundary < messages.length ? messages.slice(0, commitBoundary) : messages;
 
-    if (isLastWindowExtracted(committedMessages, windowSize, step, uuid, hashSourceMessage)) {
+    // This quick-exit is valid only for auto-sync, which processes a strictly
+    // appended chat tail. Manual Resume must scan every window: earlier windows
+    // can have failed while the last window succeeded (e.g. provider quota ran
+    // out mid-run). Exiting here made Resume report 0/0 and never retry those
+    // failed windows.
+    if (isAutoSync && isLastWindowExtracted(committedMessages, windowSize, step, uuid, hashSourceMessage)) {
         log.lifecycle(`[EventBase] Quick-exit: last committed window already extracted, nothing new`);
         return { eventsExtracted: 0, windowsProcessed: 0, windowsSkipped: 0 };
     }
