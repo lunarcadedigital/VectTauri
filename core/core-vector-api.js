@@ -1070,14 +1070,41 @@ export async function deleteVectorItems(collectionId, hashes, settings) {
  *   embed per request (Standard without the Similharity plugin)
  */
 export async function getQueryVector(backend, searchText, settings) {
+    // TauriTavern's builtin shim exposes no standalone embedding endpoint
+    // (get-embedding → 501 "not available in builtin mode"), so a precomputed
+    // query vector is impossible there — and unnecessary: the native
+    // /api/vector/query accepts searchText and embeds it server-side. Return null
+    // ("no precomputed vector, use searchText") instead of failing the whole
+    // retrieval with a 501. embedQuery() already returns null on the native path,
+    // so null is an established signal for this.
+    const isEmbeddingEndpointUnsupported = (error) => {
+        const msg = String(error?.message || error || '');
+        return error?.status === 501
+            || /get-embedding is not available in builtin mode/i.test(msg)
+            || /not available in builtin mode/i.test(msg);
+    };
+
     try {
         return await backend.embedQuery(searchText, settings);
     } catch (error) {
         if (error?.code === 'invalid_model_config') throw error;
+        if (isEmbeddingEndpointUnsupported(error)) {
+            log.verbose(`VectTauri: query embedding endpoint unavailable — letting the native query embed searchText server-side (${error?.message || error})`);
+            return null;
+        }
         log.warn(`VectTauri: query embedding failed, retrying once — ${error?.message || error}`);
-        return await backend.embedQuery(searchText, settings);
+        try {
+            return await backend.embedQuery(searchText, settings);
+        } catch (retryError) {
+            if (isEmbeddingEndpointUnsupported(retryError)) {
+                log.verbose('VectTauri: query embedding endpoint unavailable on retry — letting the native query embed searchText server-side');
+                return null;
+            }
+            throw retryError;
+        }
     }
 }
+
 
 /**
  * Queries a single collection for similar vectors
