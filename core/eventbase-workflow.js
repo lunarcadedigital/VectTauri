@@ -22,7 +22,7 @@ import { EventBaseFatalError, EventBaseExtractionError } from './eventbase-schem
 import { extractEvents } from './eventbase-extractor.js';
 import { hashSourceMessage } from './eventbase-message-hash.js';
 import { generationRateLimiter, generationRateLimitSettings } from './generation-rate-limiter.js';
-import { insertEvents, isWindowAlreadyExtracted, markWindowExtracted, clearExtractionCachesForChat, buildEventBaseCollectionId, isLastWindowExtracted, getVectorizationTip, setVectorizationTip, ensureVectorizationTip, shouldUseTipFallback, resolveEventBaseWriteTarget, hasWindowCacheForChat, rebuildWindowCacheFromCollection } from './eventbase-store.js';
+import { insertEvents, isWindowAlreadyExtracted, markWindowExtracted, clearExtractionCachesForChat, buildEventBaseCollectionId, isLastWindowExtracted, getVectorizationTip, setVectorizationTip, ensureVectorizationTip, shouldUseTipFallback, resolveEventBaseWriteTarget, rebuildWindowCacheFromCollection } from './eventbase-store.js';
 import { getSavedHashes } from './core-vector-api.js';
 import { retrieveEvents } from './eventbase-retrieval.js';
 import { retrieveEventsWithAgent } from './agentic-retrieval.js';
@@ -342,16 +342,23 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings: rawS
     // The per-window check in _runOneExtractBatch stays as a safety net for edit-in-middle
     // cases (where an old message's hash changes and breaks the contiguity assumption).
 
-    // Resume recovery: when this is NOT a fresh extraction but the local window
-    // fingerprint cache is empty for this chat (lost across a reload / settings not
-    // flushed), the only record of what was already extracted is the collection
-    // itself. Rebuild the cache from each chunk's stored source_message_hashes so the
-    // dedup below skips exactly the windows that already have data and re-extracts
-    // only the gaps — instead of restarting from message 1 (the "Resume starts over"
-    // bug). The hashes come from hashSourceMessage(), so the rebuilt fingerprints
-    // match the ones markWindowExtracted() would have produced.
+    // Resume recovery: manual Resume must be gap-accurate, so rebuild the window
+    // fingerprint cache from each chunk's stored source_message_hashes EVERY time
+    // (idempotent). The hashes come from hashSourceMessage(), so the rebuilt
+    // fingerprints match the ones markWindowExtracted() would have produced. This is
+    // what lets Resume skip exactly the windows that already have data and retry only
+    // the gaps — even when the local cache is stale/missing or a partial run left
+    // holes (e.g. provider quota ran out mid-run).
+    //
+    // The tip fallback below is max(source_window_end)+1 and assumes CONTIGUOUS
+    // coverage; after a partial run or a window-size change it skips EVERY window and
+    // reports 0 processed. Only auto-sync may use the tip — it processes the appended
+    // tail, where contiguity holds.
     let rebuiltWindowCache = 0;
-    if (!skipTipFallback && collectionId && !hasWindowCacheForChat(uuid)) {
+    // NEVER rebuild on a fresh extraction (Reset & Vectorize / window-size-change
+    // Proceed set skipTipFallback=true and expect everything re-extracted). Rebuilding
+    // there would re-mark the old collection's windows and skip the whole run.
+    if (!isAutoSync && !skipTipFallback && collectionId) {
         rebuiltWindowCache = await rebuildWindowCacheFromCollection(collectionId, settings, uuid);
         if (rebuiltWindowCache > 0) {
             log.lifecycle(`[EventBase] Resume: rebuilt ${rebuiltWindowCache} already-extracted window fingerprint(s) from the collection`);
@@ -380,7 +387,7 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings: rawS
         // When we rebuilt the cache from the collection we now have precise
         // per-window knowledge, so the coarse "jump to the highest stored window"
         // tip would only skip gaps that still need extraction. Suppress it.
-        skipTipFallback: skipTipFallback || rebuiltWindowCache > 0,
+        skipTipFallback: skipTipFallback || !isAutoSync || rebuiltWindowCache > 0,
         fastForwardSkipped,
         hasCollection: !!collectionId,
     });
