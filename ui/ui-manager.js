@@ -20,6 +20,7 @@ import {
     fetchQdrantApiKeyPresence,
 } from '../core/api-keys.js';
 import { getWebLlmProvider as getSharedWebLlmProvider } from '../providers/webllm.js';
+import { testEmbeddingConnection, testLlmConnection } from '../core/connection-test.js';
 import StringUtils from '../utils/string-utils.js';
 import { openVisualizer } from './chunk-visualizer.js';
 import { openDatabaseBrowser } from './database-browser.js';
@@ -293,6 +294,10 @@ export function renderSettings(containerId, settings, callbacks) {
                                         <small class="VectTauri_hint">Enter the model name from your Ollama installation</small>
                                     </div>
 
+                                    <button type="button" id="VectTauri_embedding_test_btn" class="menu_button" style="margin-top:6px; width:auto; white-space:nowrap;">
+                                        <i class="fa-solid fa-plug-circle-check"></i> Test Connection
+                                    </button>
+
                                     <!-- vLLM Settings -->
                                     <div class="VectTauri_provider_setting" data-provider="vllm">
                                         <label class="checkbox_label">
@@ -458,6 +463,9 @@ export function renderSettings(containerId, settings, callbacks) {
                                         </button>
                                     </div>
                                     <select id="VectTauri_summarize_model_list" class="vecttauri-select" style="display:none; margin-top:6px;"></select>
+                                    <button type="button" id="VectTauri_llm_test_btn" class="menu_button" style="margin-top:6px; width:auto; white-space:nowrap;">
+                                        <i class="fa-solid fa-plug-circle-check"></i> Test Connection
+                                    </button>
                                     <small class="VectTauri_hint">Model ID used for EventBase extraction (separate from embedding model). Required. Click <b>Choose</b> to browse the provider's model list.</small>
 
                                 </div>
@@ -2955,6 +2963,46 @@ function bindSettingsEvents(settings, callbacks) {
         if (!value) return;
         $('#VectTauri_summarize_model').val(value).trigger('change');
         $(this).hide();
+    });
+
+    // Core tab — "Test Connection" buttons. Both fire a real one-shot request
+    // through the SAME path production uses (embedding: temp insert + purge;
+    // LLM: chat completion through the proxy) and report via toast, so a failure
+    // is actionable without a console.
+    $('#VectTauri_embedding_test_btn').on('click', async function() {
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Testing…');
+        try {
+            const result = await testEmbeddingConnection(settings);
+            if (result.ok) {
+                toastr.success(result.message, 'VectTauri — Embedding');
+            } else {
+                toastr.error(result.message, 'VectTauri — Embedding failed', { timeOut: 0, extendedTimeOut: 0 });
+            }
+        } catch (e) {
+            toastr.error(e?.message || String(e), 'VectTauri — Embedding failed', { timeOut: 0, extendedTimeOut: 0 });
+        } finally {
+            $btn.prop('disabled', false).html(originalHtml);
+        }
+    });
+
+    $('#VectTauri_llm_test_btn').on('click', async function() {
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Testing…');
+        try {
+            const result = await testLlmConnection(settings);
+            if (result.ok) {
+                toastr.success(result.message, 'VectTauri — LLM');
+            } else {
+                toastr.error(result.message, 'VectTauri — LLM failed', { timeOut: 0, extendedTimeOut: 0 });
+            }
+        } catch (e) {
+            toastr.error(e?.message || String(e), 'VectTauri — LLM failed', { timeOut: 0, extendedTimeOut: 0 });
+        } finally {
+            $btn.prop('disabled', false).html(originalHtml);
+        }
     });
 
     $('#VectTauri_summarize_vllm_url')
