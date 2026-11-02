@@ -64,7 +64,6 @@ MIT License
 
 - **[KritBlade](https://github.com/KritBlade)** — Original VectFox & Similharity plugin
 - **[Darkatse](https://github.com/Darkatse)** — TauriTavern
-- **Lunarcade Digital** — TauriTavern adaptation
 
 ---
 
