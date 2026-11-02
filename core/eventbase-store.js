@@ -743,6 +743,62 @@ export async function isWindowAlreadyExtracted(sourceHashes, messageIds, setting
 }
 
 /**
+ * True when this chat already has at least one extracted-window fingerprint in
+ * the persisted cache. Resume uses this to decide whether it must rebuild the
+ * cache from the collection (see rebuildWindowCacheFromCollection).
+ *
+ * @param {string} [chatUUID]
+ * @returns {boolean}
+ */
+export function hasWindowCacheForChat(chatUUID) {
+    const uuid = chatUUID || getChatUUID();
+    if (!uuid) return false;
+    const persisted = extension_settings?.vecttauri?.eventbase_extracted_windows?.[uuid];
+    if (Array.isArray(persisted) && persisted.length > 0) return true;
+    return (_windowCacheSet.get(uuid)?.size ?? 0) > 0;
+}
+
+/**
+ * Rebuild the extracted-window fingerprint cache for a chat from the collection's
+ * stored chunks. Every chunk carries `source_message_hashes` — the exact
+ * hashSourceMessage() values the window fingerprint was originally built from —
+ * so those windows can be marked as already extracted WITHOUT re-running the LLM.
+ *
+ * This is what lets Resume continue from the DATABASE when the local cache was
+ * lost (reload, settings not flushed): previously the cache was the only record
+ * of progress, so Resume restarted from message 1 even though the collection was
+ * full of chunks. Marking per-window keeps it gap-aware — only the windows that
+ * actually have data are skipped; the ones that failed are re-extracted.
+ *
+ * @param {string} collectionId
+ * @param {object} settings
+ * @param {string} [chatUUID]
+ * @returns {Promise<number>} number of chunk windows marked
+ */
+export async function rebuildWindowCacheFromCollection(collectionId, settings, chatUUID) {
+    const uuid = chatUUID || getChatUUID();
+    if (!uuid || !collectionId) return 0;
+    try {
+        const { getBackend } = await import('../backends/backend-manager.js');
+        const backend = await getBackend(settings);
+        const result = await backend.listChunks(collectionId, settings, { limit: 10000 });
+        const items = Array.isArray(result?.items) ? result.items : [];
+        let marked = 0;
+        for (const it of items) {
+            const hashes = it?.metadata?.source_message_hashes;
+            if (Array.isArray(hashes) && hashes.length > 0) {
+                markWindowExtracted(hashes, uuid);
+                marked++;
+            }
+        }
+        return marked;
+    } catch (err) {
+        log.warn(`[EventBase] rebuildWindowCacheFromCollection failed for ${collectionId}:`, err?.message || err);
+        return 0;
+    }
+}
+
+/**
  * Find every EventBase collection registered for the given chat UUID.
  *
  * The registry — not `buildEventBaseCollectionId` — is the source of truth for

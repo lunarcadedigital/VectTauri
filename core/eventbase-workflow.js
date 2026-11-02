@@ -22,7 +22,7 @@ import { EventBaseFatalError, EventBaseExtractionError } from './eventbase-schem
 import { extractEvents } from './eventbase-extractor.js';
 import { hashSourceMessage } from './eventbase-message-hash.js';
 import { generationRateLimiter, generationRateLimitSettings } from './generation-rate-limiter.js';
-import { insertEvents, isWindowAlreadyExtracted, markWindowExtracted, clearExtractionCachesForChat, buildEventBaseCollectionId, isLastWindowExtracted, getVectorizationTip, setVectorizationTip, ensureVectorizationTip, shouldUseTipFallback, resolveEventBaseWriteTarget } from './eventbase-store.js';
+import { insertEvents, isWindowAlreadyExtracted, markWindowExtracted, clearExtractionCachesForChat, buildEventBaseCollectionId, isLastWindowExtracted, getVectorizationTip, setVectorizationTip, ensureVectorizationTip, shouldUseTipFallback, resolveEventBaseWriteTarget, hasWindowCacheForChat, rebuildWindowCacheFromCollection } from './eventbase-store.js';
 import { getSavedHashes } from './core-vector-api.js';
 import { retrieveEvents } from './eventbase-retrieval.js';
 import { retrieveEventsWithAgent } from './agentic-retrieval.js';
@@ -336,6 +336,23 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings: rawS
     // of spinning up Promise.allSettled batches that do the same check 3-at-a-time.
     // The per-window check in _runOneExtractBatch stays as a safety net for edit-in-middle
     // cases (where an old message's hash changes and breaks the contiguity assumption).
+
+    // Resume recovery: when this is NOT a fresh extraction but the local window
+    // fingerprint cache is empty for this chat (lost across a reload / settings not
+    // flushed), the only record of what was already extracted is the collection
+    // itself. Rebuild the cache from each chunk's stored source_message_hashes so the
+    // dedup below skips exactly the windows that already have data and re-extracts
+    // only the gaps — instead of restarting from message 1 (the "Resume starts over"
+    // bug). The hashes come from hashSourceMessage(), so the rebuilt fingerprints
+    // match the ones markWindowExtracted() would have produced.
+    let rebuiltWindowCache = 0;
+    if (!skipTipFallback && collectionId && !hasWindowCacheForChat(uuid)) {
+        rebuiltWindowCache = await rebuildWindowCacheFromCollection(collectionId, settings, uuid);
+        if (rebuiltWindowCache > 0) {
+            log.lifecycle(`[EventBase] Resume: rebuilt ${rebuiltWindowCache} already-extracted window fingerprint(s) from the collection`);
+        }
+    }
+
     let fastForwardSkipped = 0;
     while (fastForwardSkipped < windows.length) {
         const win = windows[fastForwardSkipped];
@@ -355,7 +372,10 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings: rawS
     // from callers inlining incompatible "should I bypass the fallback?" logic. Now
     // there's one source of truth in eventbase-store.js.
     const useTipFallback = shouldUseTipFallback({
-        skipTipFallback,
+        // When we rebuilt the cache from the collection we now have precise
+        // per-window knowledge, so the coarse "jump to the highest stored window"
+        // tip would only skip gaps that still need extraction. Suppress it.
+        skipTipFallback: skipTipFallback || rebuiltWindowCache > 0,
         fastForwardSkipped,
         hasCollection: !!collectionId,
     });
