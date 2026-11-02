@@ -48,6 +48,25 @@ The extension needs no transport configuration: the Similharity layer runs entir
 
 ---
 
+## 🔁 Resuming Vectorization
+
+If a vectorization run stops partway — app closed, **Stop** pressed, or the LLM provider failed (quota exhausted, HTTP 502, etc.) — you don't need to re-index the whole chat:
+
+1. Fix the cause first (e.g. switch to a working LLM model, or top up the provider)
+2. Open **VectTauri → Vectorization → Chat History**
+3. Leave **Start From Message** at **`1`**
+4. Click **Resume**
+
+Resume rebuilds its extraction fingerprints from the chunks already stored in the database, so it **skips windows that are already vectorized and only extracts the gaps** (for example messages 110–195). It is safe to run repeatedly.
+
+**Important**
+
+- **Start From Message must stay `1`.** That field means "discard every message before N" — it is *not* a "continue from here" point. Typing the last vectorized message number shifts window boundaries, invalidates the stored fingerprints, and re-extracts everything (with overlapping events).
+- **Keep the same Window Size** used for the original run. Dedup fingerprints are window-size dependent; changing it makes every window look new and forces a full re-extraction.
+- If the previous run failed because of the LLM provider, Resume will fail the same way until the provider/model is fixed.
+
+---
+
 ## 🔄 Updating
 
 Update the extension from **Extensions panel → Check for Updates**, or reinstall from the URL above.

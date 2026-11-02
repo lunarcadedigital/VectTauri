@@ -415,6 +415,24 @@ export async function runEventBaseIngestion({ messages, chatUUID, settings: rawS
         }
     }
 
+    // Manual Resume: surface how much work is actually left. The progress card counts
+    // COMPLETED windows, so a run that mostly skips already-vectorized windows shows
+    // "0 / N" for a while and looks like it restarted from scratch. Counting every
+    // already-extracted window (not just the contiguous front) makes it unambiguous:
+    // "N/M already vectorized — extracting K remaining" means Resume is working, and
+    // "0/M" means the rebuild found nothing to skip.
+    if (!isAutoSync && windows.length > 0) {
+        let alreadyDoneTotal = fastForwardSkipped;
+        for (let i = fastForwardSkipped; i < windows.length; i++) {
+            const hashes = windows[i].msgs.map(hashSourceMessage);
+            if (await isWindowAlreadyExtracted(hashes, null, settings, uuid)) alreadyDoneTotal++;
+        }
+        const remaining = windows.length - alreadyDoneTotal;
+        const resumeMsg = `Resume: ${alreadyDoneTotal}/${windows.length} window(s) already vectorized — extracting ${remaining} remaining.`;
+        log.lifecycle(`[EventBase] ${resumeMsg}`);
+        try { globalThis.toastr?.info(resumeMsg, 'VectTauri', { timeOut: 8000 }); } catch { /* toastr unavailable */ }
+    }
+
     if (fastForwardSkipped > 0) {
         windowsSkipped = fastForwardSkipped;
         log.lifecycle(`[EventBase] Fast-forward: skipped ${fastForwardSkipped} already-extracted window(s), starting at window ${fastForwardSkipped}`);
