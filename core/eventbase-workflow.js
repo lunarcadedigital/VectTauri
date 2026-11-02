@@ -1244,10 +1244,22 @@ export async function runEventBaseRetrieval({ chat, searchText, settings, chatUU
         log.verbose(`[EventBase Popup] no-events branch gate: retrieval_popup_on_result=${settings.retrieval_popup_on_result} → fire=${!!settings.retrieval_popup_on_result}`);
         if (settings.retrieval_popup_on_result) {
             const rawCount = debug?.rawCount ?? 0;
-            const msg = rawCount > 0
-                ? `EventBase: ${rawCount} event(s) already in context`
-                : 'EventBase: no events matched';
-            toastr.info(msg, 'VectTauri Retrieval');
+            const queryError = debug?.queryError;
+            if (queryError) {
+                // The vector query itself failed (embedding endpoint down, provider
+                // rejection, wrong model/apiUrl…). This is NOT "nothing matched" —
+                // say so, otherwise the failure is invisible without a console.
+                toastr.error(
+                    `EventBase: query failed — ${String(queryError).slice(0, 220)}`,
+                    'VectTauri Retrieval',
+                    { timeOut: 0, extendedTimeOut: 0 },
+                );
+            } else {
+                const msg = rawCount > 0
+                    ? `EventBase: ${rawCount} event(s) already in context`
+                    : `EventBase: no events matched (queried ${lockedLiveCollections.length} collection(s) + ${archiveCollections.length} archive, threshold ${settings.score_threshold ?? 0.25})`;
+                toastr.info(msg, 'VectTauri Retrieval');
+            }
         }
         if (dryRun) return { injectionText: null, eventCount: 0, lockedCollectionsCount: lockedLiveCollections.length, archiveCollectionsCount: archiveCollections.length };
         setExtensionPrompt(EVENTBASE_PROMPT_TAG, '', settings.position, settings.depth, false);

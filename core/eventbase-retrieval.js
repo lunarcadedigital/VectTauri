@@ -438,6 +438,11 @@ export async function retrieveEvents({ searchText, keywordQuery, chatLength, set
     //    Identical strings are deduped so we never pay double cost.
     //    Skipped entirely when no live collection is available.
     let rawCandidates = [];
+    // Errors from the live vector query. These used to be logged and swallowed, so
+    // a failed query (embedding endpoint down, provider rejection, etc.) looked
+    // exactly like "nothing matched" in the UI. Surfaced via debug.queryError so
+    // the caller can say WHY it found nothing.
+    const liveQueryErrors = [];
     const queryTexts = [keywordQuery, searchText]
         .filter(q => q && String(q).trim())
         .filter((q, i, arr) => arr.indexOf(q) === i);
@@ -484,6 +489,8 @@ export async function retrieveEvents({ searchText, keywordQuery, chatLength, set
                         .then(evts => _tagFrame(evts, colId))
                         .catch(err => {
                             log.error(`[EventBase] Live query failed (${colId}):`, err);
+                            const detail = err?.message || String(err);
+                            if (!liveQueryErrors.includes(detail)) liveQueryErrors.push(detail);
                             return [];
                         })
                 );
@@ -739,6 +746,10 @@ export async function retrieveEvents({ searchText, keywordQuery, chatLength, set
             nativeRerank: useNativeRerank,
             rerankComparison: comparisonLog || undefined,
             rawCount: rawCandidates.length,
+            // First live-query failure, if any. Non-null means the query itself
+            // failed (not just "no match"), so the caller can surface the reason.
+            queryError: liveQueryErrors[0] || null,
+            queryErrorCount: liveQueryErrors.length,
             archiveCandidates: additionalCandidates?.length || 0,
             afterImportanceFilter: importanceFiltered.length,
             afterDedup: dedupedEvents.length,
