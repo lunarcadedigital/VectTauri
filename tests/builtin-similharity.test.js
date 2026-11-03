@@ -185,6 +185,51 @@ describe('builtin shim chunks contract', () => {
         }
     });
 
+    it('maps numeric hashes from the native query response { hashes: [i64] }', async () => {
+        // TauriTavern's /api/vector/query answers { hashes: [i64, ...], metadata: [...] }.
+        // Those hashes are NUMBERS with no score, so the shim must not read `.hash`
+        // off them (undefined) — that used to drop every hit and make retrieval
+        // report "no events matched" even though the collection was full.
+        const realFetch = globalThis.fetch;
+        const HASH_A = 1191389692891003;
+        const HASH_B = 2267538684203703;
+        globalThis.fetch = async (url) => {
+            if (String(url).includes('/api/vector/query')) {
+                const payload = { hashes: [HASH_A, HASH_B], metadata: [{}, {}] };
+                return {
+                    ok: true, status: 200,
+                    text: async () => JSON.stringify(payload),
+                    json: async () => payload,
+                };
+            }
+            return { ok: true, status: 200, text: async () => '', json: async () => ({}) };
+        };
+        try {
+            await post(`${H}/chunks/insert`, {
+                collectionId: 'c-native', source: 'ollama', model: 'snowflake-arctic-embed',
+                items: [
+                    { hash: HASH_A, text: 'yorichi vs gojo', index: 0, metadata: { importance: 100 } },
+                    { hash: HASH_B, text: 'solar flare', index: 1, metadata: { importance: 100 } },
+                ],
+            });
+
+            const r = await post(`${H}/chunks/query`, {
+                collectionId: 'c-native', topK: 5, threshold: 0.25,
+                searchText: 'yorichi', source: 'ollama', model: 'snowflake-arctic-embed',
+            });
+            const data = await r.json();
+            expect(data.success).toBe(true);
+            expect(data.count).toBe(2);
+            expect(data.results.map(x => x.hash)).toEqual([HASH_A, HASH_B]);
+            expect(data.results[0].text).toBe('yorichi vs gojo');
+            expect(data.results[0].score).toBeGreaterThan(0);
+            // Native ordering (similarity desc) must be preserved by the ramp.
+            expect(data.results[0].score).toBeGreaterThan(data.results[1].score);
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+
     it('query requires queryVector or searchText', async () => {
         const r = await post(`${H}/chunks/query`, { collectionId: 'c-x' });
         expect(r.status).toBe(400);

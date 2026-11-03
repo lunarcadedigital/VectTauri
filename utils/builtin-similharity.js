@@ -305,19 +305,37 @@ async function handleQuery(body) {
                 topK: overfetch,
                 threshold,
             });
-            const nativeResults = Array.isArray(native) ? native : (native.results ?? native.hashes ?? []);
-            const byHash = new Map(records.map(r => [r.hash, r]));
-            for (const r of nativeResults) {
-                const hash = typeof r === 'string' ? r : r.hash;
-                const rec = byHash.get(hash);
-                if (!rec) continue;
+            // TauriTavern's native query answers { hashes: [i64, ...], metadata: [...] }:
+            // the hashes are NUMBERS and there is no score field. The old code assumed
+            // strings or objects and read `.hash` off a number (undefined), so every
+            // hit was dropped and retrieval always looked like "no events matched".
+            const nativeHashes = Array.isArray(native)
+                ? native
+                : (native?.hashes ?? native?.results ?? []);
+            const nativeMeta = Array.isArray(native?.metadata) ? native.metadata : [];
+            // Store keys are strings while native hashes are numbers — normalize both
+            // so the lookup cannot silently miss on a number-vs-string mismatch.
+            const byHash = new Map(records.map(r => [String(r.hash), r]));
+            nativeHashes.forEach((raw, i) => {
+                const isObject = raw !== null && typeof raw === 'object';
+                const rawHash = isObject ? (raw.hash ?? raw.id ?? nativeMeta[i]?.hash) : raw;
+                if (rawHash === undefined || rawHash === null) return;
+                const rec = byHash.get(String(rawHash));
+                if (!rec) return;
+                // Native results are already threshold-filtered and ordered by
+                // similarity (desc). /api/vector/query does not expose scores, so
+                // synthesize a monotonic ramp that preserves that ordering.
+                const explicitScore = isObject && typeof raw.score === 'number' ? raw.score : null;
+                const score = explicitScore !== null
+                    ? explicitScore
+                    : 1 - (i / Math.max(nativeHashes.length, 1)) * 0.5;
                 results.push({
-                    hash,
-                    score: typeof r === 'object' ? (r.score ?? 0) : 0,
+                    hash: rec.hash ?? rawHash,
+                    score,
                     text: rec.text ?? '',
                     metadata: rec.metadata ?? {},
                 });
-            }
+            });
         } else {
             return fail(400, 'chunks/query: queryVector or searchText is required');
         }
