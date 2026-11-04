@@ -228,23 +228,25 @@ export const ENGLISH_STOP_WORDS = [
 
 export const CJK_STOP_WORD_SET = new Set(CJK_STOP_WORDS);
 
-// Indonesian function words. Not exhaustive — the highest-frequency particles,
-// pronouns, prepositions and connectors that would otherwise dominate BM25.
+// Indonesian function words — verbatim from Sastrawi's StopWordRemoverFactory
+// (github.com/sastrawi/sastrawi), the de-facto Indonesian NLP stopword list.
+// Duplicates in the upstream array are collapsed. Kept conservative on purpose:
+// no colloquial fillers (aja/sih/dong) and no content-ish words (sama/terus).
 export const INDONESIAN_STOP_WORDS = [
-    'yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'pada', 'dengan', 'dalam', 'ini', 'itu',
-    'adalah', 'ialah', 'akan', 'sudah', 'udah', 'belum', 'tidak', 'tak', 'gak', 'nggak', 'ngga', 'bukan',
-    'juga', 'pula', 'saja', 'aja', 'lagi', 'lebih', 'paling', 'sangat', 'amat', 'banget', 'sekali',
-    'bisa', 'dapat', 'harus', 'mau', 'ingin', 'sedang', 'telah', 'pernah', 'masih', 'bakal',
-    'karena', 'sebab', 'jadi', 'maka', 'jika', 'kalau', 'bila', 'ketika', 'saat', 'sementara',
-    'setelah', 'sebelum', 'tetapi', 'tapi', 'namun', 'atau', 'serta', 'bahwa', 'agar', 'supaya',
-    'sehingga', 'sebagai', 'secara', 'oleh', 'tentang', 'terhadap', 'antara', 'tanpa', 'sampai',
-    'hingga', 'bagi', 'demi', 'melalui', 'seperti', 'bagai', 'hanya', 'cuma', 'bahkan', 'pun',
-    'aku', 'saya', 'kamu', 'anda', 'dia', 'ia', 'mereka', 'kita', 'kami', 'kalian', 'gue', 'lu', 'lo',
-    'kau', 'engkau', 'beliau', 'ku', 'mu', 'nya', 'sini', 'situ', 'sana', 'mana', 'apa', 'siapa',
-    'kapan', 'dimana', 'bagaimana', 'mengapa', 'kenapa', 'berapa', 'ya', 'yah', 'sih', 'dong', 'deh',
-    'kok', 'nih', 'tuh', 'emang', 'memang', 'para', 'semua', 'seluruh', 'setiap', 'tiap', 'beberapa',
-    'banyak', 'sedikit', 'lain', 'lainnya', 'sendiri', 'sama', 'begitu', 'demikian', 'tersebut',
-    'terus', 'lalu', 'kemudian', 'sekarang', 'tadi', 'nanti', 'pernah', 'sering', 'selalu',
+    'yang', 'untuk', 'pada', 'ke', 'para', 'namun', 'menurut', 'antara', 'dia', 'dua',
+    'ia', 'seperti', 'jika', 'sehingga', 'kembali', 'dan', 'tidak', 'ini', 'karena',
+    'kepada', 'oleh', 'saat', 'harus', 'sementara', 'setelah', 'belum', 'kami', 'sekitar',
+    'bagi', 'serta', 'di', 'dari', 'telah', 'sebagai', 'masih', 'hal', 'ketika', 'adalah',
+    'itu', 'dalam', 'bisa', 'bahwa', 'atau', 'hanya', 'kita', 'dengan', 'akan', 'juga',
+    'ada', 'mereka', 'sudah', 'saya', 'terhadap', 'secara', 'agar', 'lain', 'anda',
+    'begitu', 'mengapa', 'kenapa', 'yaitu', 'yakni', 'daripada', 'itulah', 'lagi', 'maka',
+    'tentang', 'demi', 'dimana', 'kemana', 'pula', 'sambil', 'sebelum', 'sesudah', 'supaya',
+    'guna', 'kah', 'pun', 'sampai', 'sedangkan', 'selagi', 'tetapi', 'apakah',
+    'kecuali', 'sebab', 'selain', 'seolah', 'seraya', 'seterusnya', 'tanpa', 'agak', 'boleh',
+    'dapat', 'dsb', 'dst', 'dll', 'dahulu', 'dulunya', 'anu', 'demikian', 'tapi', 'ingin',
+    'nggak', 'mari', 'nanti', 'melainkan', 'oh', 'ok', 'seharusnya', 'sebetulnya',
+    'setiap', 'setidaknya', 'sesuatu', 'pasti', 'saja', 'toh', 'ya', 'walau', 'tolong',
+    'tentu', 'amat', 'apalagi', 'bagaimanapun',
 ];
 
 export function createCombinedStopWordSet(extraWords = []) {
