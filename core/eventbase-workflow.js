@@ -20,6 +20,7 @@ import { queryCollection } from './core-vector-api.js';
 import { EVENTBASE_PROMPT_TAG } from './constants.js';
 import { EventBaseFatalError, EventBaseExtractionError } from './eventbase-schema.js';
 import { extractEvents } from './eventbase-extractor.js';
+import { resetBackupModelStickiness } from './llm-provider-call.js';
 import { hashSourceMessage } from './eventbase-message-hash.js';
 import { generationRateLimiter, generationRateLimitSettings } from './generation-rate-limiter.js';
 import { insertEvents, isWindowAlreadyExtracted, markWindowExtracted, clearExtractionCachesForChat, buildEventBaseCollectionId, isLastWindowExtracted, getVectorizationTip, setVectorizationTip, ensureVectorizationTip, shouldUseTipFallback, resolveEventBaseWriteTarget, rebuildWindowCacheFromCollection } from './eventbase-store.js';
@@ -120,6 +121,10 @@ export function countUnfinishedWindows(result) {
 
 export async function runEventBaseIngestion({ messages, chatUUID, settings: rawSettings, abortSignal = null, progressPlan = null, collectionIdOverride = null, parallelWindows = 3, isAutoSync = false, suppressAutoSyncPopup = false, skipTipFallback = false, windowSizeOverride = undefined, windowOverlapOverride = undefined }) {
     const uuid = chatUUID || getChatUUID();
+
+    // A new run starts fresh: never inherit the fallback model a previous run
+    // settled on. Sticky fallback is re-established on the first timeout.
+    resetBackupModelStickiness();
 
     // Single source of truth for LLM dispatch (2026-10-30): the provider switch
     // inside extractEvents reads chat_provider off THIS object. Callers pass

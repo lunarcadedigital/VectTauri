@@ -32,6 +32,16 @@ import { getModelConfigErrorMessage } from './model-http-errors.js';
 import { isConnectionError, notifyConnectionError, notifyUpstreamRejection } from './model-config-notifier.js';
 import { log } from './log.js';
 
+// Model id that the backup fallback settled on for the CURRENT run. Cleared by
+// resetBackupModelStickiness() when a new vectorization run starts, so one bad
+// day does not silently pin every later run to the fallback model.
+let _stickyBackupModel = null;
+
+/** Forget the sticky backup choice (call at the start of a vectorization run). */
+export function resetBackupModelStickiness() {
+    _stickyBackupModel = null;
+}
+
 /**
  * Neutral error from a shared LLM call. Callers switch on `kind` to map this
  * onto their own error class and fatal-vs-retryable policy.
@@ -281,17 +291,26 @@ export async function postChatCompletion({
     // transport layer, or 429/408/5xx from the provider. Same provider, URL and
     // key — only the model id changes. Auth (401/403) and model_config (404) are
     // permanent for this run and must NOT be retried.
+    //
+    // STICKY: once the backup answers successfully, every later call in the same
+    // run goes straight to it. Otherwise each window would burn the primary's full
+    // timeout first — on a 600-message chat that is hours of dead waiting for a
+    // model that is still down. resetBackupModelStickiness() clears it at run start.
     const canFallback = Boolean(backupModel) && backupModel.trim() !== '' && backupModel !== model;
     const isRetryableStatus = (status) => status === 429 || status === 408 || status >= 500;
+    const stickyActive = canFallback && _stickyBackupModel === backupModel;
+    let answeredByBackup = stickyActive;
 
     let response;
     try {
-        response = await send(model);
+        response = await send(stickyActive ? backupModel : model);
     } catch (err) {
         const timedOut = err?.name === 'TimeoutError' || err?.name === 'AbortError';
         const transient = timedOut || err?.name === 'TypeError';
         if (!transient) throw err;
-        if (!canFallback) {
+        if (!canFallback || stickyActive) {
+            // The backup itself is failing — stop pretending it is healthy.
+            if (stickyActive) _stickyBackupModel = null;
             throw new LlmCallError(
                 `${contextLabel}: ${label} request failed${timedOut ? ` (timed out after ${timeoutMs} ms)` : ''} — ${err?.message || err}`,
                 { kind: timedOut ? 'timeout' : 'connection', provider },
@@ -299,12 +318,17 @@ export async function postChatCompletion({
         }
         log.warn(`[LLM] ${contextLabel}: ${model} ${timedOut ? `timed out after ${timeoutMs} ms` : 'connection failed'} — retrying with backup model ${backupModel}`);
         response = await send(backupModel);
+        answeredByBackup = true;
     }
 
-    if (!response.ok && canFallback && isRetryableStatus(response.status)) {
+    if (!response.ok && canFallback && !answeredByBackup && isRetryableStatus(response.status)) {
         log.warn(`[LLM] ${contextLabel}: ${model} HTTP ${response.status} — retrying with backup model ${backupModel}`);
         response = await send(backupModel);
+        answeredByBackup = true;
     }
+
+    // Backup answered → stick to it for the rest of this run.
+    if (answeredByBackup && response.ok) _stickyBackupModel = backupModel;
 
     if (!response.ok) {
         const errText = await response.text().catch(() => response.statusText);

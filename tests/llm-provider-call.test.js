@@ -34,7 +34,7 @@ vi.mock('../core/log.js', () => ({
 }));
 
 import StringUtils from '../utils/string-utils.js';
-import { postChatCompletion, parseJsonArrayFromLlm, resolveModelParameterStyle, LlmCallError } from '../core/llm-provider-call.js';
+import { postChatCompletion, parseJsonArrayFromLlm, resolveModelParameterStyle, resetBackupModelStickiness, LlmCallError } from '../core/llm-provider-call.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -593,6 +593,10 @@ describe('StringUtils.ensureArray', () => {
 describe('postChatCompletion — backup model fallback', () => {
     const timeoutError = () => Object.assign(new Error('The operation timed out'), { name: 'TimeoutError' });
 
+    beforeEach(() => {
+        resetBackupModelStickiness();
+    });
+
     it('retries once with the backup model after a timeout', async () => {
         const fetchMock = vi.fn()
             .mockRejectedValueOnce(timeoutError())
@@ -634,5 +638,35 @@ describe('postChatCompletion — backup model fallback', () => {
         await expect(postChatCompletion(baseArgs()))
             .rejects.toMatchObject({ kind: 'timeout' });
         expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('sticks to the backup model for later calls in the same run', async () => {
+        const fetchMock = vi.fn()
+            .mockRejectedValueOnce(timeoutError())
+            .mockResolvedValueOnce(okResponse({ content: 'backup-1' }))
+            .mockResolvedValueOnce(okResponse({ content: 'backup-2' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        await postChatCompletion(baseArgs({ backupModel: 'backup/model' }));
+        await postChatCompletion(baseArgs({ backupModel: 'backup/model' }));
+
+        // Call 1: primary (timeout) → backup. Call 2: backup DIRECTLY, no primary attempt.
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+        expect(JSON.parse(fetchMock.mock.calls[2][1].body).model).toBe('backup/model');
+    });
+
+    it('resetBackupModelStickiness() sends the primary model again', async () => {
+        const fetchMock = vi.fn()
+            .mockRejectedValueOnce(timeoutError())
+            .mockResolvedValueOnce(okResponse({ content: 'backup' }))
+            .mockResolvedValueOnce(okResponse({ content: 'primary' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        await postChatCompletion(baseArgs({ backupModel: 'backup/model' }));
+        resetBackupModelStickiness();
+        const res = await postChatCompletion(baseArgs({ backupModel: 'backup/model' }));
+
+        expect(res.content).toBe('primary');
+        expect(JSON.parse(fetchMock.mock.calls[2][1].body).model).toBe('test/model');
     });
 });
