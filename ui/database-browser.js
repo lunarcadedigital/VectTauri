@@ -1347,7 +1347,11 @@ async function openChunkVisualizer(collection) {
         collectionId: collection.id,
         source: collection.source || "transformers",
         model: collection.model || "",
-        ...(limit ? { limit } : {}),
+        // The shim defaults to limit=100 when no limit is sent. A collection with
+        // more chunks than that used to be truncated to a hash-sorted subset, which
+        // then rendered in timeline order as scattered "missing" windows (e.g. Msg
+        // 2–3, 6–7, 10–11). Ask for everything so View Chunks matches the export.
+        limit: limit || 50000,
       };
 
       log.verbose("VECTTAURI DB Browser: Requesting chunks with:", requestBody);
