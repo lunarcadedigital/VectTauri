@@ -29,6 +29,7 @@ import { retrieveEventsWithAgent } from './agentic-retrieval.js';
 import { formatEventsForInjectionDetailed } from './eventbase-injection.js';
 import { isCollectionEnabled, isCollectionActiveForContextAnyKey, setCollectionLock, setCollectionMeta } from './collection-metadata.js';
 import { progressTracker } from '../ui/progress-tracker.js';
+import { createDebugData, setLastSearchDebug } from '../ui/search-debug.js';
 import { log } from './log.js';
 
 /**
@@ -1303,6 +1304,37 @@ export async function runEventBaseRetrieval({ chat, searchText, settings, chatUU
 
     // Inject using the same slot mechanism as legacy chunks
     setExtensionPrompt(EVENTBASE_PROMPT_TAG, injectionText, settings.position, settings.depth, false);
+
+    // Feed the Search Debug modal (ui/search-debug.js) so the injected EventBase
+    // memory is inspectable in-app — no devtools needed. Same shape the chunk
+    // path already records, so the existing modal renders it unchanged.
+    try {
+        const debugData = createDebugData();
+        debugData.query = keywordQuery || searchText || '';
+        debugData.collectionId = lockedLiveCollections.map(c => c.id).join(', ') || null;
+        const asChunk = (e) => ({
+            hash: e.hash ?? e.event_id ?? null,
+            text: e.summary || e.text || '',
+            score: typeof e.score === 'number' ? e.score : 0,
+            metadata: e,
+        });
+        debugData.stages.initial = events.map(asChunk);
+        debugData.stages.afterConditions = events.map(asChunk);
+        debugData.stages.injected = events.slice(0, injectedCount).map(asChunk);
+        debugData.injection = {
+            verified: true,
+            text: injectionText,
+            position: settings.position,
+            depth: settings.depth,
+            charCount: injectionText.length,
+        };
+        debugData.stats.retrievedFromVector = events.length;
+        debugData.stats.afterConditions = events.length;
+        debugData.stats.actuallyInjected = injectedCount;
+        setLastSearchDebug(debugData);
+    } catch (dbgErr) {
+        log.warn(`[EventBase] Search debug capture failed: ${dbgErr?.message || dbgErr}`);
+    }
 
     if (log.domainEnabled('injection')) {
         log.domain('injection', 'trace', `[EventBase] Injected ${injectedCount} event(s) (requested ${events.length}), text length: ${injectionText.length}`);

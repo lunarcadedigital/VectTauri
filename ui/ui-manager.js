@@ -1073,6 +1073,10 @@ export function renderSettings(containerId, settings, callbacks) {
                                     <i class="fa-solid fa-bug"></i>
                                     <span>Debug Query</span>
                                 </button>
+                                <button id="VectTauri_search_debug" class="vecttauri-action-btn vecttauri-btn-secondary" title="Inspect the last RAG query: retrieved events, what got filtered, and the exact text injected into the prompt (with history).">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <span>Injection Log</span>
+                                </button>
                                 <button id="VectTauri_debug_summarizer" class="vecttauri-action-btn vecttauri-btn-secondary" title="Preview the exact <VectTauriSummarizer> block that would be injected into the prompt this turn (without injecting it).">
                                     <i class="fa-solid fa-eye"></i>
                                     <span>Debug Summarizer</span>
@@ -5298,6 +5302,9 @@ function bindSettingsEvents(settings, callbacks) {
     });
     $('#VectTauri_view_results').on('click', () => {
         openQueryTestModal();
+    });
+    $('#VectTauri_search_debug').on('click', () => {
+        openSearchDebugModal();
     });
     $('#VectTauri_debug_summarizer').on('click', () => {
         openSummarizerDebug(settings);
