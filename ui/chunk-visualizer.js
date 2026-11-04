@@ -609,13 +609,17 @@ function renderChunkItem(chunk, listIndex) {
     // from the same fields that drive the timeline sort) — e.g. "Msg 2527–2531 ·
     // #3" — so multiple events extracted from one big window are told apart.
     // Legacy chunks (no window fields) keep the plain "Msg <n>" form.
+    // Stored window fields are 0-based array indices, while the chat UI numbers
+    // messages from 1. Display them +1 so "Msg 1–2" here matches chat message 1–2.
+    // Only the LABEL is shifted — chunkTimelineSortValue() keeps the raw 0-based
+    // values because it drives sorting.
     const msgId = chunk.metadata?.messageId ?? chunk.index ?? '?';
     const windowStart = chunk.metadata?.source_window_start;
     const windowEnd = chunk.metadata?.source_window_end;
     const eventOrder = chunk.metadata?.window_event_order;
-    let msgLabel = `Msg ${msgId}`;
+    let msgLabel = typeof msgId === 'number' ? `Msg ${msgId + 1}` : `Msg ${msgId}`;
     if (windowStart != null && windowEnd != null && windowEnd !== windowStart) {
-        msgLabel = `Msg ${windowStart}–${windowEnd}`;
+        msgLabel = `Msg ${windowStart + 1}–${windowEnd + 1}`;
     }
     if (typeof eventOrder === 'number') {
         msgLabel += ` · #${eventOrder + 1}`;
