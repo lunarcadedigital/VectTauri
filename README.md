@@ -31,7 +31,7 @@ Ollama models that handle non-English roleplay well. Pick one, then keep it — 
 | Model | Params | Dims | Notes |
 |---|---|---|---|
 | `embeddinggemma:300m` | 300M | 768 | 100+ languages, built for on-device/low-end CPUs. Best size/quality balance |
-| `snowflake-arctic-embed2` | 568M | 1024 | Multilingual (includes Indonesian). Heavier, noticeably slower on 2-core laptops |
+| `snowflake-arctic-embed2` | 568M | 1024 | Multilingual. Heavier, noticeably slower on 2-core laptops |
 | `bge-m3` | 568M | 1024 | Strong multilingual retrieval |
 | `qwen3-embedding:0.6b` | 0.6B | 1024 | Multilingual, solid quality |
 
