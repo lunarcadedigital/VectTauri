@@ -54,9 +54,9 @@
 }
 
 .rag-sleek-card.selected {
-    border-color: var(--ragbooks-primary, #6366f1);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
-    background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.05), transparent);
+    border-color: var(--ragbooks-primary, #24c8db);
+    box-shadow: 0 0 0 2px rgba(36, 200, 219, 0.3);
+    background: linear-gradient(to bottom right, rgba(36, 200, 219, 0.05), transparent);
 }
 
 /* Importance Indicator Bar */
@@ -100,7 +100,7 @@
     cursor: pointer;
     width: 16px;
     height: 16px;
-    accent-color: var(--ragbooks-primary, #6366f1);
+    accent-color: var(--ragbooks-primary, #24c8db);
 }
 
 .rag-header-content {
@@ -175,7 +175,7 @@
 }
 
 input:checked + .rag-slider {
-    background-color: var(--ragbooks-primary, #6366f1);
+    background-color: var(--ragbooks-primary, #24c8db);
 }
 
 input:checked + .rag-slider:before {
@@ -240,7 +240,7 @@ input:checked + .rag-slider:before {
 
 .rag-bulk-count {
     font-weight: 700;
-    background: var(--ragbooks-primary, #6366f1);
+    background: var(--ragbooks-primary, #24c8db);
     color: white;
     padding: 2px 10px;
     border-radius: 12px;
@@ -274,7 +274,7 @@ input:checked + .rag-slider:before {
 }
 
 .rag-sleek-input:focus, .rag-sleek-textarea:focus {
-    border-color: var(--ragbooks-primary, #6366f1);
+    border-color: var(--ragbooks-primary, #24c8db);
     outline: none;
     background: var(--black10a);
 }

@@ -232,7 +232,7 @@
 }
 
 .vecttauri-modal-footer .vecttauri-btn-primary {
-    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #16a9bd 100%);
     border-color: var(--vecttauri-primary);
     color: white;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
@@ -509,12 +509,12 @@
 }
 
 .vecttauri-model-active {
-    background: color-mix(in srgb, #a78bfa 10%, transparent);
-    border-color: color-mix(in srgb, #a78bfa 40%, transparent);
+    background: color-mix(in srgb, #ffd166 10%, transparent);
+    border-color: color-mix(in srgb, #ffd166 40%, transparent);
 }
 
 .vecttauri-model-active:hover {
-    background: color-mix(in srgb, #a78bfa 15%, transparent);
+    background: color-mix(in srgb, #ffd166 15%, transparent);
 }
 
 .vecttauri-model-item-info {
@@ -539,7 +539,7 @@
 }
 
 .vecttauri-model-active .vecttauri-model-name i {
-    color: #a78bfa;
+    color: #ffd166;
     opacity: 1;
 }
 
@@ -557,8 +557,8 @@
     letter-spacing: 0.5px;
     padding: 4px 10px;
     border-radius: 4px;
-    background: color-mix(in srgb, #a78bfa 20%, transparent);
-    color: #a78bfa;
+    background: color-mix(in srgb, #ffd166 20%, transparent);
+    color: #ffd166;
 }
 
 .vecttauri-model-select-btn {
@@ -573,9 +573,9 @@
 }
 
 .vecttauri-model-select-btn:hover {
-    background: color-mix(in srgb, #a78bfa 20%, transparent);
-    border-color: #a78bfa;
-    color: #a78bfa;
+    background: color-mix(in srgb, #ffd166 20%, transparent);
+    border-color: #ffd166;
+    color: #ffd166;
 }
 
 /* Activation badges - ORANGE → YELLOW → BLUE */
@@ -663,7 +663,7 @@
 }
 
 .vecttauri-btn-sm.vecttauri-btn-primary {
-    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #16a9bd 100%);
     border-color: var(--vecttauri-primary);
     color: white;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--vecttauri-primary) 30%, transparent);
@@ -848,7 +848,7 @@
 
     /* Visual styling */
     background: var(--SmartThemeBlurTintColor, #1a1a2e);
-    border: 2px solid color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 30%, var(--SmartThemeBorderColor, #333));
+    border: 2px solid color-mix(in srgb, var(--vecttauri-primary, #ffc131) 30%, var(--SmartThemeBorderColor, #333));
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 
@@ -879,9 +879,9 @@
     justify-content: space-between;
     padding: 16px 20px;
     background: linear-gradient(135deg,
-        color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 15%, transparent) 0%,
-        color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 8%, transparent) 100%);
-    border-bottom: 1px solid color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 20%, transparent);
+        color-mix(in srgb, var(--vecttauri-primary, #ffc131) 15%, transparent) 0%,
+        color-mix(in srgb, var(--vecttauri-primary, #ffc131) 8%, transparent) 100%);
+    border-bottom: 1px solid color-mix(in srgb, var(--vecttauri-primary, #ffc131) 20%, transparent);
     border-radius: 10px 10px 0 0;
 }
 
@@ -936,8 +936,8 @@
 .vecttauri-activation-editor textarea:focus,
 .vecttauri-activation-editor select:focus {
     outline: none;
-    border-color: var(--vecttauri-primary, #8b5cf6);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vecttauri-primary, #8b5cf6) 20%, transparent);
+    border-color: var(--vecttauri-primary, #ffc131);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vecttauri-primary, #ffc131) 20%, transparent);
 }
 
 .vecttauri-activation-editor input[type="text"]::placeholder,

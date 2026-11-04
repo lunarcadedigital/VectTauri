@@ -51,7 +51,7 @@
     width: 100%;
     height: 100%;
     transform: rotate(-90deg);
-    filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.3));
+    filter: drop-shadow(0 0 15px rgba(36, 200, 219, 0.3));
 }
 
 .ragbooks-ring-bg {
@@ -62,7 +62,7 @@
 
 .ragbooks-ring-progress {
     fill: none;
-    stroke: var(--ragbooks-primary, #6366f1);
+    stroke: var(--ragbooks-primary, #24c8db);
     stroke-width: 6;
     stroke-dasharray: 452; /* 2 * PI * 72 */
     stroke-dashoffset: 452;
@@ -93,7 +93,7 @@
 .ragbooks-ring-icon {
     font-size: 2.5rem;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #a5b4fc, #6366f1);
+    background: linear-gradient(135deg, #a5b4fc, #24c8db);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
@@ -146,8 +146,8 @@
 }
 
 .rag-step-dot.active {
-    background: var(--ragbooks-primary, #6366f1);
-    box-shadow: 0 0 10px var(--ragbooks-primary, #6366f1);
+    background: var(--ragbooks-primary, #24c8db);
+    box-shadow: 0 0 10px var(--ragbooks-primary, #24c8db);
     transform: scale(1.2);
 }
 

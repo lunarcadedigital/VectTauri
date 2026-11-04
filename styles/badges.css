@@ -70,9 +70,9 @@
 }
 
 .vecttauri-badge-model {
-    color: #a78bfa;  /* Purple/Violet */
-    border-color: #a78bfa;
-    background: color-mix(in srgb, #a78bfa 8%, transparent);
+    color: #ffd166;  /* Purple/Violet */
+    border-color: #ffd166;
+    background: color-mix(in srgb, #ffd166 8%, transparent);
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 0.68em;
     letter-spacing: 0.5px;
@@ -80,7 +80,7 @@
 }
 
 .vecttauri-badge-model:hover {
-    background: color-mix(in srgb, #a78bfa 15%, transparent);
+    background: color-mix(in srgb, #ffd166 15%, transparent);
 }
 
 /* ============================================================================

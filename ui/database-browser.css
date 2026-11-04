@@ -1105,7 +1105,7 @@
 
 /* "Current" / "Active" badge */
 .vecttauri-lock-badge-current {
-    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, var(--vecttauri-primary) 0%, #16a9bd 100%);
     color: white;
     padding: 3px 10px;
     border-radius: 12px;

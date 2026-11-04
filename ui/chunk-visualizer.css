@@ -346,8 +346,8 @@
 }
 
 .vecttauri-chunk-item-badge.chunk-part {
-    color: #a78bfa;
-    background: color-mix(in srgb, #a78bfa 15%, transparent);
+    color: #ffd166;
+    background: color-mix(in srgb, #ffd166 15%, transparent);
     font-size: 0.7em;
 }
 
@@ -1122,8 +1122,8 @@
 
 /* Summaries Section */
 .vecttauri-detail-summaries {
-    background: color-mix(in srgb, #8b5cf6 5%, transparent);
-    border: 1px solid color-mix(in srgb, #8b5cf6 20%, transparent);
+    background: color-mix(in srgb, #ffc131 5%, transparent);
+    border: 1px solid color-mix(in srgb, #ffc131 20%, transparent);
     border-radius: 10px;
     padding: 14px;
 }
@@ -1170,8 +1170,8 @@
 .vecttauri-summary-item-hash {
     font-size: 0.75em;
     font-family: monospace;
-    color: color-mix(in srgb, #8b5cf6 70%, transparent);
-    background: color-mix(in srgb, #8b5cf6 10%, transparent);
+    color: color-mix(in srgb, #ffc131 70%, transparent);
+    background: color-mix(in srgb, #ffc131 10%, transparent);
     padding: 2px 6px;
     border-radius: 4px;
     width: fit-content;
@@ -1191,9 +1191,9 @@
 .vecttauri-add-summary-btn {
     padding: 8px 14px;
     background: none;
-    border: 1px dashed color-mix(in srgb, #8b5cf6 50%, transparent);
+    border: 1px dashed color-mix(in srgb, #ffc131 50%, transparent);
     border-radius: 6px;
-    color: #8b5cf6;
+    color: #ffc131;
     font-size: 0.85em;
     cursor: pointer;
     transition: all 0.15s;
@@ -1201,7 +1201,7 @@
 }
 
 .vecttauri-add-summary-btn:hover {
-    background: color-mix(in srgb, #8b5cf6 10%, transparent);
+    background: color-mix(in srgb, #ffc131 10%, transparent);
 }
 
 /* ============================================================================
@@ -1336,9 +1336,9 @@
 
 .vecttauri-link-item.soft {
     background: linear-gradient(135deg,
-        color-mix(in srgb, #8b5cf6 12%, transparent),
-        color-mix(in srgb, #a78bfa 8%, transparent));
-    border: 2px solid color-mix(in srgb, #8b5cf6 35%, transparent);
+        color-mix(in srgb, #ffc131 12%, transparent),
+        color-mix(in srgb, #ffd166 8%, transparent));
+    border: 2px solid color-mix(in srgb, #ffc131 35%, transparent);
 }
 
 .vecttauri-link-item:hover {
@@ -1356,13 +1356,13 @@
 .vecttauri-link-mode-badge.force {
     background: linear-gradient(135deg, var(--vecttauri-primary), var(--vecttauri-secondary));
     color: white;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 2px 8px rgba(36, 200, 219, 0.3);
 }
 
 .vecttauri-link-mode-badge.soft {
-    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    background: linear-gradient(135deg, #ffc131, #ffd166);
     color: white;
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 2px 8px rgba(255, 193, 49, 0.3);
 }
 
 .vecttauri-link-target {
@@ -1406,7 +1406,7 @@
 }
 
 .vecttauri-help-badge.soft {
-    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    background: linear-gradient(135deg, #ffc131, #ffd166);
     color: white;
 }
 
@@ -1431,7 +1431,7 @@
         color-mix(in srgb, var(--vecttauri-secondary) 10%, transparent));
     border-style: solid;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 12px rgba(36, 200, 219, 0.2);
 }
 
 /* ============================================================================
@@ -1465,7 +1465,7 @@
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3),
-                0 0 40px rgba(99, 102, 241, 0.15);
+                0 0 40px rgba(36, 200, 219, 0.15);
     animation: slideUp 0.25s ease;
 }
 
@@ -1632,12 +1632,12 @@
     background: linear-gradient(135deg, var(--vecttauri-primary), var(--vecttauri-secondary));
     border: none;
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(36, 200, 219, 0.3);
 }
 
 .vecttauri-editor-btn.primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(36, 200, 219, 0.4);
 }
 
 /* Link Mode Selector */
@@ -1672,8 +1672,8 @@
 }
 
 .vecttauri-link-mode-card.soft {
-    background: color-mix(in srgb, #8b5cf6 10%, transparent);
-    border: 2px solid color-mix(in srgb, #8b5cf6 30%, transparent);
+    background: color-mix(in srgb, #ffc131 10%, transparent);
+    border: 2px solid color-mix(in srgb, #ffc131 30%, transparent);
 }
 
 .vecttauri-link-mode-option input:checked + .vecttauri-link-mode-card.force {
@@ -1681,15 +1681,15 @@
         color-mix(in srgb, var(--vecttauri-primary) 25%, transparent),
         color-mix(in srgb, var(--vecttauri-secondary) 20%, transparent));
     border-color: var(--vecttauri-primary);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px rgba(36, 200, 219, 0.3);
 }
 
 .vecttauri-link-mode-option input:checked + .vecttauri-link-mode-card.soft {
     background: linear-gradient(135deg,
-        color-mix(in srgb, #8b5cf6 25%, transparent),
-        color-mix(in srgb, #a78bfa 20%, transparent));
-    border-color: #8b5cf6;
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        color-mix(in srgb, #ffc131 25%, transparent),
+        color-mix(in srgb, #ffd166 20%, transparent));
+    border-color: #ffc131;
+    box-shadow: 0 0 20px rgba(255, 193, 49, 0.3);
 }
 
 .vecttauri-link-mode-card .icon {
