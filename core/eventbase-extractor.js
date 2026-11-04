@@ -306,14 +306,21 @@ export async function extractEvents({ messages, windowStart, windowEnd, settings
     // Detect dominant script BEFORE building prompt so we can inject an explicit language hint
     const excerptScript = _detectScript(excerptText);
     const languageHint = _inferLanguageHint(excerptText);
+    const languageMode = settings.cjk_tokenizer_mode || 'intl';
     let basePrompt = buildExtractionPrompt(
         excerptText,
         maxCount,
         settings.eventbase_custom_prompt || '',
-        settings.cjk_tokenizer_mode || 'intl',
+        languageMode,
     );
     if (languageHint) {
         basePrompt = `DETECTED EXCERPT LANGUAGE: ${languageHint}. You MUST write ALL string fields in that language — no exceptions.\n\n${basePrompt}`;
+    } else if (languageMode === 'id') {
+        // `others`/`intl` rely on the prompt's own language rule. For Indonesian
+        // that rule is easy to lose against English schema keys, and Qwen models
+        // measurably drift to English or Chinese — restate it as the FIRST thing
+        // the model reads (research: top-of-prompt line beats scattered rules).
+        basePrompt = `EXCERPT LANGUAGE: Bahasa Indonesia. Write ALL string fields (summary, cause, result, characters, locations, factions, items, concepts, keywords, open_threads) in Bahasa Indonesia. Never English, never Chinese — even if the schema keys or examples are in another language.\n\n${basePrompt}`;
     }
     const prompt = basePrompt;
     const provider = (settings.chat_provider || 'openrouter').toLowerCase();

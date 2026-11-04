@@ -22,6 +22,7 @@ export const LANGUAGE_MODES = [
     { value: 'jieba_tw',       label: 'Traditional Chinese (Jieba WASM)', tokenizer: 'jieba_tw',       stopLocales: ['en', 'zh-Hant'] },
     { value: 'tiny_segmenter', label: 'Japanese (TinySegmenter)',         tokenizer: 'tiny_segmenter', stopLocales: ['en', 'ja'] },
     { value: 'korean',         label: 'Korean (Intl.Segmenter)',          tokenizer: 'intl',           stopLocales: ['en', 'ko'] },
+    { value: 'id',             label: 'Indonesian (Intl.Segmenter)',      tokenizer: 'intl',           stopLocales: ['en', 'id'] },
     { value: 'others',         label: 'Others (Intl.Segmenter)',          tokenizer: 'intl',           stopLocales: ['en'] },
 ];
 

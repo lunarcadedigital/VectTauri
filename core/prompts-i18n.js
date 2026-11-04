@@ -491,6 +491,7 @@ const _PLANNER_PROMPTS = {
     jieba_tw:       _PLANNER_HEADER + _PLANNER_EXAMPLES_JIEBA_TW        + _PLANNER_FOOTER,
     tiny_segmenter: _PLANNER_HEADER + _PLANNER_EXAMPLES_TINY_SEGMENTER  + _PLANNER_FOOTER,
     korean:         _PLANNER_HEADER + _PLANNER_EXAMPLES_KOREAN          + _PLANNER_FOOTER,
+    id:             _PLANNER_HEADER + _PLANNER_EXAMPLES_OTHERS          + _PLANNER_FOOTER,
     others:         _PLANNER_HEADER + _PLANNER_EXAMPLES_OTHERS          + _PLANNER_FOOTER,
 };
 
@@ -594,12 +595,27 @@ Requirements:
 Story excerpt:
 {{text}}`;
 
+const _SUMMARIZE_ID =
+`You are a story memory archivist. Compress the following roleplay excerpt into a dense 2-10 sentence summary optimized for semantic search and retrieval.
+
+Requirements:
+- If a Date or Date + Time is in the main text, always include that in your summary.
+- Preserve ALL proper nouns exactly as written: character names, location names, item names, organization names, and titles
+- Capture: who is present, where the scene takes place, what actions occurred, any significant items or abilities referenced, and the emotional/relationship dynamics
+- IMPORTANT: Write the summary in Bahasa Indonesia. Do NOT write in English or Chinese.
+- Be factual and information-dense — no filler phrases, no meta-commentary, no interpretation
+- Output only the summary with no preamble or explanation
+
+Story excerpt:
+{{text}}`;
+
 const _SUMMARIZE_PROMPTS = {
     intl:           _SUMMARIZE_INTL,
     jieba:          _SUMMARIZE_JIEBA,
     jieba_tw:       _SUMMARIZE_JIEBA_TW,
     tiny_segmenter: _SUMMARIZE_TINY_SEGMENTER,
     korean:         _SUMMARIZE_KOREAN,
+    id:             _SUMMARIZE_ID,
     others:         _SUMMARIZE_OTHERS,
 };
 
@@ -699,6 +715,19 @@ const _EXTRACTION_LANG_KOREAN =
        나쁨: "메이라" (인명), "주막" (장소), "검" (아이템),
              "전투" (행동), "레벨업" (게임 메커닉),
              "식부해" (몬스터 이름), "능력치 분배" (게임 메커닉)
+   - Violating this rule makes the output invalid.
+
+`;
+
+const _EXTRACTION_LANG_ID =
+`1. LANGUAGE — MANDATORY:
+   - All string fields (summary, cause, result, characters, locations, factions, items, concepts, keywords, open_threads) MUST be in Bahasa Indonesia.
+   - Do NOT write in English or Chinese, even though this instruction and the schema keys are in English.
+   - Proper nouns: preserve exact form from the excerpt — DO NOT translate, romanize, or transliterate names.
+   - CONCEPTS examples for Bahasa Indonesia (abstract themes only):
+       GOOD: "pengorbanan", "hutang budi", "kepercayaan", "pengasingan", "penebusan", "harga sebuah kemenangan"
+       BAD:  "Aria" (nama karakter), "tenda" (lokasi), "pedang" (item),
+             "pertarungan" (aksi), "naik level" (mekanik)
    - Violating this rule makes the output invalid.
 
 `;
@@ -895,6 +924,12 @@ const _EXTRACTION_EXAMPLES_KOREAN =
 // "others" reuses the English example with a notice — the LLM will follow the
 // LANGUAGE rule from this variant's _EXTRACTION_LANG block to write its own
 // output in whatever language the excerpt actually uses.
+const _EXTRACTION_EXAMPLES_ID =
+`Satu event (contoh excerpt Bahasa Indonesia — semua nilai string WAJIB Bahasa Indonesia):
+[{"event_type":"relationship_change","importance":7,"summary":"Aria menanggung kesalahan Leon di depan komandan dan melindunginya dari hukuman. Leon terguncang dan bersumpah membalas budi.","cause":"Leon membeku saat briefing misi dan Aria langsung menutupinya tanpa ragu.","result":"Leon merasa berhutang budi; hubungan mereka bergeser dari rival menjadi kepercayaan yang rapuh.","characters":["Aria","Leon","Komandan Voss"],"locations":["Tenda Komando"],"factions":["Kompi Besi"],"DateTime":null,"scene_time":"","items":[],"concepts":["pengorbanan","hutang budi","kepercayaan"],"keywords":["kesalahan","tameng","hukuman","pengorbanan","hutang budi","kepercayaan","rival","sumpah","komandan","briefing misi"],"open_threads":["Apakah Leon akan membalas budi Aria?","Bagaimana reaksi Komandan Voss jika mengetahui?"],"should_persist":true}]
+
+`;
+
 const _EXTRACTION_EXAMPLES_OTHERS =
 `One event (English excerpt — apply the same field structure in your detected language):
 [{"event_type":"relationship_change","importance":7,"summary":"Aria takes the blame for Leon's mistake in front of the commander, shielding him from punishment at personal cost. Leon is visibly shaken by her sacrifice and vows to repay her.","cause":"Leon froze during the mission briefing and Aria covered for him without hesitation.","result":"Leon feels indebted to Aria; their dynamic shifts from rivalry to fragile trust.","characters":["Aria","Leon","Commander Voss"],"locations":["Command Tent"],"factions":["Iron Company"],"DateTime":null,"scene_time":"","items":[],"concepts":["sacrifice","debt","trust"],"keywords":["blame","shield","punishment","mistake","sacrifice","debt","trust","rivalry","vow","repay","commander","mission briefing","froze","covered"],"open_threads":["Will Leon repay Aria?","How will Commander Voss react if he finds out?"],"should_persist":true}]
@@ -922,6 +957,7 @@ const _EXTRACTION_PROMPTS = {
     jieba_tw:       _EXTRACTION_TOP + _EXTRACTION_LANG_JIEBA_TW       + _EXTRACTION_RULES_BODY + _EXTRACTION_EXAMPLES_JIEBA_TW       + _EXTRACTION_FOOTER,
     tiny_segmenter: _EXTRACTION_TOP + _EXTRACTION_LANG_TINY_SEGMENTER + _EXTRACTION_RULES_BODY + _EXTRACTION_EXAMPLES_TINY_SEGMENTER + _EXTRACTION_FOOTER,
     korean:         _EXTRACTION_TOP + _EXTRACTION_LANG_KOREAN         + _EXTRACTION_RULES_BODY + _EXTRACTION_EXAMPLES_KOREAN         + _EXTRACTION_FOOTER,
+    id:             _EXTRACTION_TOP + _EXTRACTION_LANG_ID             + _EXTRACTION_RULES_BODY + _EXTRACTION_EXAMPLES_ID             + _EXTRACTION_FOOTER,
     others:         _EXTRACTION_TOP + _EXTRACTION_LANG_OTHERS         + _EXTRACTION_RULES_BODY + _EXTRACTION_EXAMPLES_OTHERS         + _EXTRACTION_FOOTER,
 };
 

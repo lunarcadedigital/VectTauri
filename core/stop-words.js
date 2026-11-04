@@ -228,6 +228,25 @@ export const ENGLISH_STOP_WORDS = [
 
 export const CJK_STOP_WORD_SET = new Set(CJK_STOP_WORDS);
 
+// Indonesian function words. Not exhaustive — the highest-frequency particles,
+// pronouns, prepositions and connectors that would otherwise dominate BM25.
+export const INDONESIAN_STOP_WORDS = [
+    'yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'pada', 'dengan', 'dalam', 'ini', 'itu',
+    'adalah', 'ialah', 'akan', 'sudah', 'udah', 'belum', 'tidak', 'tak', 'gak', 'nggak', 'ngga', 'bukan',
+    'juga', 'pula', 'saja', 'aja', 'lagi', 'lebih', 'paling', 'sangat', 'amat', 'banget', 'sekali',
+    'bisa', 'dapat', 'harus', 'mau', 'ingin', 'sedang', 'telah', 'pernah', 'masih', 'bakal',
+    'karena', 'sebab', 'jadi', 'maka', 'jika', 'kalau', 'bila', 'ketika', 'saat', 'sementara',
+    'setelah', 'sebelum', 'tetapi', 'tapi', 'namun', 'atau', 'serta', 'bahwa', 'agar', 'supaya',
+    'sehingga', 'sebagai', 'secara', 'oleh', 'tentang', 'terhadap', 'antara', 'tanpa', 'sampai',
+    'hingga', 'bagi', 'demi', 'melalui', 'seperti', 'bagai', 'hanya', 'cuma', 'bahkan', 'pun',
+    'aku', 'saya', 'kamu', 'anda', 'dia', 'ia', 'mereka', 'kita', 'kami', 'kalian', 'gue', 'lu', 'lo',
+    'kau', 'engkau', 'beliau', 'ku', 'mu', 'nya', 'sini', 'situ', 'sana', 'mana', 'apa', 'siapa',
+    'kapan', 'dimana', 'bagaimana', 'mengapa', 'kenapa', 'berapa', 'ya', 'yah', 'sih', 'dong', 'deh',
+    'kok', 'nih', 'tuh', 'emang', 'memang', 'para', 'semua', 'seluruh', 'setiap', 'tiap', 'beberapa',
+    'banyak', 'sedikit', 'lain', 'lainnya', 'sendiri', 'sama', 'begitu', 'demikian', 'tersebut',
+    'terus', 'lalu', 'kemudian', 'sekarang', 'tadi', 'nanti', 'pernah', 'sering', 'selalu',
+];
+
 export function createCombinedStopWordSet(extraWords = []) {
     return new Set([
         ...ENGLISH_STOP_WORDS,
@@ -243,6 +262,7 @@ export const DEFAULT_STOP_WORD_SET = createCombinedStopWordSet();
 /** Locale key → stop-word array. Keys are referenced by LANGUAGE_MODES.stopLocales. */
 export const STOP_WORDS_BY_LOCALE = {
     en:        ENGLISH_STOP_WORDS,
+    id:        INDONESIAN_STOP_WORDS,
     ja:        JAPANESE_STOP_WORDS,
     ko:        KOREAN_STOP_WORDS,
     'zh-Hans': SIMPLIFIED_CHINESE_STOP_WORDS,
