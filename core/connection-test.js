@@ -67,9 +67,9 @@ export async function testEmbeddingConnection(settings) {
  * @param {object} settings
  * @returns {Promise<{ok: boolean, message: string}>}
  */
-export async function testLlmConnection(settings) {
+export async function testLlmConnection(settings, modelOverride = '') {
     const provider = String(settings?.chat_provider || 'openrouter').toLowerCase();
-    const model = String(settings?.chat_model || '').trim();
+    const model = String(modelOverride || settings?.chat_model || '').trim();
     if (!model) {
         return { ok: false, message: 'No LLM model is set — pick one first.' };
     }

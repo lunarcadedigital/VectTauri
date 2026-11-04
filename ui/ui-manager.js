@@ -479,6 +479,9 @@ export function renderSettings(containerId, settings, callbacks) {
                                         </button>
                                     </div>
                                     <select id="VectTauri_summarize_backup_model_list" class="vecttauri-select" style="display:none; margin-top:6px;"></select>
+                                    <button type="button" id="VectTauri_backup_llm_test_btn" class="menu_button" style="margin-top:6px; width:auto; white-space:nowrap;">
+                                        <i class="fa-solid fa-plug-circle-check"></i> Test Backup
+                                    </button>
                                     <small class="VectTauri_hint">Used automatically once when the main model times out or the provider returns 429/5xx. Same provider, URL and key — no configuration change needed.</small>
 
                                 </div>
@@ -3025,12 +3028,11 @@ function bindSettingsEvents(settings, callbacks) {
         }
     });
 
-    $('#VectTauri_llm_test_btn').on('click', async function() {
-        const $btn = $(this);
+    async function runLlmConnectionTest($btn, modelOverride = '') {
         const originalHtml = $btn.html();
         $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Testing…');
         try {
-            const result = await testLlmConnection(settings);
+            const result = await testLlmConnection(settings, modelOverride);
             if (result.ok) {
                 toastr.success(result.message, 'VectTauri — LLM');
             } else {
@@ -3041,6 +3043,13 @@ function bindSettingsEvents(settings, callbacks) {
         } finally {
             $btn.prop('disabled', false).html(originalHtml);
         }
+    }
+
+    $('#VectTauri_llm_test_btn').on('click', function() {
+        runLlmConnectionTest($(this));
+    });
+    $('#VectTauri_backup_llm_test_btn').on('click', function() {
+        runLlmConnectionTest($(this), String(settings.chat_model_backup || '').trim());
     });
 
     $('#VectTauri_summarize_vllm_url')
