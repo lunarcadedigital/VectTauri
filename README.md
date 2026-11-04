@@ -24,6 +24,24 @@ VectTauri brings full RAG (Retrieval-Augmented Generation) memory to TauriTavern
 
 Everything else runs on-device.
 
+### Recommended embedding models (multilingual)
+
+Ollama models that handle non-English roleplay well. Pick one, then keep it — changing the model means re-vectorizing every collection (different vector space).
+
+| Model | Params | Dims | Notes |
+|---|---|---|---|
+| `embeddinggemma:300m` | 300M | 768 | 100+ languages, built for on-device/low-end CPUs. Best size/quality balance |
+| `snowflake-arctic-embed2` | 568M | 1024 | Multilingual (includes Indonesian). Heavier, noticeably slower on 2-core laptops |
+| `bge-m3` | 568M | 1024 | Strong multilingual retrieval |
+| `qwen3-embedding:0.6b` | 0.6B | 1024 | Multilingual, solid quality |
+
+Do **not** use `snowflake-arctic-embed` (v1.x, the one without the `2`) for non-English chats — it is English-only.
+
+```bash
+ollama pull embeddinggemma:300m
+# then set it in VectTauri Settings → Embedding Provider (source: Ollama)
+```
+
 ---
 
 ## 🚀 Installation
