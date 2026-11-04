@@ -468,6 +468,13 @@ export function renderSettings(containerId, settings, callbacks) {
                                     </button>
                                     <small class="VectTauri_hint">Model ID used for EventBase extraction (separate from embedding model). Required. Click <b>Choose</b> to browse the provider's model list.</small>
 
+                                    <label for="VectTauri_summarize_backup_model" style="margin-top: 10px;">
+                                        <small>Backup Model (optional)</small>
+                                    </label>
+                                    <input type="text" id="VectTauri_summarize_backup_model" class="vecttauri-input"
+                                        placeholder="e.g. qwen-3.8-flash" />
+                                    <small class="VectTauri_hint">Used automatically once when the main model times out or the provider returns 429/5xx. Same provider, URL and key — no configuration change needed.</small>
+
                                 </div>
 
                                 <div class="vecttauri-form-group" style="margin-top: 12px;">
@@ -2823,6 +2830,15 @@ function bindSettingsEvents(settings, callbacks) {
             settings.chat_model = String($(this).val()).trim();
             Object.assign(extension_settings.vecttauri, settings);
             saveLlmConfigFields({ chat_model: settings.chat_model });
+            saveSettingsDebounced();
+        });
+
+    $('#VectTauri_summarize_backup_model')
+        .val(settings.chat_model_backup || '')
+        .on('input change', function() {
+            settings.chat_model_backup = String($(this).val()).trim();
+            Object.assign(extension_settings.vecttauri, settings);
+            saveLlmConfigFields({ chat_model_backup: settings.chat_model_backup });
             saveSettingsDebounced();
         });
 

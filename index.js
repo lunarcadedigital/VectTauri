@@ -185,6 +185,7 @@ const defaultSettings = {
     // re-introduction loop documented above on the embedding-side keys.
     // Readers: core/api-keys.js helpers.
     chat_model: '',              // Model ID for summarization (e.g. 'google/gemini-flash-1.5-8b')
+    chat_model_backup: '',       // Optional fallback model, same provider — used once on timeout/429/5xx
     chat_vllm_url: '',           // vLLM base URL for summarization (e.g. 'http://127.0.0.1:8000')
     summarize_prompt: '',             // Custom prompt template (empty = use built-in default)
     summarize_timeout_ms: 30000,      // Per-call timeout for one "Summarize Before Store" request (ms). Separate from eventbase_timeout_ms (extraction); both share the same model. UI: EventBase tab.

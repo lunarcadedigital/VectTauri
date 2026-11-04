@@ -249,30 +249,62 @@ export async function postChatCompletion({
     sendTemperature = true,
     tokenLimitParameter = 'max_tokens',
     reasoningEffort = null,
+    backupModel = '',
 }) {
     const label = _providerLabel(provider);
 
-    const body = { model, messages, [tokenLimitParameter]: maxTokens };
-    if (sendTemperature) body.temperature = temperature;
-    if (responseFormat) body.response_format = responseFormat;
-    // Top-level OpenAI-standard field, NOT OpenRouter's `reasoning` object —
-    // SillyTavern's proxy forwards this one and strips that one. Measured on the
-    // real EventBase prompt: deepseek-v4-flash went 153.5s / 1632 reasoning
-    // tokens → 6.7s / 0, and gpt-5.6-luna 29.5s / 1034 → 3.0s / 0, both still
-    // extracting correctly. Harmless on models that never think (gpt-4o-mini
-    // accepted it without error), so it needs no per-model gate.
-    if (reasoningEffort) body.reasoning_effort = reasoningEffort;
+    const buildRequest = (modelId) => {
+        const body = { model: modelId, messages, [tokenLimitParameter]: maxTokens };
+        if (sendTemperature) body.temperature = temperature;
+        if (responseFormat) body.response_format = responseFormat;
+        // Top-level OpenAI-standard field, NOT OpenRouter's `reasoning` object —
+        // SillyTavern's proxy forwards this one and strips that one. Measured on the
+        // real EventBase prompt: deepseek-v4-flash went 153.5s / 1632 reasoning
+        // tokens → 6.7s / 0, and gpt-5.6-luna 29.5s / 1034 → 3.0s / 0, both still
+        // extracting correctly. Harmless on models that never think (gpt-4o-mini
+        // accepted it without error), so it needs no per-model gate.
+        if (reasoningEffort) body.reasoning_effort = reasoningEffort;
 
-    const requestBody = (provider === 'vllm' || provider === 'custom')
-        ? { chat_completion_source: 'custom', custom_url: vllmUrl, ...body }
-        : { chat_completion_source: 'openrouter', ...body };
+        return (provider === 'vllm' || provider === 'custom')
+            ? { chat_completion_source: 'custom', custom_url: vllmUrl, ...body }
+            : { chat_completion_source: 'openrouter', ...body };
+    };
 
-    const response = await fetch('/api/backends/chat-completions/generate', {
+    const send = (modelId) => fetch('/api/backends/chat-completions/generate', {
         method: 'POST',
         headers: getRequestHeaders(),
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(buildRequest(modelId)),
         signal: AbortSignal.timeout(timeoutMs),
     });
+
+    // One retry with the backup model on transient failures: timeout/abort at the
+    // transport layer, or 429/408/5xx from the provider. Same provider, URL and
+    // key — only the model id changes. Auth (401/403) and model_config (404) are
+    // permanent for this run and must NOT be retried.
+    const canFallback = Boolean(backupModel) && backupModel.trim() !== '' && backupModel !== model;
+    const isRetryableStatus = (status) => status === 429 || status === 408 || status >= 500;
+
+    let response;
+    try {
+        response = await send(model);
+    } catch (err) {
+        const timedOut = err?.name === 'TimeoutError' || err?.name === 'AbortError';
+        const transient = timedOut || err?.name === 'TypeError';
+        if (!transient) throw err;
+        if (!canFallback) {
+            throw new LlmCallError(
+                `${contextLabel}: ${label} request failed${timedOut ? ` (timed out after ${timeoutMs} ms)` : ''} — ${err?.message || err}`,
+                { kind: timedOut ? 'timeout' : 'connection', provider },
+            );
+        }
+        log.warn(`[LLM] ${contextLabel}: ${model} ${timedOut ? `timed out after ${timeoutMs} ms` : 'connection failed'} — retrying with backup model ${backupModel}`);
+        response = await send(backupModel);
+    }
+
+    if (!response.ok && canFallback && isRetryableStatus(response.status)) {
+        log.warn(`[LLM] ${contextLabel}: ${model} HTTP ${response.status} — retrying with backup model ${backupModel}`);
+        response = await send(backupModel);
+    }
 
     if (!response.ok) {
         const errText = await response.text().catch(() => response.statusText);

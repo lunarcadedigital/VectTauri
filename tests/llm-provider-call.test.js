@@ -585,3 +585,54 @@ describe('StringUtils.ensureArray', () => {
         expect(StringUtils.ensureArray([1, 2, 2, null])).toEqual(['1', '2']);
     });
 });
+
+// ---------------------------------------------------------------------------
+// Backup model fallback (timeout / 429 / 5xx)
+// ---------------------------------------------------------------------------
+
+describe('postChatCompletion — backup model fallback', () => {
+    const timeoutError = () => Object.assign(new Error('The operation timed out'), { name: 'TimeoutError' });
+
+    it('retries once with the backup model after a timeout', async () => {
+        const fetchMock = vi.fn()
+            .mockRejectedValueOnce(timeoutError())
+            .mockResolvedValueOnce(okResponse({ content: 'from-backup' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        const res = await postChatCompletion(baseArgs({ backupModel: 'backup/model' }));
+        expect(res.content).toBe('from-backup');
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(JSON.parse(fetchMock.mock.calls[0][1].body).model).toBe('test/model');
+        expect(JSON.parse(fetchMock.mock.calls[1][1].body).model).toBe('backup/model');
+    });
+
+    it('retries once with the backup model on HTTP 429', async () => {
+        const fetchMock = vi.fn()
+            .mockResolvedValueOnce(errorResponse(429, 'rate limited'))
+            .mockResolvedValueOnce(okResponse({ content: 'from-backup' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        const res = await postChatCompletion(baseArgs({ backupModel: 'backup/model' }));
+        expect(res.content).toBe('from-backup');
+        expect(JSON.parse(fetchMock.mock.calls[1][1].body).model).toBe('backup/model');
+    });
+
+    it('does not retry on HTTP 404 (model config)', async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(errorResponse(404, 'no such model'));
+        vi.stubGlobal('fetch', fetchMock);
+        mockGetModelConfigError.mockReturnValue('model not found');
+
+        await expect(postChatCompletion(baseArgs({ backupModel: 'backup/model' })))
+            .rejects.toMatchObject({ kind: 'model_config' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('surfaces a timeout error when no backup model is configured', async () => {
+        const fetchMock = vi.fn().mockRejectedValueOnce(timeoutError());
+        vi.stubGlobal('fetch', fetchMock);
+
+        await expect(postChatCompletion(baseArgs()))
+            .rejects.toMatchObject({ kind: 'timeout' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+});

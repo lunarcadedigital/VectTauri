@@ -165,6 +165,7 @@ async function _callOpenRouter(prompt, settings, windowIndex) {
             temperature: settings.eventbase_temperature ?? DEFAULT_TEMPERATURE,
             timeoutMs: settings.eventbase_timeout_ms || DEFAULT_TIMEOUT_MS,
             contextLabel: 'EventBase',
+            backupModel: settings.chat_model_backup || '',
             ...resolveModelParameterStyle(settings),
         });
         return content;
@@ -208,6 +209,7 @@ async function _callVLLM(prompt, settings, windowIndex) {
             temperature: settings.eventbase_temperature ?? DEFAULT_TEMPERATURE,
             timeoutMs: settings.eventbase_timeout_ms || DEFAULT_TIMEOUT_MS,
             contextLabel: 'EventBase',
+            backupModel: settings.chat_model_backup || '',
             ...resolveModelParameterStyle(settings),
         });
         return content;
