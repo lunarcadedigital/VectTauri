@@ -471,8 +471,14 @@ export function renderSettings(containerId, settings, callbacks) {
                                     <label for="VectTauri_summarize_backup_model" style="margin-top: 10px;">
                                         <small>Backup Model (optional)</small>
                                     </label>
-                                    <input type="text" id="VectTauri_summarize_backup_model" class="vecttauri-input"
-                                        placeholder="e.g. qwen-3.8-flash" />
+                                    <div style="display: flex; gap: 6px; align-items: stretch;">
+                                        <input type="text" id="VectTauri_summarize_backup_model" class="vecttauri-input" style="flex: 1;"
+                                            placeholder="e.g. qwen-3.8-flash" />
+                                        <button id="VectTauri_summarize_backup_model_choose" class="menu_button" type="button" title="Fetch available models from the configured provider">
+                                            <i class="fa-solid fa-list"></i> Choose
+                                        </button>
+                                    </div>
+                                    <select id="VectTauri_summarize_backup_model_list" class="vecttauri-select" style="display:none; margin-top:6px;"></select>
                                     <small class="VectTauri_hint">Used automatically once when the main model times out or the provider returns 429/5xx. Same provider, URL and key — no configuration change needed.</small>
 
                                 </div>
@@ -2872,11 +2878,9 @@ function bindSettingsEvents(settings, callbacks) {
             saveSettingsDebounced();
         });
 
-    // "Choose" button — fetches model list from the configured provider and populates a dropdown
-    $('#VectTauri_summarize_model_choose').on('click', async function() {
-        const $btn = $(this);
-        const $list = $('#VectTauri_summarize_model_list');
-        const $input = $('#VectTauri_summarize_model');
+    // "Choose" buttons — fetch the provider's model list and populate the paired
+    // dropdown. Shared by the primary and backup model pickers.
+    async function loadModelOptions($btn, $list, $input) {
         const provider = settings.chat_provider || 'openrouter';
 
         const originalHtml = $btn.html();
@@ -2976,12 +2980,26 @@ function bindSettingsEvents(settings, callbacks) {
         } finally {
             $btn.prop('disabled', false).html(originalHtml);
         }
+    }
+
+    $('#VectTauri_summarize_model_choose').on('click', function() {
+        loadModelOptions($(this), $('#VectTauri_summarize_model_list'), $('#VectTauri_summarize_model'));
+    });
+    $('#VectTauri_summarize_backup_model_choose').on('click', function() {
+        loadModelOptions($(this), $('#VectTauri_summarize_backup_model_list'), $('#VectTauri_summarize_backup_model'));
     });
 
     $('#VectTauri_summarize_model_list').on('change', function() {
         const value = String($(this).val() || '').trim();
         if (!value) return;
         $('#VectTauri_summarize_model').val(value).trigger('change');
+        $(this).hide();
+    });
+
+    $('#VectTauri_summarize_backup_model_list').on('change', function() {
+        const value = String($(this).val() || '').trim();
+        if (!value) return;
+        $('#VectTauri_summarize_backup_model').val(value).trigger('change');
         $(this).hide();
     });
 
