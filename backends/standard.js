@@ -35,6 +35,7 @@ import { extension_settings } from '../../../../extensions.js';
 import { oai_settings } from '../../../../openai.js';
 import { log } from '../core/log.js';
 import { warnIfEmbeddingSlow } from '../core/embedding-latency-warning.js';
+import { createOpenAiCompatibleEmbeddings } from '../core/embeddings-openai.js';
 import { fetchQueryEmbedding } from './query-embedding.js';
 import { getPluginUrl, similharityFetch } from '../utils/similharity-url.js';
 
@@ -581,6 +582,12 @@ export class StandardBackend extends VectorBackend {
      * @returns {Promise<number[]|null>}
      */
     async embedQuery(searchText, settings) {
+        // OpenAI-compatible sources embed client-side: the store knows nothing
+        // about their base URL, so asking it to embed would just fail.
+        if (settings?.embedding_provider === 'electronhub' || settings?.embedding_provider === 'custom') {
+            const { embeddings } = await createOpenAiCompatibleEmbeddings([searchText], settings);
+            return embeddings?.[searchText] ?? null;
+        }
         if (!this.pluginAvailable) return null;
         return fetchQueryEmbedding(searchText, settings, getProviderSpecificParams(settings, true));
     }

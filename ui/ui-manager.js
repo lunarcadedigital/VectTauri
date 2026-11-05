@@ -39,6 +39,7 @@ import { doesChatHaveVectors, getCollectionRegistry, getCollectionListing, check
 import { getCollectionMeta } from '../core/collection-metadata.js';
 import { parseRegistryKey } from '../core/collection-ids.js';
 import { getModelField } from '../core/providers.js';
+import { resolveOpenAiCompatibleBaseUrl, getOpenAiCompatibleApiKey, listOpenAiCompatibleEmbeddingModels } from '../core/embeddings-openai.js';
 import { getChunkingStrategies } from '../core/content-types.js';
 import { CJK_TOKENIZER_MODES, setCjkTokenizerMode, ensureJiebaTokenizerLoaded, ensureJiebaTwLoaded } from '../core/bm25-scorer.js';
 import { LANGUAGE_MODES } from '../core/language-modes.js';
@@ -269,6 +270,8 @@ export function renderSettings(containerId, settings, callbacks) {
                                     <option value="transformers">Transformers (Local)</option>
                                     <option value="ollama">Ollama</option>
                                     <option value="openrouter">OpenRouter</option>
+                                    <option value="electronhub">Electron Hub</option>
+                                    <option value="custom">Custom (OpenAI-compatible)</option>
                                     <option value="vllm">vLLM</option>
                                 </select>
 
@@ -336,6 +339,56 @@ export function renderSettings(containerId, settings, callbacks) {
                                         </label>
                                         <input type="password" id="VectTauri_openrouter_apikey" class="vecttauri-input" placeholder="Paste key here to save..." autocomplete="off" />
                                         <button type="button" id="VectTauri_openrouter_apikey_clear" class="menu_button" style="margin-top:4px; width:auto; white-space:nowrap;"><i class="fa-solid fa-trash-can"></i> Clear saved key</button>
+                                    </div>
+
+                                <!-- Electron Hub -->
+                                    <div class="VectTauri_provider_setting" data-provider="electronhub">
+                                        <label for="VectTauri_electronhub_url">
+                                            <small>Electron Hub Endpoint:</small>
+                                        </label>
+                                        <input type="text" id="VectTauri_electronhub_url" class="vecttauri-input" placeholder="https://api.electronhub.ai/v1" />
+                                        <small class="VectTauri_hint">Leave empty to use the default endpoint (https://api.electronhub.ai/v1). Paste an override only if you self-host or route through a proxy.</small>
+                                        <label for="VectTauri_electronhub_model">
+                                            <small>Electron Hub Model:</small>
+                                        </label>
+                                        <div style="display: flex; gap: 6px; align-items: stretch;">
+                                            <input type="text" id="VectTauri_electronhub_model" class="vecttauri-input" style="flex: 1;" placeholder="text-embedding-3-small" />
+                                            <button id="VectTauri_electronhub_model_choose" class="menu_button" type="button" title="Fetch the model list from Electron Hub">
+                                                <i class="fa-solid fa-list"></i> Choose
+                                            </button>
+                                        </div>
+                                        <select id="VectTauri_electronhub_model_list" class="vecttauri-select" style="display:none; margin-top:6px;"></select>
+                                        <small class="VectTauri_hint">OpenAI-compatible model ID from Electron Hub (e.g. text-embedding-3-small, text-embedding-3-large). Embedded by VectTauri itself — the vector store is never asked to know this provider.</small>
+                                        <label for="VectTauri_electronhub_apikey" style="margin-top: 8px;">
+                                            <small>Electron Hub API Key:</small>
+                                        </label>
+                                        <input type="password" id="VectTauri_electronhub_apikey" class="vecttauri-input" placeholder="ek-..." autocomplete="off" />
+                                        <small class="VectTauri_hint">Key starts with <b>ek-</b>. Stored in VectTauri settings (SillyTavern has no secret slot for this provider).</small>
+                                        <button type="button" id="VectTauri_electronhub_apikey_clear" class="menu_button" style="margin-top:4px; width:auto; white-space:nowrap;"><i class="fa-solid fa-trash-can"></i> Clear saved key</button>
+                                    </div>
+
+                                    <!-- Custom OpenAI-compatible -->
+                                    <div class="VectTauri_provider_setting" data-provider="custom">
+                                        <label for="VectTauri_custom_url">
+                                            <small>Embeddings Endpoint:</small>
+                                        </label>
+                                        <input type="text" id="VectTauri_custom_url" class="vecttauri-input" placeholder="https://api.example.com/v1" />
+                                        <small class="VectTauri_hint">Any OpenAI-compatible base URL. <code>/v1</code> and a trailing <code>/embeddings</code> are both accepted — VectTauri posts to <code>&lt;base&gt;/embeddings</code>.</small>
+                                        <label for="VectTauri_custom_model" style="margin-top: 8px;">
+                                            <small>Embedding Model:</small>
+                                        </label>
+                                        <div style="display: flex; gap: 6px; align-items: stretch;">
+                                            <input type="text" id="VectTauri_custom_model" class="vecttauri-input" style="flex: 1;" placeholder="text-embedding-3-small" />
+                                            <button id="VectTauri_custom_model_choose" class="menu_button" type="button" title="Fetch the model list from this endpoint">
+                                                <i class="fa-solid fa-list"></i> Choose
+                                            </button>
+                                        </div>
+                                        <select id="VectTauri_custom_model_list" class="vecttauri-select" style="display:none; margin-top:6px;"></select>
+                                        <label for="VectTauri_custom_apikey" style="margin-top: 8px;">
+                                            <small>API Key:</small>
+                                        </label>
+                                        <input type="password" id="VectTauri_custom_apikey" class="vecttauri-input" placeholder="Bearer token for the endpoint" autocomplete="off" />
+                                        <button type="button" id="VectTauri_custom_apikey_clear" class="menu_button" style="margin-top:4px; width:auto; white-space:nowrap;"><i class="fa-solid fa-trash-can"></i> Clear saved key</button>
                                     </div>
 
                                 </div>
@@ -5245,6 +5298,141 @@ function bindSettingsEvents(settings, callbacks) {
                 $(document).trigger('vecttauri:openrouter-key-changed');
             }
         });
+
+    // Electron Hub + Custom (OpenAI-compatible) — key lives in VectTauri settings
+    // because SillyTavern has no secret slot for either provider.
+    const bindOpenAiCompatible = ({ provider, urlSel, modelSel, keySel, clearSel, urlField, modelField, keyField, keyPlaceholder, tips }) => {
+        if (urlSel) {
+            $(urlSel)
+                .val(settings[urlField] || '')
+                .on('input', function() {
+                    settings[urlField] = String($(this).val()).trim();
+                    Object.assign(extension_settings.vecttauri, settings);
+                    saveSettingsDebounced();
+                });
+        }
+        $(modelSel)
+            .val(settings[modelField] || '')
+            .on('input', function() {
+                settings[modelField] = String($(this).val()).trim();
+                Object.assign(extension_settings.vecttauri, settings);
+                saveSettingsDebounced();
+            });
+
+        const refreshKeyDisplay = () => {
+            const saved = String(settings[keyField] || '');
+            const masked = saved.length > 4
+                ? '*'.repeat(Math.min(saved.length - 4, 8)) + saved.slice(-4)
+                : '*'.repeat(saved.length);
+            $(keySel).attr('placeholder', saved ? `${tips}: ${masked}` : keyPlaceholder);
+        };
+        refreshKeyDisplay();
+
+        $(keySel).on('change', function() {
+            const value = String($(this).val()).trim();
+            if (!value) return;
+            settings[keyField] = value;
+            Object.assign(extension_settings.vecttauri, settings);
+            saveSettingsDebounced();
+            $(this).val('');
+            refreshKeyDisplay();
+            toastr.success(`${provider} API key saved`);
+        });
+
+        $(clearSel).on('click', function() {
+            settings[keyField] = '';
+            Object.assign(extension_settings.vecttauri, settings);
+            saveSettingsDebounced();
+            refreshKeyDisplay();
+            toastr.info(`${provider} API key cleared`);
+        });
+    };
+
+    // "Choose" for the OpenAI-compatible embedding providers — EMBEDDING models
+    // only, using the shared discovery helper from core/embeddings-openai.js.
+    async function loadOpenAiCompatibleModelOptions($btn, $list, $input) {
+        const provider = settings.embedding_provider;
+        const isHub = provider === 'electronhub';
+        const baseUrl = resolveOpenAiCompatibleBaseUrl(settings);
+        const apiKey = getOpenAiCompatibleApiKey(settings);
+
+        if (!baseUrl) {
+            toastr.error('Set the endpoint URL first.', 'Provider not configured');
+            return;
+        }
+
+        const originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Loading…');
+
+        try {
+            const ids = await listOpenAiCompatibleEmbeddingModels(baseUrl, apiKey);
+
+            if (!ids.length) {
+                toastr.warning('No embedding models returned — type the model name manually.');
+                return;
+            }
+
+            const currentValue = String($input.val() || '').trim();
+            const options = ['<option value="">— Select an embedding model —</option>']
+                .concat(ids.map(id => {
+                    const selected = id === currentValue ? ' selected' : '';
+                    return `<option value="${$('<div>').text(id).html()}"${selected}>${$('<div>').text(id).html()}</option>`;
+                }));
+
+            $list.html(options.join('')).show();
+            toastr.success(`Loaded ${ids.length} embedding model(s) from ${isHub ? 'Electron Hub' : 'the endpoint'}.`);
+        } catch (err) {
+            log.error('[VectTauri] Embedding model list fetch failed:', err);
+            toastr.error(`Could not fetch embedding models: ${err?.message || err}. Type the model name manually.`);
+        } finally {
+            $btn.prop('disabled', false).html(originalHtml);
+        }
+    }
+
+    $('#VectTauri_electronhub_model_choose').on('click', function() {
+        loadOpenAiCompatibleModelOptions($(this), $('#VectTauri_electronhub_model_list'), $('#VectTauri_electronhub_model'));
+    });
+    $('#VectTauri_custom_model_choose').on('click', function() {
+        loadOpenAiCompatibleModelOptions($(this), $('#VectTauri_custom_model_list'), $('#VectTauri_custom_model'));
+    });
+    $('#VectTauri_electronhub_model_list').on('change', function() {
+        const value = String($(this).val() || '').trim();
+        if (!value) return;
+        $('#VectTauri_electronhub_model').val(value).trigger('input');
+        $(this).hide();
+    });
+    $('#VectTauri_custom_model_list').on('change', function() {
+        const value = String($(this).val() || '').trim();
+        if (!value) return;
+        $('#VectTauri_custom_model').val(value).trigger('input');
+        $(this).hide();
+    });
+
+    bindOpenAiCompatible({
+        provider: 'Electron Hub',
+        urlSel: '#VectTauri_electronhub_url',
+        modelSel: '#VectTauri_electronhub_model',
+        keySel: '#VectTauri_electronhub_apikey',
+        clearSel: '#VectTauri_electronhub_apikey_clear',
+        urlField: 'embedding_electronhub_url',
+        modelField: 'embedding_electronhub_model',
+        keyField: 'embedding_electronhub_api_key',
+        keyPlaceholder: 'ek-...',
+        tips: 'Key saved',
+    });
+
+    bindOpenAiCompatible({
+        provider: 'Custom endpoint',
+        urlSel: '#VectTauri_custom_url',
+        modelSel: '#VectTauri_custom_model',
+        keySel: '#VectTauri_custom_apikey',
+        clearSel: '#VectTauri_custom_apikey_clear',
+        urlField: 'embedding_custom_url',
+        modelField: 'embedding_custom_model',
+        keyField: 'embedding_custom_api_key',
+        keyPlaceholder: 'Bearer token for the endpoint',
+        tips: 'Key saved',
+    });
 
     // Rate Limiting
     $('#VectTauri_rate_limit_calls')

@@ -99,6 +99,12 @@ const defaultSettings = {
     openai_model: 'text-embedding-ada-002',
     electronhub_model: 'text-embedding-3-small',
     embedding_openrouter_model: 'openai/text-embedding-3-large',
+    embedding_electronhub_model: 'text-embedding-3-small',
+    embedding_electronhub_url: '',
+    embedding_electronhub_api_key: '',
+    embedding_custom_url: '',
+    embedding_custom_model: '',
+    embedding_custom_api_key: '',
     // OpenRouter key: stored in SECRET_KEYS.OPENROUTER (ST's shared slot, not in
     // defaults). Reader: core/api-keys.js::getOpenRouterApiKey. The legacy
     // plaintext slot used to live here as `openrouter_api_key: ''` but kept

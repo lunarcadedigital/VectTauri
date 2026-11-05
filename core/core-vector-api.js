@@ -34,6 +34,7 @@ import { textgen_types, textgenerationwebui_settings } from '../../../../textgen
 import { oai_settings } from '../../../../openai.js';
 import { isWebLlmSupported } from '../../../shared.js';
 import { getWebLlmProvider } from '../providers/webllm.js';
+import { createOpenAiCompatibleEmbeddings, getOpenAiCompatibleApiKey } from './embeddings-openai.js';
 import { getBackend, getBackendForCollection, invalidateBackendHealth, recordQuery, recordInsert, recordDelete, recordError } from '../backends/backend-manager.js';
 import { parseRegistryKey, resolveBackendForCollection } from './collection-ids.js';
 import {
@@ -461,11 +462,23 @@ export function getVectorsRequestBody(args = {}, settings) {
  * @param {Function} onProgress - Optional callback (embedded, total) => void for progress updates
  * @returns {Promise<object>} Additional arguments
  */
-export async function getAdditionalArgs(items, settings, onProgress = null) {
+export async function getAdditionalArgs(items, settings, onProgress = null, abortSignal = null) {
     const args = {};
     switch (settings.embedding_provider) {
         // case 'webllm': args.embeddings = await createWebLlmEmbeddings(items, settings); break;
         // case 'koboldcpp': { const { embeddings, model } = await createKoboldCppEmbeddings(items, settings, onProgress); args.embeddings = embeddings; args.model = model; break; }
+        case 'electronhub':
+        case 'custom': {
+            // OpenAI-compatible endpoints embedded client-side, so the vector
+            // store stays provider-agnostic. See core/embeddings-openai.js.
+            // Progress is reported by the stream wrapper after each batch, not
+            // from inside here — that keeps the numbers relative to the whole run.
+            args.embeddings = await createOpenAiCompatibleEmbeddings(items, settings, {
+                signal: abortSignal,
+            });
+            args.model = getModelFromSettings(settings);
+            break;
+        }
     }
     return args;
 }
@@ -624,6 +637,10 @@ export function throwIfSourceInvalid(settings) {
     // Check API key requirement
     if (requiresApiKey(source)) {
         const secretKey = getSecretKey(source);
+        // Providers without a SillyTavern secret slot (electronhub, custom) keep
+        // their key in VectTauri settings; secretKey is null for them, so the
+        // settings-copy is the only place it can live.
+        const settingsKey = !secretKey ? getOpenAiCompatibleApiKey(settings) : '';
         if (secretKey && !secret_state[secretKey]) {
             // Special case: VertexAI can use service account as fallback
             if (source === 'vertexai' && secret_state['VERTEXAI_SERVICE_ACCOUNT']) {
@@ -631,12 +648,15 @@ export function throwIfSourceInvalid(settings) {
             } else {
                 throw new Error('VectTauri: API key missing', { cause: 'api_key_missing' });
             }
+        } else if (!secretKey && !settingsKey) {
+            throw new Error('VectTauri: API key missing', { cause: 'api_key_missing' });
         }
     }
 
     // Check URL requirement. resolveProviderApiUrl() reads the canonical
     // per-provider alt-endpoint keys and falls back to ST's native server URL,
     // so an empty result means nothing is configured for this provider.
+    // It also covers the OpenAI-compatible sources (electronhub / custom).
     if (requiresUrl(source)) {
         if (!resolveProviderApiUrl(settings, source)) {
             throw new Error('VectTauri: API URL missing', { cause: 'api_url_missing' });
@@ -723,7 +743,7 @@ export async function insertVectorItems(collectionId, items, settings, onProgres
     const backend = await getBackend(settings);
 
     // Sources that require client-side embedding generation
-    const clientSideEmbeddingSources = ['webllm', 'koboldcpp'];
+    const clientSideEmbeddingSources = ['webllm', 'koboldcpp', 'electronhub', 'custom'];
 
     try {
         // If source requires client-side embeddings, use streaming approach
@@ -951,7 +971,7 @@ async function streamEmbeddingsAndWrite(backend, collectionId, items, textString
         let additionalArgs;
         try {
             additionalArgs = await AsyncUtils.retry(async () => {
-                return await getAdditionalArgs(batchTextStrings, settings);
+                return await getAdditionalArgs(batchTextStrings, settings, onProgress, abortSignal);
             }, RETRY_CONFIG);
         } catch (error) {
             // A wrong/unreachable embedding URL surfaces here, NOT at the DB-write
@@ -1132,7 +1152,7 @@ export async function queryCollection(collectionId, searchText, topK, settings, 
         : await getBackend(settings);
 
     // Sources that require client-side embedding generation
-    const clientSideEmbeddingSources = ['webllm', 'koboldcpp'];
+    const clientSideEmbeddingSources = ['webllm', 'koboldcpp', 'electronhub', 'custom'];
 
     // If source requires client-side embeddings, generate query vector
     if (!queryVector && clientSideEmbeddingSources.includes(settings.embedding_provider)) {
@@ -1332,7 +1352,7 @@ export async function queryMultipleCollections(collectionIds, searchText, topK, 
     const backend = await getBackend(settings);
 
     // Sources that require client-side embedding generation
-    const clientSideEmbeddingSources = ['webllm', 'koboldcpp'];
+    const clientSideEmbeddingSources = ['webllm', 'koboldcpp', 'electronhub', 'custom'];
     let queryVector = null;
 
     // Generate query vector once for all collections (efficiency)

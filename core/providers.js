@@ -12,6 +12,7 @@
 
 import { SECRET_KEYS } from '../../../../secrets.js';
 import { textgen_types, textgenerationwebui_settings } from '../../../../textgen-settings.js';
+import { resolveOpenAiCompatibleBaseUrl } from './embeddings-openai.js';
 
 /**
  * All supported embedding providers
@@ -60,6 +61,31 @@ export const EMBEDDING_PROVIDERS = {
         requiresApiKey: true,
         secretKey: SECRET_KEYS.OPENROUTER,
         requiresUrl: false,
+    },
+    electronhub: {
+        name: 'Electron Hub',
+        local: false,
+        requiresModel: true,
+        modelField: 'embedding_electronhub_model',
+        requiresApiKey: true,
+        // Electron Hub has no SECRET_KEYS slot of its own in SillyTavern, so the
+        // key lives in VectTauri settings (not ST's secret store) — see
+        // getEmbeddingApiKey() below.
+        secretKey: null,
+        requiresUrl: false,
+    },
+    custom: {
+        name: 'Custom (OpenAI-compatible)',
+        local: false,
+        requiresModel: true,
+        modelField: 'embedding_custom_model',
+        requiresApiKey: true,
+        secretKey: null,
+        requiresUrl: true,
+        // Any OpenAI-compatible /v1/embeddings endpoint. Embedded client-side
+        // (see core/embeddings-openai.js) because the vector store is a generic
+        // sink: it must never be taught a specific provider's base URL.
+        clientSideEmbedding: true,
     },
     // mistral: { name: 'MistralAI', local: false, requiresModel: true, modelField: 'mistral_model', requiresApiKey: true, secretKey: SECRET_KEYS.MISTRALAI, requiresUrl: false },
     // nomicai: { name: 'NomicAI', local: false, requiresModel: false, requiresApiKey: true, secretKey: SECRET_KEYS.NOMICAI, requiresUrl: false },
@@ -199,6 +225,13 @@ export function resolveProviderApiUrl(settings, source = settings?.embedding_pro
             return settings.use_alt_endpoint
                 ? settings.alt_endpoint_url
                 : textgenerationwebui_settings.server_urls[textgen_types.KOBOLDCPP];
+        case 'electronhub':
+        case 'custom':
+            // OpenAI-compatible sources keep their endpoint in VectTauri settings
+            // (ST has no slot for them). Resolving it HERE keeps every consumer
+            // that already calls this — validation, diagnostics, UI — correct
+            // without a per-caller special case.
+            return resolveOpenAiCompatibleBaseUrl(settings);
         default:
             return undefined;
     }

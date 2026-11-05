@@ -169,13 +169,22 @@ async function handleInsert(body) {
     }
 
     try {
-        // Native insert stores {hash, text, index} and embeds server-side for
-        // remote sources — forward provider fields (apiUrl etc.) verbatim.
-        await nativeVector('insert', {
-            ...nativeBody(body),
-            collectionId,
-            items: items.map(it => ({ hash: it.hash, text: it.text || '', index: it.index ?? 0 })),
-        });
+        // Sources embedded client-side by the extension itself (core/embeddings-openai.js).
+        // Their base URL is unknown to the native store, so a native insert would
+        // fail — the vector persisted below is the only copy, and handleQuery
+        // scores it client-side with cosine.
+        const CLIENT_SIDE_SOURCES = ['electronhub', 'custom'];
+        const skipNativeInsert = CLIENT_SIDE_SOURCES.includes(source);
+
+        if (!skipNativeInsert) {
+            await nativeVector('insert', {
+                ...nativeBody(body),
+                collectionId,
+                items: items.map(it => ({ hash: it.hash, text: it.text || '', index: it.index ?? 0 })),
+            });
+        } else {
+            log.verbose(`[builtin] insert: ${items.length} pre-embedded item(s) for ${collectionId} — native insert skipped (source=${source})`);
+        }
 
         // Rich metadata: keep the vector here too, so builtin query can score
         // even when the native query path lacks the same model subfolder.
