@@ -107,14 +107,14 @@ MIT License
 ## Contributors
 
 | Name | Division | Role |
-|------|----------|------|
-| Fajar Nugroho | Qa | Quality assurance & testing |
-| Ayu Pratiwi | Web | Web development |
-| Agus Pratama | Asset | 2D assets & visuals |
-| Dewi Lestari | Architect | System architecture |
-| Nina Salsabila | Research | Tech research & analysis |
-| Ahmad Fauzi | Release | Release & CI pipeline |
-| Gilang Permadi | Web | Web integration & optimization |
-| Raka Wiraguna | Design | UI/UX design |
-| Sari Dewi | Archive | Documentation & archival |
-| Dimas Pratama | Fixing | Bug fixes & patching |
+|---|---|---|
+| Gilang Permadi | Web | Web Developer |
+| Ika | Web | Web Integration Engineer |
+| Fajar Nugroho | QA | QA Automation Engineer |
+| Nina Salsabila | Research | Research Analyst |
+| Agus Pratama | Asset | 2D Asset Composer |
+| Sari Dewi | Archive | Archive Engineer |
+| Ahmad Fauzi | Release | Release Engineer |
+| Dimas Pratama | Fixing | Maintenance Engineer |
+| Raka Wiraguna | Design | UX Designer |
+| Dewi Lestari | Architect | Database Architect |
